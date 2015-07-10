@@ -1,0 +1,14 @@
+{
+  "purchase-date": "2014-11-22T08:22:13.000000",
+  "customer-id": 3242,
+  "line-items": [
+    {"item-id": "TX2343", "name": "Scout Walker",     "units": 10,  "price": 125000.00, "total": 1250000.00  },
+    {"item-id": "RK3543", "name": "Landing Craft",    "units": 1,   "price": 890000.00, "total": 890000.00  }
+  ],
+  "shipping": {
+    "street": "500 Stoneridge CT",
+    "city": "Arlington",
+    "state": "VA",
+    "zip": "99999"
+  }
+}

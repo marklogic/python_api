@@ -1,0 +1,15 @@
+{
+  "purchase-date": "2014-11-14T14:22:13.000000",
+  "customer-id": 1234,
+  "line-items": [
+    {"item-id": "AB1234", "name": "Base Terraformer", "units": 3,   "price": 123000.00, "total": 369000.00  },
+    {"item-id": "FK5689", "name": "Plasma Rifles",    "units": 125, "price": 10000.00,  "total": 1250000.00 },
+    {"item-id": "MT2423", "name": "Landing Craft",    "units": 1,   "price": 890000.00, "total": 890000.00  }
+  ],
+  "shipping": {
+    "street": "123 Melody Lane",
+    "city": "Fairfax",
+    "state": "VA",
+    "zip": "99999"
+  }
+}
