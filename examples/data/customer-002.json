@@ -1,0 +1,17 @@
+{
+  "id": 3242,
+  "name": "Arlington Corp",
+  "address": {
+    "street": "800 Lyndstrom Ct",
+    "suite": "200",
+    "city": "Fairfax",
+    "state": "VA",
+    "zip": "99999"
+  },
+  "customer-type": "business",
+  "contact": {
+    "name": "Jane Doe",
+    "telephone": "703-555-1212",
+    "email": "joe@arlingtoncorp.com"
+  }
+}
