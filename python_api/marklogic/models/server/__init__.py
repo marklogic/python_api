@@ -1428,45 +1428,55 @@ class Server(PropertyLists):
         return self.set_property_list('request-blackout',
                                       blackouts, RequestBlackout)
 
-    def create(self, connection):
+    def create(self, connection=None):
         """
         Creates a server on the MarkLogic server.
 
         :param connection: The connection to a MarkLogic server
         :return: The server object
         """
+        if connection is None:
+            connection = self.connection
+
         uri = "http://{0}:{1}/manage/v2/servers" \
           .format(connection.host, connection.management_port)
 
+        self.logger.debug("Creating server: {0}|{1}" \
+                          .format(self.group_name(), self.server_name()))
         response = requests.post(uri, json=self._config, auth=connection.auth)
         if response.status_code > 299:
             raise UnexpectedManagementAPIResponse(response.text)
 
         return self
 
-    def read(self, connection):
+    def read(self, connection=None):
         """
         Loads the server from the MarkLogic server. This will refresh
         the properties of the object.
 
         :param connection: The connection to a MarkLogic server
-        :return: The server object
+        :return: The server object, updated if the server exists
         """
+        if connection is None:
+            connection = self.connection
+
         server = Server.lookup(connection, self.server_name(), self.group_name())
-        if server is None:
-            return None
-        else:
+        if server is not None:
             self._config = server._config
             self.etag = server.etag
-            return self
 
-    def update(self, connection):
+        return self
+
+    def update(self, connection=None):
         """
         Updates the server on the MarkLogic server.
 
         :param connection: The connection to a MarkLogic server
         :return: The server object
         """
+        if connection is None:
+            connection = self.connection
+
         uri = "http://{0}:{1}/manage/v2/servers/{2}/properties?group-id={3}" \
           .format(connection.host, connection.management_port,
                   self.name, self.group_name())
@@ -1475,6 +1485,8 @@ class Server(PropertyLists):
         if self.etag is not None:
             headers['if-match'] = self.etag
 
+        self.logger.debug("Updating server: {0}|{1}" \
+                          .format(self.group_name(), self.server_name()))
         struct = self.marshal()
         response = requests.put(uri, json=struct, auth=connection.auth,
                                 headers=headers)
@@ -1491,13 +1503,16 @@ class Server(PropertyLists):
 
         return self
 
-    def delete(self, connection):
+    def delete(self, connection=None):
         """
         Deletes the server on the MarkLogic server.
 
         :param connection: The connection to a MarkLogic server
         :return: The server object
         """
+        if connection is None:
+            connection = self.connection
+
         uri = "http://{0}:{1}/manage/v2/servers/{2}?group-id={3}" \
           .format(connection.host, connection.management_port,
                   self.server_name(), self.group_name())
@@ -1506,6 +1521,8 @@ class Server(PropertyLists):
         if self.etag is not None:
             headers['if-match'] = self.etag
 
+        self.logger.debug("Deleting server: {0}|{1}" \
+                          .format(self.group_name(), self.server_name()))
         response = requests.delete(uri, auth=connection.auth, headers=headers)
 
         if response.status_code > 299 and not response.status_code == 404:
@@ -1517,16 +1534,7 @@ class Server(PropertyLists):
         return self
 
     @classmethod
-    def list(cls, connection):
-        """
-        List the names of all the servers on the system. Server
-        names are structured values, they consist of the group name and
-        the server name separated by "|".
-
-        :param connection: The connection to a MarkLogic server
-
-        :return: A list of servers
-        """
+    def _list(cls, connection, kind=None):
         uri = "http://{0}:{1}/manage/v2/servers" \
           .format(connection.host, connection.port)
 
@@ -1540,10 +1548,24 @@ class Server(PropertyLists):
         json_doc = json.loads(response.text)
 
         for item in json_doc['server-default-list']['list-items']['list-item']:
-            results.append("{0}|{1}" \
-                           .format(item['groupnameref'], item['nameref']))
+            if kind is None or item['kindref'] == kind:
+                results.append("{0}|{1}" \
+                               .format(item['groupnameref'], item['nameref']))
 
         return results
+
+    @classmethod
+    def list(cls, connection):
+        """
+        List the names of all the servers on the system. Server
+        names are structured values, they consist of the group name and
+        the server name separated by "|".
+
+        :param connection: The connection to a MarkLogic server
+
+        :return: A list of servers
+        """
+        return Server._list(connection)
 
     @classmethod
     def exists(cls, connection, name, group="Default"):
@@ -1603,8 +1625,8 @@ class Server(PropertyLists):
         uri = "http://{0}:{1}/manage/v2/servers/{2}/properties?group-id={3}" \
           .format(connection.host, connection.management_port, name, group)
 
-        logging.info("Reading server configuration: {0}[{1}]" \
-                     .format(name,group))
+        logging.debug("Reading server configuration: {0}[{1}]" \
+                      .format(name,group))
 
         response = requests.get(uri, auth=connection.auth,
                                 headers={u'accept': u'application/json'})
@@ -1626,6 +1648,7 @@ class Server(PropertyLists):
 
         return result
 
+    # FIXME: refactor to have only the version in host?
     @classmethod
     def wait_for_restart(cls, connection, response):
         """
@@ -1794,8 +1817,17 @@ class Server(PropertyLists):
 
 class HttpServer(Server):
     def __init__(self, name, group="Default", port=0, root='/',
-                 content_db_name=None, modules_db_name=None):
+                 content_db_name=None, modules_db_name=None,
+                 connection=None, save_connection=True):
         super(Server, self).__init__()
+
+        self.save_connection = save_connection
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
+
+        self.logger = logging.getLogger("marklogic.server")
         self.name = name
         self.etag = None
         self._config = {
@@ -2252,10 +2284,32 @@ class HttpServer(Server):
             return self._config['webDAV']
         return None
 
+    @classmethod
+    def list(cls, connection):
+        """
+        List the names of all the HTTP servers on the system. Server
+        names are structured values, they consist of the group name and
+        the server name separated by "|".
+
+        :param connection: The connection to a MarkLogic server
+
+        :return: A list of servers
+        """
+        return Server._list(connection,kind="http")
+
 class OdbcServer(Server):
     def __init__(self, name, group='Default', port=0, root='/',
-                 content_db_name=None, modules_db_name=None):
+                 content_db_name=None, modules_db_name=None,
+                 connection=None, save_connection=True):
         super(Server, self).__init__()
+
+        self.save_connection = save_connection
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
+
+        self.logger = logging.getLogger("marklogic.server")
         self.name = name
         self.etag = None
         self._config = {
@@ -2359,10 +2413,32 @@ class OdbcServer(Server):
         self._config['max-query-time-limit'] = max_query_time_limit
         return self
 
+    @classmethod
+    def list(cls, connection):
+        """
+        List the names of all the ODBC servers on the system. Server
+        names are structured values, they consist of the group name and
+        the server name separated by "|".
+
+        :param connection: The connection to a MarkLogic server
+
+        :return: A list of servers
+        """
+        return Server._list(connection,kind="odbc")
+
 class XdbcServer(Server):
     def __init__(self, name, group='Default', port=0, root='/',
-                 content_db_name=None, modules_db_name=None):
+                 content_db_name=None, modules_db_name=None,
+                 connection=None, save_connection=True):
         super(Server, self).__init__()
+
+        self.save_connection = save_connection
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
+
+        self.logger = logging.getLogger("marklogic.server")
         self.name = name
         self.etag = None
         self._config = {
@@ -2554,10 +2630,32 @@ class XdbcServer(Server):
         self._config['session-timeout'] = session_timeout
         return self
 
+    @classmethod
+    def list(cls, connection):
+        """
+        List the names of all the XDBC servers on the system. Server
+        names are structured values, they consist of the group name and
+        the server name separated by "|".
+
+        :param connection: The connection to a MarkLogic server
+
+        :return: A list of servers
+        """
+        return Server._list(connection,kind="xdbc")
+
 class WebDAVServer(Server):
     def __init__(self, name, group='Default', port=0, root='/',
-                 content_db_name=None):
+                 content_db_name=None, connection=None,
+                 save_connection=True):
         super(Server, self).__init__()
+
+        self.save_connection = save_connection
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
+
+        self.logger = logging.getLogger("marklogic.server")
         self.name = name
         self.etag = None
         self._config = {
@@ -2930,3 +3028,16 @@ class WebDAVServer(Server):
         if 'webDAV' in self._config:
             return self._config['webDAV']
         return None
+
+    @classmethod
+    def list(cls, connection):
+        """
+        List the names of all the WebDAV servers on the system. Server
+        names are structured values, they consist of the group name and
+        the server name separated by "|".
+
+        :param connection: The connection to a MarkLogic server
+
+        :return: A list of servers
+        """
+        return Server._list(connection,kind="webdav")

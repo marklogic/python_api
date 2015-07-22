@@ -10,3 +10,6 @@ docs: invenv
 
 invenv:
 	@python3 python_api/invirtual.py
+
+install: invenv
+	python setup.py install

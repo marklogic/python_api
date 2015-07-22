@@ -349,6 +349,7 @@ class ScheduledDatabaseBackupHourly(ScheduledDatabaseBackup):
         """
         The start time.
         """
+        # FIXME: Check start-date!?
         return self._config['backup-start-date']
 
 class ScheduledDatabaseBackupDaily(ScheduledDatabaseBackup):

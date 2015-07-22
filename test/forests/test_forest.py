@@ -34,9 +34,10 @@ class TestForest(unittest.TestCase):
         pass
 
     def test_getters_and_setters(self):
-        forest = Forest("Foo", host="bar", data_directory=ds.data_directory,
-                        large_data_directory=ds.large_data_directory,
-                        fast_data_directory=ds.fast_data_directory)
+        forest = Forest("Foo", host="bar")
+        forest.set_data_directory(ds.data_directory)
+        forest.set_large_data_directory(ds.large_data_directory)
+        forest.set_fast_data_directory(ds.fast_data_directory)
 
         self.assertEqual(forest.forest_name(), "Foo")
 
@@ -50,9 +51,6 @@ class TestForest(unittest.TestCase):
 
         self.assertEqual(ds.data_directory, forest.data_directory())
 
-        forest.set_database("foo")
-        self.assertEqual("foo", forest.database())
-
         self.assertEqual(ds.fast_data_directory, forest.fast_data_directory())
 
         self.assertEqual(ds.large_data_directory, forest.large_data_directory())
@@ -62,9 +60,11 @@ class TestForest(unittest.TestCase):
 
         host = Host.list(conn)[0]
 
-        forest = Forest("test-forest-simple-create", host=host,
-                        large_data_directory=ds.large_data_directory,
-                        fast_data_directory=ds.fast_data_directory, )
+        forest = Forest("test-forest-simple-create", host=host)
+
+        forest.set_large_data_directory(ds.large_data_directory)
+        forest.set_fast_data_directory(ds.fast_data_directory)
+
         forest.create(conn)
 
         forest = Forest.lookup(conn, "test-forest-simple-create")
@@ -72,11 +72,12 @@ class TestForest(unittest.TestCase):
         try:
             self.assertIsNotNone(forest)
             self.assertEqual("test-forest-simple-create", forest.forest_name())
-            self.assertEqual(host, forest.host())
+            #This isn't included in the properties
+            #self.assertEqual(host, forest.host())
             self.assertEqual(ds.large_data_directory, forest.large_data_directory())
             self.assertEqual(ds.fast_data_directory, forest.fast_data_directory())
         finally:
-            forest.remove(conn)
+            forest.delete(conn)
 
 if __name__ == "__main__":
     unittest.main();

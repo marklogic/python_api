@@ -69,7 +69,8 @@ class Database(PropertyLists):
     allow IDEs with tooling to provide auto-completion hints.
     """
 
-    def __init__(self, name, hostname='$ML-LOCALHOST'):
+    def __init__(self, name=None, hostname='$ML-LOCALHOST',
+                 connection=None, save_connection=True):
         """
         Initialize the database object to either create a database or
         lookup the existing database information
@@ -93,6 +94,10 @@ class Database(PropertyLists):
         self.name = name # separate so we can rename databases
         self.etag = None
         self.hostname = hostname
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
 
     def set_database_name(self, name):
         """
@@ -3126,40 +3131,47 @@ class Database(PropertyLists):
 
     # ============================================================
 
-    def backup(self, conn, backup_dir, forests=None,
+    def backup(self, backup_dir, forests=None,
                journal_archiving=False, journal_archive_path=None,
-               lag_limit=30,
-               incremental=False, incremental_dir=None):
+               lag_limit=30, incremental=False, incremental_dir=None,
+               connection=None):
         """
         Start a database backup.
         """
-        return DatabaseBackup.backup(conn, self.name, backup_dir, forests,
-                                     journal_archiving, journal_archive_path,
-                                     lag_limit,
-                                     incremental, incremental_dir)
+        if connection is None:
+            connection = self.connection
 
-    def restore(self, conn, backup_dir, forests=None,
+        return DatabaseBackup.backup(connection, self.name, backup_dir, forests,
+                                     journal_archiving, journal_archive_path,
+                                     lag_limit, incremental, incremental_dir)
+
+    def restore(self, backup_dir, forests=None,
                 journal_archiving=False, journal_archive_path=None,
-                incremental=False, incremental_dir=None):
+                incremental=False, incremental_dir=None,
+                connection=None):
         """
         Start a database restore.
         """
-        return DatabaseRestore.restore(conn, self.name, backup_dir, forests,
+        if connection is None:
+            connection = self.connection
+
+        return DatabaseRestore.restore(connection, self.name, backup_dir, forests,
                                        journal_archiving, journal_archive_path,
                                        incremental, incremental_dir)
 
-    def clear(self, conn):
+    def clear(self, connection=None):
         """
         Clear the database.
         """
-        payload = {
-            'operation': 'clear-database',
-            }
+        if connection is None:
+            connection = self.connection
+
+        payload = {'operation': 'clear-database'}
 
         uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.name)
+          .format(connection.host, connection.management_port, self.name)
 
-        response = requests.post(uri, json=payload, auth=conn.auth,
+        response = requests.post(uri, json=payload, auth=connection.auth,
                                  headers={'content-type': 'application/json',
                                           'accept': 'application/json'})
 
@@ -3168,18 +3180,19 @@ class Database(PropertyLists):
 
         return
 
-    def merge(self, conn):
+    def merge(self, connenection=None):
         """
         Initiate a merge on the database.
         """
-        payload = {
-            'operation': 'merge-database',
-            }
+        if connection is None:
+            connection = self.connection
+
+        payload = {'operation': 'merge-database'}
 
         uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.name)
+          .format(connection.host, connection.management_port, self.name)
 
-        response = requests.post(uri, json=payload, auth=conn.auth,
+        response = requests.post(uri, json=payload, auth=connection.auth,
                                  headers={'content-type': 'application/json',
                                           'accept': 'application/json'})
 
@@ -3188,18 +3201,19 @@ class Database(PropertyLists):
 
         return
 
-    def reindex(self, conn):
+    def reindex(self, connection=None):
         """
         Initiate a re-index on the database.
         """
-        payload = {
-            'operation': 'reindex-database',
-            }
+        if connection is None:
+            connection = self.connection
+
+        payload = {'operation': 'reindex-database'}
 
         uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.name)
+          .format(connection.host, connection.management_port, self.name)
 
-        response = requests.post(uri, json=payload, auth=conn.auth,
+        response = requests.post(uri, json=payload, auth=connection.auth,
                                  headers={'content-type': 'application/json',
                                           'accept': 'application/json'})
 
@@ -3210,7 +3224,7 @@ class Database(PropertyLists):
 
     # ============================================================
 
-    def create(self, connection):
+    def create(self, connection=None):
         """
         Create a new database defined by these parameters on the given connection.
 
@@ -3218,6 +3232,9 @@ class Database(PropertyLists):
 
         :return: The database object
         """
+        if connection is None:
+            connection = self.connection
+
         uri = "http://{0}:{1}/manage/v2/databases" \
           .format(connection.host, connection.management_port)
 
@@ -3253,7 +3270,7 @@ class Database(PropertyLists):
 
         return self
 
-    def read(self, connection):
+    def read(self, connection=None):
         """
         Loads the database from the MarkLogic server. This will refresh
         the properties of the object.
@@ -3261,15 +3278,17 @@ class Database(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The server object
         """
-        database = Server.lookup(connection, self.database_name())
-        if database is None:
-            return None
-        else:
+        if connection is None:
+            connection = self.connection
+
+        database = Database.lookup(connection, self.database_name())
+        if database is not None:
             self._config = database._config
             self.etag = database.etag
-            return self
 
-    def update(self, connection):
+        return self
+
+    def update(self, connection=None):
         """
         Save the configuration changes with the given connection.
         If the database already exists on the
@@ -3279,6 +3298,9 @@ class Database(PropertyLists):
 
         :return: The database object
         """
+        if connection is None:
+            connection = self.connection
+
         uri = "http://{0}:{1}/manage/v2/databases/{2}/properties" \
           .format(connection.host, connection.management_port, self.name)
 
@@ -3298,7 +3320,7 @@ class Database(PropertyLists):
 
         return self
 
-    def delete(self, connection):
+    def delete(self, connection=None):
         """
         Remove the given database and all its forests.
 
@@ -3306,6 +3328,9 @@ class Database(PropertyLists):
 
         :return: The database object
         """
+        if connection is None:
+            connection = self.connection
+
         uri = "http://{0}:{1}/manage/v2/databases/{2}?forest-delete=data" \
           .format(connection.host, connection.management_port, self.name)
         response = requests.delete(uri, auth=connection.auth)
@@ -3315,7 +3340,9 @@ class Database(PropertyLists):
 
         return self
 
-    def load_file(self, connection, path, uri, collections=None, content_type="application/json"):
+    def load_file(self, path, uri, collections=None,
+                  content_type="application/json",
+                  connection=None):
         """
         Load a given file into a given database.
 
@@ -3327,6 +3354,9 @@ class Database(PropertyLists):
 
         :return: The database object
         """
+        if connection is None:
+            connection = self.connection
+
         doc_url = "http://{0}:{1}/v1/documents?uri={2}&database={3}" \
           .format(connection.host, connection.port, uri, self.name)
 
@@ -3343,7 +3373,9 @@ class Database(PropertyLists):
 
         return self
 
-    def load_directory_files(self, connection, path, prefix="/", collections=None, content_type="application/json"):
+    def load_directory_files(self, path, prefix="/", collections=None,
+                             content_type="application/json",
+                             connection=None):
         """
         Load all the given files in a directory.  It will combine the prefix with the filename to generate
         a uri for the file on the server.
@@ -3356,13 +3388,18 @@ class Database(PropertyLists):
 
         :return: The database object
         """
+        if connection is None:
+            connection = self.connection
+
         file_list = files.walk_directories(path)
         for result in file_list:
             self.load_file(connection, result['partial-directory'], prefix + result['filename'],
                            collections=collections, content_type=content_type)
         return self
 
-    def load_directory(self, connection, path, prefix="/", collections=None, content_type="application/json"):
+    def load_directory(self, path, prefix="/", collections=None,
+                       content_type="application/json",
+                       connection=None):
         """
         Load all the file in a directory, preserving the partial path between the directory root and the
         file.  So a file located at /data/files/myfile.xml, with a prefix parameter of '/data' will be
@@ -3376,6 +3413,9 @@ class Database(PropertyLists):
 
         :return: The database object
         """
+        if connection is None:
+            connection = self.connection
+
         file_list = files.walk_directories(path)
         for result in file_list:
             self.load_file(connection, result['partial-directory'], prefix + result['partial-directory'],
@@ -3414,9 +3454,11 @@ class Database(PropertyLists):
         return result
 
     @classmethod
-    def list_databases(cls, connection):
-        uri = "http://{0}:{1}/manage/v2/databases".format(connection.host, connection.management_port)
-        response = requests.get(uri, auth=connection.auth, headers={'accept': 'application/json'})
+    def list(cls, connection):
+        uri = "http://{0}:{1}/manage/v2/databases".format(
+            connection.host, connection.management_port)
+        response = requests.get(uri, auth=connection.auth,
+                                headers={'accept': 'application/json'})
 
         if response.status_code == 200:
             response_json = json.loads(response.text)
@@ -3425,12 +3467,11 @@ class Database(PropertyLists):
             result = []
             if db_count > 0:
                 for item in response_json['database-default-list']['list-items']['list-item']:
-                    result.append(Database(item['nameref']))
+                    result.append(item['nameref'])
         else:
             raise UnexpectedManagementAPIResponse(response.text)
 
         return result
-
 
     @classmethod
     def unmarshal(cls, config):
@@ -4009,11 +4050,15 @@ class Database(PropertyLists):
             fields.append(assert_type(word_query, WordQuery))
         self._config['field'] = fields
 
-    def get_document(self, conn, document_uri, content_type='*/*'):
-        doc_url = "http://{0}:{1}/v1/documents?uri={2}&database={3}" \
-          .format(conn.host, conn.port, document_uri, self.name)
+    def get_document(self, connection, document_uri, content_type='*/*'):
+        if connection is None:
+            connection = self.connection
 
-        response = requests.get(doc_url, auth=conn.auth, headers={'accept': content_type})
+        doc_url = "http://{0}:{1}/v1/documents?uri={2}&database={3}" \
+          .format(connection.host, connection.port, document_uri, self.name)
+
+        response = requests.get(doc_url, auth=connection.auth,
+                                headers={'accept': content_type})
         if response.status_code == 404:
             return None
         elif response.status_code == 200:

@@ -31,6 +31,31 @@ class MLClientException(Exception):
     pass
 
 
+class UnauthorizedAPIRequest(MLClientException):
+    """
+    This exception class is for exceptions that arise from attempts to
+    use endpoints in ways that are unauthorized (HTTP returns 401).
+
+    """
+    pass
+
+class UnsupportedOperation(MLClientException):
+    """
+    This exception class is for exceptions that arise from attempts to
+    use the API in ways that are not yet defined.
+
+    """
+    pass
+
+class InvalidAPIRequest(MLClientException):
+    """
+    This exception class is for exceptions that arise when Management API
+    responses do not satisfy necessary preconditions, such as attempting
+    to read an XDBC server as if it was an HTTP server.
+
+    """
+    pass
+
 class UnexpectedManagementAPIResponse(MLClientException):
     """
     This exception class is for exceptions that arise from unexpected management
@@ -38,7 +63,6 @@ class UnexpectedManagementAPIResponse(MLClientException):
 
     """
     pass
-
 
 class UnexpectedAPIResponse(MLClientException):
     """
