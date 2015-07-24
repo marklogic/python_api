@@ -77,9 +77,9 @@ class Docker:
             sys.exit(1)
 
         if self.localimage:
-            ps = os.popen("docker exec " + self.container_list[0] + " netstat -nr")
+            ps = os.popen("docker exec " + self.container_list[0] + " ip route")
             for line in ps.readlines():
-                match = re.match("^0\.0\.0\.0\s+(\S+)", line)
+                match = re.match("^default via (\S+)", line)
                 if match:
                     self.localip = match.group(1)
             if self.localip is None:
