@@ -31,9 +31,11 @@ class Docker:
         self.blacklist_file="/tmp/{0}.docker.skip".format(self.uname)
         self.blacklist={}
         self.container_list=[]
+        self.cluster_list=[]
         self.containers={}
         self.localip=None
         self.ipaddr={}
+        self.hostname={}
 
     def set_credentials(self,user,password):
         self.adminuser = user
@@ -46,9 +48,6 @@ class Docker:
         self.imatch = match
 
     def set_boot_image(self,image):
-        if self.bootimage is not None:
-            print ("Only one of -b or -B may be specified.")
-            sys.exit(1)
         self.bootimage = image
         self.localimage = (image == "localhost")
 
@@ -70,6 +69,7 @@ class Docker:
             self.couple_pass = self.adminpass
             self.couple_user = self.adminuser
 
+        self.load_blacklist()
         self.find_containers()
 
         if not self.container_list:
@@ -91,27 +91,13 @@ class Docker:
         if self.localimage:
             pass
         else:
-            if self.bootimage:
-                found = False
-                for key in self.containers:
-                    image = self.containers[key]
-                    if not found and \
-                        (key == self.bootimage or re.match(self.bootimage, image)):
-                        self.bootimage = key
-                        found = True
-                for key in self.ipaddr:
-                    image = self.ipaddr[key]
-                    if not found and image == self.bootimage:
-                        self.bootimage = key
-                        found = True
-                if not found:
-                    print("Cannot find boot image: {0}".format(self.bootimage))
-                    sys.exit(1)
-            else:
-                self.bootimage = self.container_list[0]
-                self.container_list.remove(self.bootimage)
+            self.bootimage = self.pick_image(self.bootimage)
+            self.container_list.remove(self.bootimage)
+
+        self.cluster_list = self.pick_containers()
 
         self.display_info()
+        #sys.exit(1)
 
         # Initialize the bootstrap image, if necessary
 
@@ -121,26 +107,17 @@ class Docker:
             bootip = self.ipaddr[self.bootimage]
 
         if self.ml_init(bootip, self.bootimage):
-            self.ml_security(bootip)
+            self.ml_security(bootip, self.bootimage)
 
         conn = Connection(bootip, HTTPDigestAuth(self.adminuser, self.adminpass))
         self.marklogic = MarkLogic(conn)
 
-        if self.count is not None:
-            self.count -= 1
-
-        for container in self.container_list:
-            if container == self.bootimage or container in self.blacklist:
+        for container in self.cluster_list:
+            if container == self.bootimage:
                 continue
-            if self.count is not None and self.count <= 0:
-                continue
-
             ip = self.ipaddr[container]
             self.ml_init(ip, container)
             self.ml_join(bootip, ip)
-
-            if self.count is not None:
-                self.count -= 1
 
         if self.name is not None:
             print("{0}: rename cluster...".format(bootip))
@@ -149,26 +126,31 @@ class Docker:
             cluster.update()
 
         if self.couple is not None:
-            print("{0}: couple with {1}...".format(bootip,self.couple))
-            altconn = Connection(self.couple,
-                                 HTTPDigestAuth(self.couple_user,
-                                                self.couple_pass))
-            altml = MarkLogic(altconn)
-            altcluster = altml.cluster()
-            cluster = self.marklogic.cluster()
-            cluster.couple(altcluster)
+            for couple in self.couple:
+                print("{0}: couple with {1}...".format(bootip,couple))
+                altconn = Connection(couple,
+                                     HTTPDigestAuth(self.couple_user,
+                                                    self.couple_pass))
+                altml = MarkLogic(altconn)
+                altcluster = altml.cluster()
+                cluster = self.marklogic.cluster()
+                cluster.couple(altcluster)
 
         print("Finished")
 
     def ml_init(self, ip, container):
-        print("{0}: initialize host {1}...".format(ip,container))
+        if container in self.hostname:
+            hostname = self.hostname[container]
+        else:
+            hostname = container
+        print("{0}: initialize host {1}...".format(ip,hostname))
         try:
             host = MarkLogic.instance_init(ip)
         except UnauthorizedAPIRequest:
             # Assume that this happened because the host is already initialized
             host = Host(ip)
 
-        self.blacklist[container] = 1
+        self.blacklist[container] = "used"
         self.save_blacklist()
         return host.just_initialized()
 
@@ -178,15 +160,76 @@ class Docker:
         host = Host(ip)
         cluster.add_host(host)
 
-    def ml_security(self, ip):
+    def ml_security(self, ip, container):
         print("{0}: initialize security...".format(ip))
         MarkLogic.instance_admin(ip,self.realm,self.adminuser,self.adminpass)
+        self.blacklist[container] = "boot"
+        self.save_blacklist()
+
+    def pick_image(self, name):
+        if name is None:
+            for container in self.container_list:
+                if not container in self.blacklist:
+                    return container
+            print("Cannot find unused container")
+            sys.exit(1)
+
+        for key in self.hostname:
+            if name == self.hostname[key]:
+                return key
+
+        count = 0
+        container = None
+        for key in self.ipaddr:
+            if name == self.ipaddr[key]:
+                return key
+            if re.match("^"+name, key):
+                count += 1
+                container = key
+        if count == 1:
+            return container
+        if count > 1:
+            print("Ambiguous container id:", name)
+            sys.exit(1)
+
+        for key in self.containers:
+            image = self.containers[key]
+            if (key == self.bootimage or re.match(self.bootimage, image)):
+                return key
+
+        print("Cannot find container \"{0}\".".format(name))
+        sys.exit(1)
+
+    def pick_containers(self):
+        if self.count is None:
+            count = -1
+        else:
+            count = self.count - 1
+
+        cset = set()
+
+        if not self.localimage:
+            cset.add(self.bootimage)
+
+        for container in self.container_list:
+            if container == self.bootimage or container in self.blacklist:
+                continue
+            if count == 0:
+                continue
+            cset.add(container)
+            count -= 1
+
+        containers = []
+        for key in cset:
+            containers.append(key)
+        return containers
 
     def load_blacklist(self):
         try:
             f = open(self.blacklist_file, "r")
             for line in f.readlines():
-                self.blacklist[line.strip()] = 0
+                (container, flag) = line.strip().split(" ")
+                self.blacklist[container] = flag
             f.close()
         except FileNotFoundError:
             pass
@@ -194,8 +237,8 @@ class Docker:
     def save_blacklist(self):
         f = open(self.blacklist_file, "w")
         for key in self.blacklist:
-            if self.blacklist[key] == 1:
-                f.write("{0}\n".format(key))
+            if self.blacklist[key] != "gone":
+                f.write("{0} {1}\n".format(key,self.blacklist[key]))
         f.close()
 
     def find_containers(self):
@@ -208,35 +251,38 @@ class Docker:
                 container = match.group(1)
                 image = match.group(2)
 
-                ipx = os.popen("docker exec {0} ip -o -f inet addr show eth0"
-                               .format(container))
+                ipx = os.popen("docker inspect {0}".format(container))
                 ip = None
+                hostname = None
                 for line in ipx.readlines():
-                    match = re.match("\d+:\s+eth0\s+inet\s+([0-9.]+)", line)
+                    match = re.match('\s+"IPAddress": "([^"]+)"', line)
                     if match:
                         ip = match.group(1)
+                    match = re.match('\s+"Hostname": "([^"]+)"', line)
+                    if match:
+                        hostname = match.group(1)
                 if ip is None:
                     print("Cannot read IP address of container {0}"
                           .format(container))
                 else:
                     self.ipaddr[container] = ip
 
-                if container in self.blacklist:
-                    self.blacklist[container] = 1
-                    self.container_list.append(container)
-                    self.containers[container] = image
+                if hostname is None:
+                    print("Cannot read hostname of container {0}"
+                          .format(container))
                 else:
-                    if re.match(self.imatch, image):
-                        self.container_list.append(container)
-                        self.containers[container] = image
+                    self.hostname[container] = hostname
+
+                if re.match(self.imatch, image):
+                    self.container_list = [container] + self.container_list
+                    self.containers[container] = image
+
+        for container in self.blacklist:
+            if not container in self.containers:
+                self.blacklist[container] = "gone"
 
     def display_info(self):
         # Display information about docker containers
-        if self.count is None:
-            dcount = 100000 # hack
-        else:
-            dcount = self.count
-
         # Sigh. Report formatting is such a drag...
         dinfo = []
         ps = os.popen("docker ps")
@@ -246,15 +292,17 @@ class Docker:
                 container = match.group(1)
                 image = match.group(2)
                 ip = self.ipaddr[container]
+                hostname = self.hostname[container]
                 attr = []
                 if container in self.blacklist:
                     attr.append("used")
+                    if self.blacklist[container] == "boot":
+                        attr.append("boot")
                 else:
-                    if dcount <= 0:
+                    if not container in self.cluster_list:
                         attr.append("skip")
                     else:
                         if re.match(self.imatch, image):
-                            dcount -= 1
                             attr.append("*")
                             if container == self.bootimage:
                                 attr.append("boot")
@@ -264,11 +312,13 @@ class Docker:
                 data = {"container": container,
                         "image": image,
                         "ipaddr": ip,
+                        "hostname": hostname,
                         "flags": ", ".join(attr)}
-                dinfo.append(data)
+                dinfo = [data] + dinfo
 
         headers = {"container": "Container",
                    "image": "Image",
+                   "hostname": "Hostname",
                    "ipaddr": "IP Addr",
                    "flags": "Flags"}
 
@@ -280,15 +330,17 @@ class Docker:
                     flen = len(data[key])
             maxlen[key] = flen
 
-        fstr = "%-{0}s  %-{1}s  %-{2}s  %s".format(
-            maxlen['container'], maxlen['image'], maxlen['ipaddr'])
+        fstr = "%-{0}s  %-{1}s  %-{2}s  %-{3}s  %s".format(
+            maxlen['container'], maxlen['image'],
+            maxlen['hostname'], maxlen['ipaddr'])
 
         print(fstr % (headers['container'], headers['image'],
-                      headers['ipaddr'], headers['flags']))
+                      headers['hostname'], headers['ipaddr'],
+                      headers['flags']))
 
         for data in dinfo:
             print(fstr % (data['container'], data['image'],
-                          data['ipaddr'], data['flags']))
+                          data['hostname'], data['ipaddr'], data['flags']))
 
 
 def main():
@@ -296,7 +348,7 @@ def main():
         description="Configure instances of MarkLogic server " \
                     + "running in Docker containers.")
 
-    parser.add_argument('-u', '--credentials', default='admin:admin',
+    parser.add_argument('--credentials', default='admin:admin',
                         metavar='USER:PASS',
                         help='Admin user:pass for new cluster')
     parser.add_argument('--realm', default='public',
@@ -311,8 +363,8 @@ def main():
                         help='Maximum number of containers to cluster')
     parser.add_argument('--name',
                         help='Set the cluster name for the new cluster')
-    parser.add_argument('--couple',
-                        metavar='BOOTHOST',
+    parser.add_argument('--couple', nargs="+",
+                        metavar='BOOTHOST(S)',
                         help='Bootstrap host of cluster with which to couple')
     parser.add_argument('--couple-credentials',
                         metavar='USER:PASS',
