@@ -25,6 +25,8 @@ import logging
 from marklogic.models.connection import Connection
 from marklogic.models.cluster import Cluster
 from marklogic.models.host import Host
+from marklogic.models.user import User
+from marklogic.models.role import Role
 from marklogic.models.database import Database
 from marklogic.models.forest import Forest
 from requests.auth import HTTPDigestAuth
@@ -252,6 +254,36 @@ class MarkLogic:
                                     .format(server.server_type()))
 
         return server
+
+    def users(self, connection=None):
+        if connection is None:
+            connection = self.connection
+
+        return User.list(connection)
+
+    def user(self, user_name, password=None, connection=None):
+        if connection is None:
+            connection = self.connection
+            user = User(user_name, password, self.connection, self.save_connection)
+        else:
+            user = User(user_name, password, connection, False)
+
+        return user.read(connection)
+
+    def roles(self, connection=None):
+        if connection is None:
+            connection = self.connection
+
+        return Role.list(connection)
+
+    def role(self, role_name, connection=None):
+        if connection is None:
+            connection = self.connection
+            role = Role(role_name, connection)
+        else:
+            role = User(role_name, connection, False)
+
+        return role.read(connection)
 
     # =================================================================
 
