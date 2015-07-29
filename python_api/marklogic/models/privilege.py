@@ -33,6 +33,7 @@ from marklogic.models.utilities.validators import validate_custom
 from marklogic.models.utilities.validators import validate_privilege_kind
 from marklogic.models.utilities.utilities import PropertyLists
 import json
+import logging
 
 class Privilege(PropertyLists):
     """
@@ -48,6 +49,7 @@ class Privilege(PropertyLists):
         self._config['action'] = action
         self.the_kind = kind
         self.etag = None
+        self.logger = logging.getLogger("marklogic.privilege")
 
     def privilege_name(self):
         """
@@ -108,7 +110,7 @@ class Privilege(PropertyLists):
         :return: The list of role names
         """
         if u'role' not in self._config:
-            return None
+            return []
         return self._config[u'role']
 
     def set_role_names(self, roles):
@@ -218,6 +220,8 @@ class Privilege(PropertyLists):
                                 headers=headers)
 
         if response.status_code not in [200, 204]:
+            self.logger.debug("Update priv returned {0}: {1}"
+                              .format(response.status_code, response.text))
             raise exceptions.UnexpectedManagementAPIResponse(response.text)
 
         if 'etag' in response.headers:
