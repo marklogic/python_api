@@ -115,7 +115,12 @@ class Forest(Model,PropertyLists):
     def database(self):
         return self._get_config_property('database')
 
-    # There's no set_database() because that's not how that works
+    def set_database(self,name):
+        if name is None:
+            del self._config['database']
+            return self
+        else:
+            return self._set_config_property('database', name)
 
     def database_replication(self):
       raise UnsupportedOperation("Not implemented yet")
@@ -381,19 +386,23 @@ class Forest(Model,PropertyLists):
         result._config = config
         result.name = result._config['forest-name']
 
+        logger = logging.getLogger("marklogic.forest")
+
         olist = []
         if 'forest-backup' in result._config:
             for backup in result._config['forest-backup']:
+                #logger.debug(backup)
                 temp = None
                 if (backup['backup-type'] == 'minutely'):
                     temp = ScheduledForestBackup.minutely(
                         backup['backup-directory'],
                         backup['backup-period'])
                 elif (backup['backup-type'] == 'hourly'):
+                    minute = int(backup['backup-start-time'].split(':')[1])
                     temp = ScheduledForestBackup.hourly(
                         backup['backup-directory'],
                         backup['backup-period'],
-                        backup['backup-start-minute'])
+                        minute)
                 elif (backup['backup-type'] == 'daily'):
                     temp = ScheduledForestBackup.daily(
                         backup['backup-directory'],

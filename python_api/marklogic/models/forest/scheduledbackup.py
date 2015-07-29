@@ -150,7 +150,7 @@ class ScheduledForestBackupHourly(ScheduledForestBackup):
             'backup-enabled': True,
             'backup-directory': backup_dir,
             'backup-period': period,
-            'backup-start-time': "00:%02d:00" % start_time
+            'backup-start-time': "00:%02d:00" % start_minute
             }
 
     def period(self):
