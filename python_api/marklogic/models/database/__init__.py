@@ -3479,378 +3479,395 @@ class Database(PropertyLists):
         result._config = config
         result.name = result._config['database-name']
 
-        olist = []
-        if 'range-element-index' in result._config:
-            for index in result._config['range-element-index']:
-                temp = ElementRangeIndex(index['scalar-type'],
-                                         index['namespace-uri'],
-                                         index['localname'],
-                                         index['collation'],
-                                         index['range-value-positions'] == 'true',
-                                         index['invalid-values'])
-                olist.append(temp)
-        result._config['range-element-index'] = olist
+        logger = logging.getLogger("marklogic")
 
-        olist = []
-        if 'range-field-index' in result._config:
-            for index in result._config['range-field-index']:
-                temp = FieldRangeIndex(index['scalar-type'],
-                                       index['field-name'],
-                                       index['collation'],
-                                       index['range-value-positions'] == 'true',
-                                       index['invalid-values'])
-                olist.append(temp)
-        result._config['range-field-index'] = olist
+        # This long, explicit approach may be somewhat inefficient, but it
+        # catches the case where a new, unhandled database property arises.
+        # The atomic list are properties that have values that are either
+        # atomic values or lists of atomic values.
 
-        olist = []
-        if 'range-element-attribute-index' in result._config:
-            for index in result._config['range-element-attribute-index']:
-                temp = AttributeRangeIndex(index['scalar-type'],
-                                           index['parent-namespace-uri'],
-                                           index['parent-localname'],
-                                           index['namespace-uri'],
-                                           index['localname'],
+        atomic = {'attribute-value-positions', 'collection-lexicon',
+                  'database-name', 'directory-creation',
+                  'element-value-positions', 'element-word-positions',
+                  'enabled', 'expunge-locks',
+                  'fast-case-sensitive-searches',
+                  'fast-diacritic-sensitive-searches',
+                  'fast-element-character-searches',
+                  'fast-element-phrase-searches',
+                  'fast-element-trailing-wildcard-searches',
+                  'fast-element-word-searches',
+                  'fast-phrase-searches', 'fast-reverse-searches',
+                  'field-value-positions', 'field-value-searches',
+                  'forest', 'format-compatibility', 'in-memory-limit',
+                  'in-memory-list-size', 'in-memory-range-index-size',
+                  'in-memory-reverse-index-size',
+                  'in-memory-tree-size',
+                  'in-memory-triple-index-size', 'index-detection',
+                  'inherit-collections', 'inherit-permissions',
+                  'inherit-quality', 'journal-count', 'journal-size',
+                  'journaling', 'language', 'large-size-threshold',
+                  'locking', 'maintain-directory-last-modified',
+                  'maintain-last-modified', 'merge-max-size',
+                  'merge-min-ratio', 'merge-min-size',
+                  'merge-priority', 'merge-timestamp',
+                  'one-character-searches',
+                  'positions-list-max-size', 'preallocate-journals',
+                  'preload-mapped-data',
+                  'preload-replica-mapped-data',
+                  'range-index-optimize', 'rebalancer-enable',
+                  'rebalancer-throttle', 'reindexer-enable',
+                  'reindexer-throttle', 'reindexer-timestamp',
+                  'retain-until-backup', 'retired-forest-count',
+                  'schema-database', 'security-database',
+                  'triggers-database', 'stemmed-searches',
+                  'tf-normalization', 'three-character-searches',
+                  'three-character-word-positions',
+                  'trailing-wildcard-searches',
+                  'trailing-wildcard-word-positions', 'triple-index',
+                  'triple-positions', 'two-character-searches',
+                  'uri-lexicon', 'word-positions', 'word-searches'}
+
+        for key in result._config:
+            olist = []
+
+            if key in atomic:
+                pass
+            elif key == 'assignment-policy':
+                logger.warn("Unhandled property: " + key)
+            elif key == 'database-backup':
+                for backup in result._config['database-backup']:
+                    incremental = None
+                    if 'incremental' in backup:
+                        incremental = backup['incremental']
+                    temp = None
+                    if (backup['backup-type'] == 'minutely'):
+                        temp = ScheduledDatabaseBackup.minutely(
+                            backup['backup-directory'],
+                            backup['backup-period'],
+                            backup['max-backups'],
+                            backup['backup-security-database'],
+                            backup['backup-schemas-database'],
+                            backup['backup-triggers-database'],
+                            backup['include-replicas'],
+                            incremental,
+                            backup['journal-archiving'],
+                            backup['journal-archive-path'],
+                            backup['journal-archive-lag-limit'])
+                    elif (backup['backup-type'] == 'hourly'):
+                        temp = ScheduledDatabaseBackup.hourly(
+                            backup['backup-directory'],
+                            backup['backup-period'],
+                            backup['backup-start-time'],
+                            backup['max-backups'],
+                            backup['backup-security-database'],
+                            backup['backup-schemas-database'],
+                            backup['backup-triggers-database'],
+                            backup['include-replicas'],
+                            incremental,
+                            backup['journal-archiving'],
+                            backup['journal-archive-path'],
+                            backup['journal-archive-lag-limit'])
+                    elif (backup['backup-type'] == 'daily'):
+                        temp = ScheduledDatabaseBackup.daily(
+                            backup['backup-directory'],
+                            backup['backup-period'],
+                            backup['backup-start-time'],
+                            backup['max-backups'],
+                            backup['backup-security-database'],
+                            backup['backup-schemas-database'],
+                            backup['backup-triggers-database'],
+                            backup['include-replicas'],
+                            incremental,
+                            backup['journal-archiving'],
+                            backup['journal-archive-path'],
+                            backup['journal-archive-lag-limit'])
+                    elif (backup['backup-type'] == 'weekly'):
+                        temp = ScheduledDatabaseBackup.weekly(
+                            backup['backup-directory'],
+                            backup['backup-period'],
+                            backup['backup-day'],
+                            backup['backup-start-time'],
+                            backup['max-backups'],
+                            backup['backup-security-database'],
+                            backup['backup-schemas-database'],
+                            backup['backup-triggers-database'],
+                            backup['include-replicas'],
+                            incremental,
+                            backup['journal-archiving'],
+                            backup['journal-archive-path'],
+                            backup['journal-archive-lag-limit'])
+                    elif (backup['backup-type'] == 'monthly'):
+                        temp = ScheduledDatabaseBackup.monthly(
+                            backup['backup-directory'],
+                            backup['backup-period'],
+                            backup['backup-month-day'],
+                            backup['backup-start-time'],
+                            backup['max-backups'],
+                            backup['backup-security-database'],
+                            backup['backup-schemas-database'],
+                            backup['backup-triggers-database'],
+                            backup['include-replicas'],
+                            incremental,
+                            backup['journal-archiving'],
+                            backup['journal-archive-path'],
+                            backup['journal-archive-lag-limit'])
+                    elif (backup['backup-type'] == 'once'):
+                        temp = ScheduledDatabaseBackup.once(
+                            backup['backup-directory'],
+                            backup['backup-start-date'],
+                            backup['backup-start-time'],
+                            backup['max-backups'],
+                            backup['backup-security-database'],
+                            backup['backup-schemas-database'],
+                            backup['backup-triggers-database'],
+                            backup['include-replicas'],
+                            incremental,
+                            backup['journal-archiving'],
+                            backup['journal-archive-path'],
+                            backup['journal-archive-lag-limit'])
+                    else:
+                        raise UnexpectedManagementAPIResponse("Unparseable backup")
+                    temp._config['backup-id'] = backup['backup-id']
+                    olist.append(temp)
+                result._config['database-backup'] = olist
+            elif key == 'database-replication':
+                logger.warn("Unhandled property: " + key)
+            elif key == 'default-ruleset':
+                for path in result._config['default-ruleset']:
+                    temp = RuleSet(
+                        path['location'])
+                    olist.append(temp)
+                result._config['default-ruleset'] = olist
+            elif key == 'element-attribute-word-lexicon':
+                for path in result._config['element-attribute-word-lexicon']:
+                    temp = AttributeWordLexicon(
+                        path['parent-namespace-uri'],
+                        path['parent-localname'],
+                        path['namespace-uri'],
+                        path['localname'],
+                        path['collation'])
+                    olist.append(temp)
+                result._config['element-attribute-word-lexicon'] = olist
+            elif key == 'element-word-lexicon':
+                for path in result._config['element-word-lexicon']:
+                    temp = ElementWordLexicon(
+                        path['namespace-uri'],
+                        path['localname'],
+                        path['collation'])
+                    olist.append(temp)
+                result._config['element-word-lexicon'] = olist
+            elif key == 'element-word-query-through':
+                for path in result._config['element-word-query-through']:
+                    temp = ElementWordQueryThrough(
+                        path['namespace-uri'],
+                        path['localname'])
+                    olist.append(temp)
+                result._config['element-word-query-through'] = olist
+            elif key == 'field':
+                for field in result._config['field']:
+                    name = field['field-name']
+                    if 'field-path' in field:
+                        paths = []
+                        for path in field['field-path']:
+                            paths.append(FieldPath(
+                                path['path'], path['weight']))
+                        temp = PathField(name, paths)
+                    else:
+                        root = False
+                        if 'include-root' in field:
+                            root = (field['include-root'] == 'true')
+                        if field['field-name'] == "":
+                            temp = WordQuery(root)
+                        else:
+                            temp = RootField(name, root)
+                    temp.unmarshal(field)
+                    olist.append(temp)
+                result._config['field'] = olist
+            elif key == 'fragment-parent':
+                for root in result._config['fragment-parent']:
+                    temp = FragmentParent(root['namespace-uri'],root['localname'])
+                    olist.append(temp)
+                result._config['fragment-parent'] = olist
+            elif key == 'fragment-root':
+                for root in result._config['fragment-root']:
+                    temp = FragmentRoot(root['namespace-uri'],root['localname'])
+                    olist.append(temp)
+                result._config['fragment-root'] = olist
+            elif key == 'geospatial-element-attribute-pair-index':
+                for index in result._config['geospatial-element-attribute-pair-index']:
+                    temp = GeospatialElementAttributePairIndex(
+                        index['parent-namespace-uri'],
+                        index['parent-localname'],
+                        index['longitude-namespace-uri'],
+                        index['longitude-localname'],
+                        index['latitude-namespace-uri'],
+                        index['latitude-localname'],
+                        index['coordinate-system'],
+                        index['range-value-positions'] == 'true',
+                        index['invalid-values'])
+                    olist.append(temp)
+                result._config['geospatial-element-attribute-pair-index'] = olist
+            elif key == 'geospatial-element-child-index':
+                for index in result._config['geospatial-element-child-index']:
+                    temp = GeospatialElementChildIndex(
+                        index['parent-namespace-uri'],
+                        index['parent-localname'],
+                        index['namespace-uri'],
+                        index['localname'],
+                        index['coordinate-system'],
+                        index['point-format'],
+                        index['range-value-positions'] == 'true',
+                        index['invalid-values'])
+                    olist.append(temp)
+                result._config['geospatial-element-child-index'] = olist
+            elif key == 'geospatial-element-index':
+                for index in result._config['geospatial-element-index']:
+                    temp = GeospatialElementIndex(index['namespace-uri'],
+                                                  index['localname'],
+                                                  index['coordinate-system'],
+                                                  index['point-format'],
+                                                  index['range-value-positions'] == 'true',
+                                                  index['invalid-values'])
+                    olist.append(temp)
+                result._config['geospatial-element-index'] = olist
+            elif key == 'geospatial-element-pair-index':
+                for index in result._config['geospatial-element-pair-index']:
+                    temp = GeospatialElementPairIndex(
+                        index['parent-namespace-uri'],
+                        index['parent-localname'],
+                        index['longitude-namespace-uri'],
+                        index['longitude-localname'],
+                        index['latitude-namespace-uri'],
+                        index['latitude-localname'],
+                        index['coordinate-system'],
+                        index['range-value-positions'] == 'true',
+                        index['invalid-values'])
+                    olist.append(temp)
+                result._config['geospatial-element-pair-index'] = olist
+            elif key == 'geospatial-path-index':
+                for index in result._config['geospatial-path-index']:
+                    temp = GeospatialPathIndex(index['path-expression'],
+                                               index['coordinate-system'],
+                                               index['point-format'],
+                                               index['range-value-positions'] == 'true',
+                                               index['invalid-values'])
+                    olist.append(temp)
+                result._config['geospatial-path-index'] = olist
+            elif key == 'merge-blackout':
+                for blackout in result._config['merge-blackout']:
+                    temp = None
+                    if (blackout['blackout-type'] == 'recurring'
+                        and blackout['period'] is None):
+                        temp = MergeBlackout.recurringAllDay(
+                            blackout['merge-priority'],
+                            blackout['limit'],
+                            blackout['day'])
+                    elif (blackout['blackout-type'] == 'recurring'
+                          and 'duration' in blackout['period']):
+                        temp = MergeBlackout.recurringDuration(
+                            blackout['merge-priority'],
+                            blackout['limit'],
+                            blackout['day'],
+                            blackout['period']['start-time'],
+                            blackout['period']['duration'])
+                    elif (blackout['blackout-type'] == 'recurring'
+                          and 'end-time' in blackout['period']):
+                        temp = MergeBlackout.recurringStartEnd(
+                            blackout['merge-priority'],
+                            blackout['limit'],
+                            blackout['day'],
+                            blackout['period']['start-time'],
+                            blackout['period']['end-time'])
+                    elif (blackout['blackout-type'] == 'once'
+                          and 'end-time' in blackout['period']):
+                        temp = MergeBlackout.oneTimeStartEnd(
+                            blackout['merge-priority'],
+                            blackout['limit'],
+                            blackout['period']['start-date'],
+                            blackout['period']['start-time'],
+                            blackout['period']['end-date'],
+                            blackout['period']['end-time'])
+                    elif (blackout['blackout-type'] == 'once'
+                          and 'duration' in blackout['period']):
+                        temp = MergeBlackout.oneTimeDuration(
+                            blackout['merge-priority'],
+                            blackout['limit'],
+                            blackout['period']['start-date'],
+                            blackout['period']['start-time'],
+                            blackout['period']['duration'])
+                    else:
+                        raise UnexpectedManagementAPIResponse("Unparseable merge blackout period")
+                    olist.append(temp)
+                result._config['merge-blackout'] = olist
+            elif key == 'path-namespace':
+                for path in result._config['path-namespace']:
+                    temp = PathNamespace(
+                        path['prefix'],
+                        path['namespace-uri'])
+                    olist.append(temp)
+                result._config['path-namespace'] = olist
+            elif key == 'phrase-around':
+                for path in result._config['phrase-around']:
+                    temp = PhraseAround(
+                        path['namespace-uri'],
+                        path['localname'])
+                    olist.append(temp)
+                result._config['phrase-around'] = olist
+            elif key == 'phrase-through':
+                for path in result._config['phrase-through']:
+                    temp = PhraseThrough(
+                        path['namespace-uri'],
+                        path['localname'])
+                    olist.append(temp)
+                result._config['phrase-through'] = olist
+            elif key == 'range-element-attribute-index':
+                for index in result._config['range-element-attribute-index']:
+                    temp = AttributeRangeIndex(index['scalar-type'],
+                                               index['parent-namespace-uri'],
+                                               index['parent-localname'],
+                                               index['namespace-uri'],
+                                               index['localname'],
+                                               index['collation'],
+                                               index['range-value-positions'] == 'true',
+                                               index['invalid-values'])
+                    olist.append(temp)
+                result._config['range-element-attribute-index'] = olist
+            elif key == 'range-element-index':
+                for index in result._config['range-element-index']:
+                    temp = ElementRangeIndex(index['scalar-type'],
+                                             index['namespace-uri'],
+                                             index['localname'],
+                                             index['collation'],
+                                             index['range-value-positions'] == 'true',
+                                             index['invalid-values'])
+                    olist.append(temp)
+                result._config['range-element-index'] = olist
+            elif key == 'range-field-index':
+                for index in result._config['range-field-index']:
+                    temp = FieldRangeIndex(index['scalar-type'],
+                                           index['field-name'],
                                            index['collation'],
                                            index['range-value-positions'] == 'true',
                                            index['invalid-values'])
-                olist.append(temp)
-        result._config['range-element-attribute-index'] = olist
-
-        olist = []
-        if 'range-path-index' in result._config:
-            for index in result._config['range-path-index']:
-                temp = PathRangeIndex(index['scalar-type'],
-                                      index['path-expression'],
-                                      index['collation'],
-                                      index['range-value-positions'] == 'true',
-                                      index['invalid-values'])
-                olist.append(temp)
-        result._config['range-path-index'] = olist
-
-        olist = []
-        if 'geospatial-element-index' in result._config:
-            for index in result._config['geospatial-element-index']:
-                temp = GeospatialElementIndex(index['namespace-uri'],
-                                              index['localname'],
-                                              index['coordinate-system'],
-                                              index['point-format'],
-                                              index['range-value-positions'] == 'true',
-                                              index['invalid-values'])
-                olist.append(temp)
-        result._config['geospatial-element-index'] = olist
-
-        olist = []
-        if 'geospatial-path-index' in result._config:
-            for index in result._config['geospatial-path-index']:
-                temp = GeospatialPathIndex(index['path-expression'],
-                                           index['coordinate-system'],
-                                           index['point-format'],
-                                           index['range-value-positions'] == 'true',
-                                           index['invalid-values'])
-                olist.append(temp)
-        result._config['geospatial-path-index'] = olist
-
-        olist = []
-        if 'geospatial-element-child-index' in result._config:
-            for index in result._config['geospatial-element-child-index']:
-                temp = GeospatialElementChildIndex(
-                          index['parent-namespace-uri'],
-                          index['parent-localname'],
-                          index['namespace-uri'],
-                          index['localname'],
-                          index['coordinate-system'],
-                          index['point-format'],
-                          index['range-value-positions'] == 'true',
-                          index['invalid-values'])
-                olist.append(temp)
-        result._config['geospatial-element-child-index'] = olist
-
-        olist = []
-        if 'geospatial-element-pair-index' in result._config:
-            for index in result._config['geospatial-element-pair-index']:
-                temp = GeospatialElementPairIndex(
-                          index['parent-namespace-uri'],
-                          index['parent-localname'],
-                          index['longitude-namespace-uri'],
-                          index['longitude-localname'],
-                          index['latitude-namespace-uri'],
-                          index['latitude-localname'],
-                          index['coordinate-system'],
-                          index['range-value-positions'] == 'true',
-                          index['invalid-values'])
-                olist.append(temp)
-        result._config['geospatial-element-pair-index'] = olist
-
-        olist = []
-        if 'geospatial-element-attribute-pair-index' in result._config:
-            for index in result._config['geospatial-element-attribute-pair-index']:
-                temp = GeospatialElementAttributePairIndex(
-                          index['parent-namespace-uri'],
-                          index['parent-localname'],
-                          index['longitude-namespace-uri'],
-                          index['longitude-localname'],
-                          index['latitude-namespace-uri'],
-                          index['latitude-localname'],
-                          index['coordinate-system'],
-                          index['range-value-positions'] == 'true',
-                          index['invalid-values'])
-                olist.append(temp)
-        result._config['geospatial-element-attribute-pair-index'] = olist
-
-        olist = []
-        if 'fragment-root' in result._config:
-            for root in result._config['fragment-root']:
-                temp = FragmentRoot(root['namespace-uri'],root['localname'])
-                olist.append(temp)
-        result._config['fragment-root'] = olist
-
-        olist = []
-        if 'fragment-parent' in result._config:
-            for root in result._config['fragment-parent']:
-                temp = FragmentParent(root['namespace-uri'],root['localname'])
-                olist.append(temp)
-        result._config['fragment-parent'] = olist
-
-        olist = []
-        if 'merge-blackout' in result._config:
-            for blackout in result._config['merge-blackout']:
-                temp = None
-                if (blackout['blackout-type'] == 'recurring'
-                    and blackout['period'] is None):
-                    temp = MergeBlackout.recurringAllDay(
-                        blackout['merge-priority'],
-                        blackout['limit'],
-                        blackout['day'])
-                elif (blackout['blackout-type'] == 'recurring'
-                      and 'duration' in blackout['period']):
-                    temp = MergeBlackout.recurringDuration(
-                        blackout['merge-priority'],
-                        blackout['limit'],
-                        blackout['day'],
-                        blackout['period']['start-time'],
-                        blackout['period']['duration'])
-                elif (blackout['blackout-type'] == 'recurring'
-                      and 'end-time' in blackout['period']):
-                    temp = MergeBlackout.recurringStartEnd(
-                        blackout['merge-priority'],
-                        blackout['limit'],
-                        blackout['day'],
-                        blackout['period']['start-time'],
-                        blackout['period']['end-time'])
-                elif (blackout['blackout-type'] == 'once'
-                      and 'end-time' in blackout['period']):
-                    temp = MergeBlackout.oneTimeStartEnd(
-                        blackout['merge-priority'],
-                        blackout['limit'],
-                        blackout['period']['start-date'],
-                        blackout['period']['start-time'],
-                        blackout['period']['end-date'],
-                        blackout['period']['end-time'])
-                elif (blackout['blackout-type'] == 'once'
-                      and 'duration' in blackout['period']):
-                    temp = MergeBlackout.oneTimeDuration(
-                        blackout['merge-priority'],
-                        blackout['limit'],
-                        blackout['period']['start-date'],
-                        blackout['period']['start-time'],
-                        blackout['period']['duration'])
-                else:
-                    raise UnexpectedManagementAPIResponse("Unparseable merge blackout period")
-
-                olist.append(temp)
-        result._config['merge-blackout'] = olist
-
-        olist = []
-        if 'database-backup' in result._config:
-            for backup in result._config['database-backup']:
-                incremental = None
-                if 'incremental' in backup:
-                    incremental = backup['incremental']
-
-                temp = None
-                if (backup['backup-type'] == 'minutely'):
-                    temp = ScheduledDatabaseBackup.minutely(
-                        backup['backup-directory'],
-                        backup['backup-period'],
-                        backup['max-backups'],
-                        backup['backup-security-database'],
-                        backup['backup-schemas-database'],
-                        backup['backup-triggers-database'],
-                        backup['include-replicas'],
-                        incremental,
-                        backup['journal-archiving'],
-                        backup['journal-archive-path'],
-                        backup['journal-archive-lag-limit'])
-                elif (backup['backup-type'] == 'hourly'):
-                    temp = ScheduledDatabaseBackup.hourly(
-                        backup['backup-directory'],
-                        backup['backup-period'],
-                        backup['backup-start-time'],
-                        backup['max-backups'],
-                        backup['backup-security-database'],
-                        backup['backup-schemas-database'],
-                        backup['backup-triggers-database'],
-                        backup['include-replicas'],
-                        incremental,
-                        backup['journal-archiving'],
-                        backup['journal-archive-path'],
-                        backup['journal-archive-lag-limit'])
-                elif (backup['backup-type'] == 'daily'):
-                    temp = ScheduledDatabaseBackup.daily(
-                        backup['backup-directory'],
-                        backup['backup-period'],
-                        backup['backup-start-time'],
-                        backup['max-backups'],
-                        backup['backup-security-database'],
-                        backup['backup-schemas-database'],
-                        backup['backup-triggers-database'],
-                        backup['include-replicas'],
-                        incremental,
-                        backup['journal-archiving'],
-                        backup['journal-archive-path'],
-                        backup['journal-archive-lag-limit'])
-                elif (backup['backup-type'] == 'weekly'):
-                    temp = ScheduledDatabaseBackup.weekly(
-                        backup['backup-directory'],
-                        backup['backup-period'],
-                        backup['backup-day'],
-                        backup['backup-start-time'],
-                        backup['max-backups'],
-                        backup['backup-security-database'],
-                        backup['backup-schemas-database'],
-                        backup['backup-triggers-database'],
-                        backup['include-replicas'],
-                        incremental,
-                        backup['journal-archiving'],
-                        backup['journal-archive-path'],
-                        backup['journal-archive-lag-limit'])
-                elif (backup['backup-type'] == 'monthly'):
-                    temp = ScheduledDatabaseBackup.monthly(
-                        backup['backup-directory'],
-                        backup['backup-period'],
-                        backup['backup-month-day'],
-                        backup['backup-start-time'],
-                        backup['max-backups'],
-                        backup['backup-security-database'],
-                        backup['backup-schemas-database'],
-                        backup['backup-triggers-database'],
-                        backup['include-replicas'],
-                        incremental,
-                        backup['journal-archiving'],
-                        backup['journal-archive-path'],
-                        backup['journal-archive-lag-limit'])
-                elif (backup['backup-type'] == 'once'):
-                    temp = ScheduledDatabaseBackup.once(
-                        backup['backup-directory'],
-                        backup['backup-start-date'],
-                        backup['backup-start-time'],
-                        backup['max-backups'],
-                        backup['backup-security-database'],
-                        backup['backup-schemas-database'],
-                        backup['backup-triggers-database'],
-                        backup['include-replicas'],
-                        incremental,
-                        backup['journal-archiving'],
-                        backup['journal-archive-path'],
-                        backup['journal-archive-lag-limit'])
-                else:
-                    raise UnexpectedManagementAPIResponse("Unparseable backup")
-                temp._config['backup-id'] = backup['backup-id']
-                olist.append(temp)
-        result._config['database-backup'] = olist
-
-        olist = []
-        if 'path-namespace' in result._config:
-            for path in result._config['path-namespace']:
-                temp = PathNamespace(
-                    path['prefix'],
-                    path['namespace-uri'])
-                olist.append(temp)
-        result._config['path-namespace'] = olist
-
-        olist = []
-        if 'element-word-lexicon' in result._config:
-            for path in result._config['element-word-lexicon']:
-                temp = ElementWordLexicon(
-                    path['namespace-uri'],
-                    path['localname'],
-                    path['collation'])
-                olist.append(temp)
-        result._config['element-word-lexicon'] = olist
-
-        olist = []
-        if 'element-attribute-word-lexicon' in result._config:
-            for path in result._config['element-attribute-word-lexicon']:
-                temp = AttributeWordLexicon(
-                    path['parent-namespace-uri'],
-                    path['parent-localname'],
-                    path['namespace-uri'],
-                    path['localname'],
-                    path['collation'])
-                olist.append(temp)
-        result._config['element-attribute-word-lexicon'] = olist
-
-        olist = []
-        if 'element-word-query-through' in result._config:
-            for path in result._config['element-word-query-through']:
-                temp = ElementWordQueryThrough(
-                    path['namespace-uri'],
-                    path['localname'])
-                olist.append(temp)
-        result._config['element-word-query-through'] = olist
-
-        olist = []
-        if 'phrase-through' in result._config:
-            for path in result._config['phrase-through']:
-                temp = PhraseThrough(
-                    path['namespace-uri'],
-                    path['localname'])
-                olist.append(temp)
-        result._config['phrase-through'] = olist
-
-        olist = []
-        if 'phrase-around' in result._config:
-            for path in result._config['phrase-around']:
-                temp = PhraseAround(
-                    path['namespace-uri'],
-                    path['localname'])
-                olist.append(temp)
-        result._config['phrase-around'] = olist
-
-        olist = []
-        if 'default-ruleset' in result._config:
-            for path in result._config['default-ruleset']:
-                temp = RuleSet(
-                    path['location'])
-                olist.append(temp)
-        result._config['default-ruleset'] = olist
-
-        olist = []
-        if 'field' in result._config:
-            for field in result._config['field']:
-                name = field['field-name']
-                if 'field-path' in field:
-                    paths = []
-                    for path in field['field-path']:
-                        paths.append(FieldPath(
-                            path['path'], path['weight']))
-                    temp = PathField(name, paths)
-                else:
-                    root = False
-                    if 'include-root' in field:
-                        root = (field['include-root'] == 'true')
-                    if field['field-name'] == "":
-                        temp = WordQuery(root)
-                    else:
-                        temp = RootField(name, root)
-                temp.unmarshal(field)
-                olist.append(temp)
-        result._config['field'] = olist
+                    olist.append(temp)
+                result._config['range-field-index'] = olist
+            elif key == 'range-path-index':
+                for index in result._config['range-path-index']:
+                    temp = PathRangeIndex(index['scalar-type'],
+                                          index['path-expression'],
+                                          index['collation'],
+                                          index['range-value-positions'] == 'true',
+                                          index['invalid-values'])
+                    olist.append(temp)
+                result._config['range-path-index'] = olist
+            else:
+                logger.warn("Unexpected database property: " + key)
 
         return result
 
     def marshal(self):
         struct = { }
+
         for key in self._config:
             if (key == 'range-element-index'
                 or key == 'range-field-index'
