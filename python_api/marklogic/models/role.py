@@ -38,11 +38,16 @@ class Role(PropertyLists):
     allow IDEs with tooling to provide auto-completion hints.
     """
 
-    def __init__(self, name):
+    def __init__(self, name, connection=None, save_connection=None):
         self._config = {}
         self._config['role-name'] = name
         self.name = name
         self.etag = None
+        self.save_connection = save_connection
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
 
     def role_name(self):
         """

@@ -39,12 +39,17 @@ class User(PropertyLists):
     methods to set/get database attributes.  The use of methods will
     allow IDEs with tooling to provide auto-completion hints.
     """
-    def __init__(self, name, password=None):
+    def __init__(self, name, password=None, connection=None, save_connection=None):
         self._config = {}
         self._config['user-name'] = name
         if password is not None:
             self._config['password'] = password
         self.etag = None
+        self.save_connection = save_connection
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
         self.name = name
 
     def user_name(self):
@@ -301,7 +306,7 @@ class User(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The User object
         """
-        user = User.lookup(self._config['role-name'])
+        user = User.lookup(connection, self._config['user-name'])
         if user is None:
             return None
         else:
