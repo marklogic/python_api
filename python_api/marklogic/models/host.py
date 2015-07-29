@@ -338,8 +338,7 @@ class Host:
                                                response.text))
                 pass
             except ConnectionError:
-                logger.debug("{0}: {1}".format(response.status_code,
-                                               response.text))
+                logger.debug("Connection error...")
                 pass
             time.sleep(4) # Sleep one more time even after success...
             count -= 1
