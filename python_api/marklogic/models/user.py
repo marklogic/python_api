@@ -27,11 +27,10 @@ User related classes for manipulating MarkLogic users
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import requests
-from marklogic.models.utilities import exceptions
+import json, requests
+import marklogic.exceptions
 from marklogic.models.permission import Permission
-from marklogic.models.utilities.utilities import PropertyLists
-import json
+from marklogic.utilities import PropertyLists
 
 class User(PropertyLists):
     """

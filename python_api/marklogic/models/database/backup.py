@@ -25,8 +25,8 @@ Classes for dealing with scheduled backups
 
 import requests
 import json
-from marklogic.models.utilities.validators import *
-from marklogic.models.utilities.exceptions import *
+from marklogic.utilities.validators import *
+from marklogic.exceptions import *
 
 class DatabaseBackup:
     """

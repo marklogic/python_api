@@ -23,10 +23,11 @@ from __future__ import unicode_literals, print_function, absolute_import
 #
 
 import unittest
-from marklogic.models import Forest, Host, Connection
+from marklogic.connection import Connection
+from marklogic.models import Forest, Host
 from test.resources import TestConnection as tc
 from requests.auth import HTTPDigestAuth
-from marklogic.models.utilities.validators import ValidationError
+from marklogic.utilities.validators import ValidationError
 from test.settings import DatabaseSettings as ds
 
 class TestForest(unittest.TestCase):

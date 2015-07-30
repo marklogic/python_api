@@ -24,8 +24,9 @@ from __future__ import unicode_literals, print_function, absolute_import
 #
 
 import unittest
-from marklogic.models import Database, Connection, Host, Forest
-from marklogic.models.utilities.exceptions import UnexpectedManagementAPIResponse
+from marklogic.connection import Connection
+from marklogic.models import Database, Host, Forest
+from marklogic.exceptions import UnexpectedManagementAPIResponse
 from requests.auth import HTTPDigestAuth
 from test.resources import TestConnection as tc
 from test.settings import DatabaseSettings as ds

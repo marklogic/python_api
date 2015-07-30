@@ -26,10 +26,9 @@ Role related classes for manipulating MarkLogic roles
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import requests
-from marklogic.models.utilities import exceptions
-from marklogic.models.utilities.utilities import PropertyLists
-import json
+import json, requests
+import marklogic.exceptions
+from marklogic.utilities import PropertyLists
 
 class Role(PropertyLists):
     """

@@ -23,7 +23,8 @@ from __future__ import unicode_literals, print_function, absolute_import
 #
 
 import unittest
-from marklogic.models import Connection, User
+from marklogic.connection import Connection
+from marklogic.models.user import User
 from test.resources import TestConnection as tc
 
 class TestUser(unittest.TestCase):

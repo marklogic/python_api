@@ -30,7 +30,7 @@ import json
 import logging
 import argparse
 import re
-from marklogic.models.connection import Connection
+from marklogic.connection import Connection
 from marklogic.models.database import Database
 from marklogic import MarkLogic
 from requests.auth import HTTPDigestAuth

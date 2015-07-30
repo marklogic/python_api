@@ -21,10 +21,10 @@
 #
 
 from abc import ABCMeta, abstractmethod
-from marklogic.models.utilities.validators import validate_index_type
-from marklogic.models.utilities.validators import validate_index_invalid_value_actions
-from marklogic.models.utilities.validators import validate_boolean
-from marklogic.models.utilities.validators import validate_collation
+from marklogic.utilities.validators import validate_index_type
+from marklogic.utilities.validators import validate_index_invalid_value_actions
+from marklogic.utilities.validators import validate_boolean
+from marklogic.utilities.validators import validate_collation
 
 class _Index:
     """

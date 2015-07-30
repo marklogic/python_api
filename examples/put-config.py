@@ -29,7 +29,7 @@ import os
 import base64
 import logging
 from requests.auth import HTTPDigestAuth
-from marklogic.models.connection import Connection
+from marklogic.connection import Connection
 from marklogic.models.database import Database
 from marklogic.models.forest import Forest
 from marklogic.models.permission import Permission

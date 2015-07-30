@@ -1,15 +1,15 @@
 Marklogic Utility Classes
 =========================
 
-.. automodule:: marklogic.models.utilities.validators
+.. automodule:: marklogic.utilities.validators
    :members:
 
-.. automodule:: marklogic.models.utilities.exceptions
+.. automodule:: marklogic.exceptions
    :members:
 
-.. automodule:: marklogic.models.utilities.utilities
+.. automodule:: marklogic.utilities
    :members:
 
-.. automodule:: marklogic.models.utilities.files
+.. automodule:: marklogic.utilities.files
    :members:
 

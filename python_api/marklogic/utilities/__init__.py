@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright 2015 MarkLogic Corporation
 #
@@ -14,11 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# File History
-# ------------
-#
-# Paul Hoehne       03/05/2015     Initial development
-#
 
 """
 Various utility classes.
@@ -26,9 +20,9 @@ Various utility classes.
 
 from __future__ import unicode_literals, print_function, absolute_import
 from abc import ABCMeta, abstractmethod
-from marklogic.models.utilities.validators import validate_type
-from marklogic.models.utilities.validators import validate_list_of_type
-from marklogic.models.utilities.validators import assert_list_of_type
+from marklogic.utilities.validators import validate_type
+from marklogic.utilities.validators import validate_list_of_type
+from marklogic.utilities.validators import assert_list_of_type
 
 class PropertyLists:
     """

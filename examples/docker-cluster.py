@@ -10,8 +10,8 @@ import argparse
 from requests.auth import HTTPDigestAuth
 from marklogic import MarkLogic
 from marklogic.models.host import Host
-from marklogic.models.connection import Connection
-from marklogic.models.utilities.exceptions import *
+from marklogic.connection import Connection
+from marklogic.exceptions import *
 
 class Docker:
     def __init__(self):

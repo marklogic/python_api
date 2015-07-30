@@ -25,11 +25,9 @@ Classes for dealing with database fragment parents and roots.
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import sys
-import requests
-import json
-from marklogic.models.utilities.validators import *
-from marklogic.models.utilities.exceptions import *
+import json, requests, sys
+from marklogic.utilities.validators import *
+from marklogic.exceptions import *
 
 class FragmentRoot:
     """

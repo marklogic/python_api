@@ -22,7 +22,7 @@ import logging
 import requests
 import json
 import logging
-from marklogic.models.connection import Connection
+from marklogic.connection import Connection
 from marklogic.models.cluster import Cluster
 from marklogic.models.host import Host
 from marklogic.models.user import User
@@ -32,8 +32,7 @@ from marklogic.models.forest import Forest
 from requests.auth import HTTPDigestAuth
 from marklogic.models.server import Server, HttpServer, WebDAVServer
 from marklogic.models.server import OdbcServer, XdbcServer, WebDAVServer
-
-from marklogic.models.utilities.exceptions import *
+from marklogic.exceptions import *
 
 class MarkLogic:
     """

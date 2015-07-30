@@ -23,11 +23,10 @@
 Classes for dealing with scheduled forest backups
 """
 
-import requests
-import json
+import json, requests
 from abc import ABCMeta, abstractmethod
-from marklogic.models.utilities.validators import *
-from marklogic.models.utilities.exceptions import *
+import marklogic.utilities.validators
+import marklogic.exceptions
 from marklogic.models.model import Model
 
 class ScheduledForestBackup(Model):

@@ -26,14 +26,11 @@ Classes for manipulating MarkLogic privileges.
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-
-import requests
-from marklogic.models.utilities import exceptions
-from marklogic.models.utilities.validators import validate_custom
-from marklogic.models.utilities.validators import validate_privilege_kind
-from marklogic.models.utilities.utilities import PropertyLists
-import json
-import logging
+import json, logging, requests
+import marklogic.exceptions
+from marklogic.utilities.validators import validate_custom
+from marklogic.utilities.validators import validate_privilege_kind
+from marklogic.utilities import PropertyLists
 
 class Privilege(PropertyLists):
     """

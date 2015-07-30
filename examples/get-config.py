@@ -32,7 +32,7 @@ import logging
 import json
 import logging
 from requests.auth import HTTPDigestAuth
-from marklogic.models.connection import Connection
+from marklogic.connection import Connection
 from marklogic.models.database import Database
 from marklogic.models.permission import Permission
 from marklogic.models.privilege import Privilege
@@ -196,7 +196,7 @@ class Closure:
             self.databases[name] = None
         else:
             self.databases[name] = database
-            self._close_over_database(self, database)
+            self._close_over_database(database)
 
     def add_forest(self, forest):
         if (isinstance(forest, str)):

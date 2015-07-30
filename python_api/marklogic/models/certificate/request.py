@@ -27,7 +27,7 @@ Request related classes for manipulating Certificate Requests
 from __future__ import unicode_literals, print_function, absolute_import
 
 import json
-from marklogic.models.utilities.validators import validate_custom
+from marklogic.utilities.validators import validate_custom
 
 class Request:
     """

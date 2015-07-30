@@ -23,14 +23,10 @@ Server related classes for manipulating MarkLogic databases
 """
 
 from abc import ABCMeta, abstractmethod
-import re
-import requests
-import time
-import json
-import logging
-from marklogic.models.utilities.exceptions import UnexpectedManagementAPIResponse
-from marklogic.models.utilities.validators import validate_custom
-from marklogic.models.utilities.utilities import PropertyLists
+import json, logging, re, requests, time
+from marklogic.exceptions import UnexpectedManagementAPIResponse
+from marklogic.utilities.validators import validate_custom
+from marklogic.utilities import PropertyLists
 from marklogic.models.server.schema import Schema
 from marklogic.models.server.namespace import UsingNamespace, Namespace
 from marklogic.models.server.requestblackout import RequestBlackout

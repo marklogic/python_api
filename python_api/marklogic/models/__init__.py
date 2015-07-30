@@ -14,10 +14,10 @@
 # limitations under the License.
 #
 
-from marklogic.models.connection import Connection
 from marklogic.models.forest import Forest
 from marklogic.models.database import Database
-from marklogic.models.server import Server, HttpServer, XdbcServer, OdbcServer, WebDAVServer
+from marklogic.models.server import Server, HttpServer, XdbcServer
+from marklogic.models.server import OdbcServer, WebDAVServer
 from marklogic.models.host import Host
 from marklogic.models.role import Role
 from marklogic.models.user import User

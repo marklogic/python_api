@@ -26,16 +26,12 @@ Database related classes for manipulating MarkLogic databases
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import sys
-
-import requests
-import json
-import logging
+import json, logging, requests, sys
 from marklogic.models.forest import Forest
-from marklogic.models.utilities import files
-from marklogic.models.utilities.utilities import PropertyLists
-from marklogic.models.utilities.validators import *
-from marklogic.models.utilities.exceptions import *
+from marklogic.utilities import files
+from marklogic.utilities import PropertyLists
+from marklogic.utilities.validators import *
+from marklogic.exceptions import *
 from marklogic.models.database.fragment import FragmentRoot, FragmentParent
 from marklogic.models.database.index import ElementRangeIndex, AttributeRangeIndex
 from marklogic.models.database.index import PathRangeIndex, FieldRangeIndex

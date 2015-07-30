@@ -25,15 +25,12 @@ Cluster class for manipulating MarkLogic clusters
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-import requests
-import json
-import time
-import logging
+import json, logging, requests, time
 from http.client import BadStatusLine
-from marklogic.models.connection import Connection
+from marklogic.connection import Connection
 from requests.packages.urllib3.exceptions import ProtocolError
 from requests.exceptions import ConnectionError
-from marklogic.models.utilities.exceptions import *
+from marklogic.exceptions import *
 from marklogic.models.host import Host
 
 class Cluster:

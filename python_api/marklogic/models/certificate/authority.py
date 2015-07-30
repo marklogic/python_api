@@ -26,10 +26,9 @@ Authority related classes for manipulating Certificate Authorities
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import requests
-import json
-from marklogic.models.utilities.exceptions import UnexpectedManagementAPIResponse
-from marklogic.models.utilities.validators import assert_boolean
+import json, requests
+from marklogic.exceptions import UnexpectedManagementAPIResponse
+from marklogic.utilities.validators import assert_boolean
 
 class Authority:
     """

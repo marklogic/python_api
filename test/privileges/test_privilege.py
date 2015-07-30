@@ -23,7 +23,8 @@ from __future__ import unicode_literals, print_function, absolute_import
 #
 
 import unittest
-from marklogic.models import Connection, Role, Privilege
+from marklogic.connection import Connection
+from marklogic.models import Role, Privilege
 from test.resources import TestConnection as tc
 
 class TestPrivilege(unittest.TestCase):

@@ -23,7 +23,7 @@
 Classes for dealing with lists of names, a namespace plus a list of localnames.
 """
 
-from marklogic.models.utilities.utilities import PropertyLists
+from marklogic.utilities import PropertyLists
 
 class NameList(PropertyLists):
     """

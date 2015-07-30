@@ -22,15 +22,12 @@ from __future__ import unicode_literals, print_function, absolute_import
 # Paul Hoehne       03/01/2015     Initial development
 #
 
-import socket
-import requests
-import json
-import logging
-from marklogic.models.utilities.exceptions import *
-from marklogic.models.utilities.validators import *
+import json, logging, requests
+import marklogic.exceptions
+from marklogic.utilities.validators import *
 from marklogic.models.model import Model
 from marklogic.models.forest.scheduledbackup import ScheduledForestBackup
-from marklogic.models.utilities.utilities import PropertyLists
+from marklogic.utilities import PropertyLists
 
 """
 MarkLogic Forest support classes.
