@@ -235,6 +235,19 @@ class Forest(Model,PropertyLists):
         validate_boolean(allowed)
         return self._set_config_property('updates-allowed', allowed)
 
+    def exists(self, connection=None):
+        """
+        Checks to see if the forest exists on the server.
+
+        :param connection: The connection to a MarkLogic server
+        :return: True if the forest exists
+        """
+        if connection is None:
+            connection = self.connection
+
+        forest = Forest.lookup(connection, self.forest_name())
+        return forest is not None
+
     def create(self, connection=None):
         """
         Creates the forest on the MarkLogic server.
@@ -307,7 +320,7 @@ class Forest(Model,PropertyLists):
 
         return self
 
-    def delete(self, connection=None):
+    def delete(self, level="full", replicas="delete", connection=None):
         """
         Delete a forest from the MarkLogic server.
 
@@ -317,9 +330,9 @@ class Forest(Model,PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/forests/{2}?level=full".format(
-            connection.host, connection.management_port,
-            self.name)
+        uri = "http://{0}:{1}/manage/v2/forests/{2}?level={3}&replicas={4}" \
+          .format(connection.host, connection.management_port,
+                  self.name, level, replicas)
 
         response = requests.delete(uri, auth=connection.auth)
 
