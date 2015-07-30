@@ -3224,6 +3224,19 @@ class Database(PropertyLists):
 
     # ============================================================
 
+    def exists(self, connection=None):
+        """
+        Checks to see if the database exists on the server.
+
+        :param connection: The connection to a MarkLogic server
+        :return: True if the database exists
+        """
+        if connection is None:
+            connection = self.connection
+
+        database = Database.lookup(connection, self.database_name())
+        return database is not None
+
     def create(self, connection=None):
         """
         Create a new database defined by these parameters on the given connection.
@@ -3239,27 +3252,17 @@ class Database(PropertyLists):
           .format(connection.host, connection.management_port)
 
         forest_names = []
-        # unicode doesn't exist in Python 3
-        if sys.version_info[0] < 3:
-            for forest_info in self._config['forest']:
-                if isinstance(forest_info, str) or isinstance(forest_info, unicode):
-                    new_forest = Forest(forest_info, host=self.hostname)
-                    new_forest.create(connection)
-                    forest_names.append(forest_info)
-
-                elif isinstance(forest_info, Forest):
-                    forest_info.create(connection)
-                    forest_names.append(forest_info.name())
-        else:
+        if 'forest' in self._config:
             for forest_info in self._config['forest']:
                 if isinstance(forest_info, str):
                     new_forest = Forest(forest_info, host=self.hostname)
                     new_forest.create(connection)
                     forest_names.append(forest_info)
-
                 elif isinstance(forest_info, Forest):
                     forest_info.create(connection)
                     forest_names.append(forest_info.name())
+                else:
+                    raise UnsupportedOperation("Unexpected object in forests")
 
         self._config['forest'] = forest_names
 
@@ -3320,7 +3323,7 @@ class Database(PropertyLists):
 
         return self
 
-    def delete(self, connection=None):
+    def delete(self, forest_delete="data", connection=None):
         """
         Remove the given database and all its forests.
 
@@ -3331,8 +3334,9 @@ class Database(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}?forest-delete=data" \
-          .format(connection.host, connection.management_port, self.name)
+        uri = "http://{0}:{1}/manage/v2/databases/{2}?forest-delete={3}" \
+          .format(connection.host, connection.management_port,
+                  self.name, forest_delete)
         response = requests.delete(uri, auth=connection.auth)
 
         if response.status_code > 299 and not response.status_code == 404:
