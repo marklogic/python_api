@@ -58,7 +58,7 @@ class TestDatabase(unittest.TestCase):
             self.assertEqual('test-db', validate_db.database_name())
 
         finally:
-            validate_db.delete(conn)
+            validate_db.delete(connection=conn)
             validate_db = Database.lookup(conn, "test-db")
             self.assertIsNone(validate_db)
 
@@ -88,12 +88,13 @@ class TestDatabase(unittest.TestCase):
         conn = Connection(tc.hostname, HTTPDigestAuth(tc.admin, tc.password))
 
         hosts = Host.list(conn)
-        db = Database("simple-forest-create-test-db", hosts[0])
+        db = Database("simple-forest-create-test-db", hosts[0],
+                      connection=conn)
 
         db.set_forest_names(["simple-forest-create-forest1",
                              "simple-forest-create-forest2"])
 
-        db.create(conn)
+        db.create()
 
         db = Database.lookup(conn, "simple-forest-create-test-db")
         try:
@@ -103,7 +104,7 @@ class TestDatabase(unittest.TestCase):
             self.assertIn("simple-forest-create-forest2", db.forest_names())
 
         finally:
-            db.delete(conn)
+            db.delete(connection=conn)
 
     def test_create_single_detailed_forest(self):
         """
@@ -134,7 +135,7 @@ class TestDatabase(unittest.TestCase):
             #this isn't in the properties...oddly.
             #self.assertEqual(ds.large_data_directory, forest.large_data_directory())
         finally:
-            db.delete(conn)
+            db.delete(connection=conn)
 
 if __name__ == "__main__":
     unittest.main()

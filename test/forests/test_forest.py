@@ -72,12 +72,11 @@ class TestForest(unittest.TestCase):
         try:
             self.assertIsNotNone(forest)
             self.assertEqual("test-forest-simple-create", forest.forest_name())
-            #This isn't included in the properties
-            #self.assertEqual(host, forest.host())
+            self.assertEqual(host, forest.host())
             self.assertEqual(ds.large_data_directory, forest.large_data_directory())
             self.assertEqual(ds.fast_data_directory, forest.fast_data_directory())
         finally:
-            forest.delete(conn)
+            forest.delete(connection=conn)
 
 if __name__ == "__main__":
     unittest.main();
