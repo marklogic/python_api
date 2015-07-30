@@ -28,10 +28,11 @@ import json
 import logging
 import re
 import sys
+from marklogic.cli.manager import Manager
 from marklogic.models.server import Server, HttpServer, XdbcServer
 from marklogic.models.server import OdbcServer, WebDAVServer
 
-class ServerManager:
+class ServerManager(Manager):
     """
     The ServerManager performs operations on servers.
     """

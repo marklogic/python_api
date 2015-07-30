@@ -28,9 +28,10 @@ import json
 import logging
 import re
 import sys
+from marklogic.cli.manager import Manager
 from marklogic.models.user import User
 
-class UserManager:
+class UserManager(Manager):
     """
     The UserManager performs operations on users.
     """

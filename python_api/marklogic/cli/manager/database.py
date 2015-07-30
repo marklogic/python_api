@@ -28,9 +28,10 @@ import json
 import logging
 import re
 import sys
+from marklogic.cli.manager import Manager
 from marklogic.models.database import Database
 
-class DatabaseManager:
+class DatabaseManager(Manager):
     """
     The DatabaseManager performs operations on databases.
     """

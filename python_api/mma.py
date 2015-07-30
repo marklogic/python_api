@@ -9,7 +9,8 @@ import logging
 import argparse
 from requests.auth import HTTPDigestAuth
 from marklogic import MarkLogic
-from marklogic.models.connection import Connection
+import marklogic.cli.manager
+from marklogic.connection import Connection
 from marklogic.cli.template import Template
 
 def main():

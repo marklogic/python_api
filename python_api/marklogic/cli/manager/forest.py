@@ -28,10 +28,11 @@ import json
 import logging
 import re
 import sys
+from marklogic.cli.manager import Manager
 from marklogic.models.forest import Forest
 from marklogic.models.database import Database
 
-class ForestManager:
+class ForestManager(Manager):
     """
     The ForestManager performs operations on forests.
     """
