@@ -1428,6 +1428,19 @@ class Server(PropertyLists):
         return self.set_property_list('request-blackout',
                                       blackouts, RequestBlackout)
 
+    def exists(self, connection=None):
+        """
+        Checks to see if the application server exists.
+
+        :param connection: The connection to a MarkLogic server
+        :return: True if the server exists
+        """
+        if connection is None:
+            connection = self.connection
+
+        server = Server.lookup(connection, self.server_name(), self.group_name())
+        return server is not None
+
     def create(self, connection=None):
         """
         Creates a server on the MarkLogic server.
@@ -1566,39 +1579,6 @@ class Server(PropertyLists):
         :return: A list of servers
         """
         return Server._list(connection)
-
-    @classmethod
-    def exists(cls, connection, name, group="Default"):
-        """
-        Returns true if (and only if) the server exists. The server
-        name may be a structured value consisting of the name of the group
-        and the name of the server separated by "|". If a structured name
-        is used the group parameter is ignored.
-
-        :param name: The server name
-        :param group: The group name
-        :param: connection: The connection to a MarkLogic server
-        :return: True or False
-        """
-        parts = name.split("|")
-        if len(parts) == 1:
-            pass
-        elif len(parts) == 2:
-            group = parts[0]
-            name = parts[1]
-        else:
-            raise validate_custom("Unparseable server name")
-
-        uri = "http://{0}:{1}/manage/v2/servers/{2}/properties?group-id={3}" \
-          .format(connection.host, connection.management_port,
-                  name, group)
-
-        response = requests.head(uri, auth=connection.auth)
-
-        if response.status_code > 299 and not response.status_code == 404:
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        return (response.status_code == 200)
 
     @classmethod
     def lookup(cls, connection, name, group='Default'):
