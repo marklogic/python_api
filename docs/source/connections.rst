@@ -1,5 +1,5 @@
 MarkLogic Connections
 =====================
 
-.. automodule:: marklogic.models.connection
+.. automodule:: marklogic.connection
    :members:

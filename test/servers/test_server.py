@@ -23,7 +23,9 @@ from __future__ import unicode_literals, print_function, absolute_import
 #
 
 import unittest
-from marklogic.models import Connection, Server, HttpServer, XdbcServer, OdbcServer, WebDAVServer
+from marklogic.connection import Connection
+from marklogic.models.server import Server, HttpServer, XdbcServer
+from marklogic.models.server import OdbcServer, WebDAVServer
 from test.resources import TestConnection as tc
 
 class TestServer(unittest.TestCase):

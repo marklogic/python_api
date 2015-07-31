@@ -26,8 +26,8 @@
 Classes for dealing with fields.
 """
 
-from marklogic.models.utilities.validators import assert_list_of_type, assert_boolean
-from marklogic.models.utilities.utilities import PropertyLists
+from marklogic.utilities.validators import assert_list_of_type, assert_boolean
+from marklogic.utilities import PropertyLists
 
 class _IncludedExcludedElement:
     """

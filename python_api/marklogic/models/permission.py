@@ -26,10 +26,9 @@ Classes for manipulating MarkLogic permissions.
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import requests
-from marklogic.models.utilities.validators import *
-from marklogic.models.utilities import exceptions
-import json
+import requests, json
+from marklogic.utilities.validators import *
+from marklogic.exceptions import *
 
 class Permission(object):
     """

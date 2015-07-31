@@ -22,7 +22,7 @@
 from __future__ import unicode_literals, print_function, absolute_import
 
 import unittest
-from marklogic.models import Connection
+from marklogic.connection import Connection
 from marklogic.models.certificate.request import Request
 from marklogic.models.certificate.template import Template
 from test.resources import TestConnection as tc

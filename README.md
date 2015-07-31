@@ -7,6 +7,13 @@ and it will certainly grow higher-level APIs.
 The API aims to provide complete coverage of what's in the MarkLogic
 REST API in idiomatic Python.
 
+## Churn warning
+
+Several aspects of the API design are still in flux. Some
+inconsistencies are present. If you write scripts based on it, you'll
+probably have to fix them after each update. Apologies, in advance,
+and thanks for your feedback.
+
 ## Features
 
 -  Creation and configuration of databases, forests, servers, hosts,

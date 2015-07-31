@@ -23,8 +23,8 @@
 Classes for dealing with server request blackouts
 """
 
-from marklogic.models.utilities.validators import assert_list_of_type
-from marklogic.models.utilities.utilities import PropertyLists
+from marklogic.utilities.validators import assert_list_of_type
+from marklogic.utilities import PropertyLists
 
 class RequestBlackout(PropertyLists):
     """

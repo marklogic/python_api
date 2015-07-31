@@ -16,34 +16,25 @@
 # File History
 # ------------
 #
-# Paul Hoehne       03/26/2015     Initial development
+# Norman Walsh      19 July 2015     Initial development
 #
 
-"""
-MarkLogic exception classes
-"""
+from abc import ABCMeta, abstractmethod
 
-class MLClientException(Exception):
+class Model:
     """
-    Base class for MarkLogic client exceptions.
+    The base type for models. Defines a few general methods.
 
+    This is an abstract class.
     """
-    pass
+    __metaclass__ = ABCMeta
 
+    def _get_config_property(self, key):
+        if key in self._config:
+            return self._config[key]
+        else:
+            return None
 
-class UnexpectedManagementAPIResponse(MLClientException):
-    """
-    This exception class is for exceptions that arise from unexpected management
-    API responses.
-
-    """
-    pass
-
-
-class UnexpectedAPIResponse(MLClientException):
-    """
-    This exception class is for exceptions that arise from unexpected REST api
-    responses when dealing with search or documents.
-
-    """
-    pass
+    def _set_config_property(self, key, value):
+        self._config[key] = value
+        return self

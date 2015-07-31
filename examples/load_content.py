@@ -28,7 +28,8 @@ import os
 import time
 import logging
 from mlcploader import MLCPLoader
-from marklogic.models import Connection, Host
+from marklogic.connection import Connection
+from marklogic.models import Host
 from quickstart import SimpleApplication
 from requests.auth import HTTPDigestAuth
 from resources import TestConnection as tc

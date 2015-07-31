@@ -23,10 +23,11 @@ from __future__ import unicode_literals, print_function, absolute_import
 #
 
 import unittest
-from marklogic.models import Forest, Host, Connection
+from marklogic.connection import Connection
+from marklogic.models import Forest, Host
 from test.resources import TestConnection as tc
 from requests.auth import HTTPDigestAuth
-from marklogic.models.utilities.validators import ValidationError
+from marklogic.utilities.validators import ValidationError
 from test.settings import DatabaseSettings as ds
 
 class TestForest(unittest.TestCase):
@@ -34,9 +35,10 @@ class TestForest(unittest.TestCase):
         pass
 
     def test_getters_and_setters(self):
-        forest = Forest("Foo", host="bar", data_directory=ds.data_directory,
-                        large_data_directory=ds.large_data_directory,
-                        fast_data_directory=ds.fast_data_directory)
+        forest = Forest("Foo", host="bar")
+        forest.set_data_directory(ds.data_directory)
+        forest.set_large_data_directory(ds.large_data_directory)
+        forest.set_fast_data_directory(ds.fast_data_directory)
 
         self.assertEqual(forest.forest_name(), "Foo")
 
@@ -50,9 +52,6 @@ class TestForest(unittest.TestCase):
 
         self.assertEqual(ds.data_directory, forest.data_directory())
 
-        forest.set_database("foo")
-        self.assertEqual("foo", forest.database())
-
         self.assertEqual(ds.fast_data_directory, forest.fast_data_directory())
 
         self.assertEqual(ds.large_data_directory, forest.large_data_directory())
@@ -62,9 +61,11 @@ class TestForest(unittest.TestCase):
 
         host = Host.list(conn)[0]
 
-        forest = Forest("test-forest-simple-create", host=host,
-                        large_data_directory=ds.large_data_directory,
-                        fast_data_directory=ds.fast_data_directory, )
+        forest = Forest("test-forest-simple-create", host=host)
+
+        forest.set_large_data_directory(ds.large_data_directory)
+        forest.set_fast_data_directory(ds.fast_data_directory)
+
         forest.create(conn)
 
         forest = Forest.lookup(conn, "test-forest-simple-create")
@@ -76,7 +77,7 @@ class TestForest(unittest.TestCase):
             self.assertEqual(ds.large_data_directory, forest.large_data_directory())
             self.assertEqual(ds.fast_data_directory, forest.fast_data_directory())
         finally:
-            forest.remove(conn)
+            forest.delete(connection=conn)
 
 if __name__ == "__main__":
     unittest.main();

@@ -24,7 +24,7 @@ from __future__ import unicode_literals, print_function, absolute_import
 import sys
 import logging
 
-from marklogic.models.connection import Connection
+from marklogic.connection import Connection
 from marklogic.models.host import Host
 from marklogic.models.database import Database
 from marklogic.models.forest import Forest

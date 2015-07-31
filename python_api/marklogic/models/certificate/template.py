@@ -28,9 +28,9 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import requests
 import json
-from marklogic.models.utilities.exceptions import UnexpectedManagementAPIResponse
-from marklogic.models.utilities.validators import assert_type
-from marklogic.models.utilities.validators import validate_custom
+from marklogic.exceptions import UnexpectedManagementAPIResponse
+from marklogic.utilities.validators import assert_type
+from marklogic.utilities.validators import validate_custom
 from marklogic.models.certificate.request import Request
 
 class Template:

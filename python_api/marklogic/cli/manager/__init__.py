@@ -13,5 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# File History
+# ------------
+#
+# Norman Walsh      30 July 2015     Initial development
+#
 
-from .files import walk_directories
+from abc import ABCMeta, abstractmethod
+
+class Manager:
+    """
+    The base type for managers.
+
+    This is an abstract class.
+    """
+    __metaclass__ = ABCMeta
