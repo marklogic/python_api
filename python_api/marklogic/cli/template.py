@@ -25,6 +25,7 @@ from marklogic.cli.manager.forest import ForestManager
 from marklogic.cli.manager.database import DatabaseManager
 from marklogic.cli.manager.server import ServerManager
 from marklogic.cli.manager.user import UserManager
+from marklogic.cli.manager.marklogic import MarkLogicManager
 
 """
 Templates for the command line interface.
@@ -39,15 +40,74 @@ class Template:
         db_mgr = DatabaseManager()
         srv_mgr = ServerManager()
         user_mgr = UserManager()
+        ml_mgr = MarkLogicManager()
 
-        self._parsers = {'create': {'forest':   {'code': f_mgr.create},
-                                    'database': {'code': db_mgr.create},
-                                    'server':   {'code': srv_mgr.create},
-                                    'user':     {'code': user_mgr.create}},
-                         'delete': {'forest':   {'code': f_mgr.delete},
-                                    'database': {'code': db_mgr.delete},
-                                    'server':   {'code': srv_mgr.delete},
-                                    'user':     {'code': user_mgr.delete}}}
+        self._parsers = {'start':                {'code': ml_mgr.start},
+                         'status':               {'code': ml_mgr.status},
+                         'init':                 {'code': ml_mgr.init},
+                         'save':                 {'code': ml_mgr.save},
+                         'switch':               {'code': ml_mgr.switch},
+                         'clear':                {'code': ml_mgr.clear},
+                         'log':                  {'code': ml_mgr.log},
+                         'run':                  {'code': None},
+                         'stop':    {'host':     {'code': ml_mgr.stop},
+                                     'cluster':  {'code': ml_mgr.stop}},
+                         'restart': {'host':     {'code': ml_mgr.restart},
+                                     'cluster':  {'code': ml_mgr.restart}},
+                         'create':  {'forest':   {'code': f_mgr.create},
+                                     'database': {'code': db_mgr.create},
+                                     'server':   {'code': srv_mgr.create},
+                                     'user':     {'code': user_mgr.create}},
+                         'delete':  {'forest':   {'code': f_mgr.delete},
+                                     'database': {'code': db_mgr.delete},
+                                     'server':   {'code': srv_mgr.delete},
+                                     'user':     {'code': user_mgr.delete}}}
+
+        parser = self._make_parser('start',None,'Start the server')
+        self._parsers["start"]["parser"] = parser
+
+        parser = self._make_parser('status',None,'Report server status')
+        self._parsers["status"]["parser"] = parser
+
+        parser = self._make_parser('init',None,'Initialize server')
+        parser.add_argument('--realm', default='public',
+                            help='The realm')
+        self._parsers["init"]["parser"] = parser
+
+        parser = self._make_parser('stop','host','Stop the host')
+        self._parsers["stop"]["host"]["parser"] = parser
+
+        parser = self._make_parser('stop','cluster','Stop the cluster')
+        self._parsers["stop"]["cluster"]["parser"] = parser
+
+        parser = self._make_parser('restart','host','Restart the host')
+        self._parsers["restart"]["host"]["parser"] = parser
+
+        parser = self._make_parser('restart','cluster','Restart the cluster')
+        self._parsers["restart"]["cluster"]["parser"] = parser
+
+        parser = self._make_parser('save',None,'Save configuration')
+        parser.add_argument('--archive', required=True,
+                            help='The name of the archive file')
+        self._parsers["save"]["parser"] = parser
+
+        parser = self._make_parser('switch',None,'Switch configuration')
+        parser.add_argument('--archive', required=True,
+                            help='The name of the archive file')
+        self._parsers["switch"]["parser"] = parser
+
+        parser = self._make_parser('clear',None,'Clear configuration')
+        self._parsers["clear"]["parser"] = parser
+
+        parser = self._make_parser('log',None,'Show logs')
+        parser.add_argument('--logfile', default="ErrorLog.txt",
+                            help='The name of the log file')
+        self._parsers["log"]["parser"] = parser
+
+        parser = self._make_parser('run',None,'Switch configuration')
+        parser.add_argument('--script', required=True,
+                            help='The name of the script file')
+        self._parsers["run"]["parser"] = parser
 
         parser = self._make_parser('create','forest','Create a forest')
         parser.add_argument('name',
@@ -139,9 +199,12 @@ class Template:
         parser = argparse.ArgumentParser(description=description)
         parser.add_argument(command, choices=[command], metavar=command,
                             help="The {0} command name".format(command))
-        parser.add_argument(artifact, choices=artifact, metavar=artifact,
-                            help="The {0} artifact name".format(artifact))
-        parser.add_argument('--host', default='localhost',
+        if artifact is not None:
+            parser.add_argument(artifact, choices=artifact, metavar=artifact,
+                                help="The {0} artifact name".format(artifact))
+        parser.add_argument('--config', default='DEFAULT',
+                            help='Configuration section')
+        parser.add_argument('--hostname', default='localhost',
                             help='Host on which to issue the request')
         parser.add_argument('--credentials', default='admin:admin',
                             help='Login credentials for request')

@@ -38,7 +38,7 @@ class UserManager(Manager):
     def __init__(self):
         pass
 
-    def create(self, args, connection):
+    def create(self, args, config, connection):
         user = User(args['name'], args['password'], connection=connection)
         if user.exists():
             print("Error: User already exists: {0}".format(args['name']))
@@ -72,12 +72,14 @@ class UserManager(Manager):
                            .format(name))
                     sys.exit(1)
 
+        print("Create user {0}...".format(args['name']))
         user.create()
 
-    def delete(self, args, connection):
+    def delete(self, args, config, connection):
         user = User.lookup(connection, args['name'])
         if user is None:
             return
 
+        print("Delete user {0}...".format(args['name']))
         user.delete(connection)
 
