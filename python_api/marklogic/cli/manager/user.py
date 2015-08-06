@@ -24,10 +24,7 @@
 A class to manage users.
 """
 
-import json
-import logging
-import re
-import sys
+import inspect, json, logging, re, sys
 from marklogic.cli.manager import Manager
 from marklogic.models.user import User
 
@@ -74,6 +71,41 @@ class UserManager(Manager):
 
         print("Create user {0}...".format(args['name']))
         user.create()
+
+    def modify(self, args, config, connection):
+        user = User(args['name'], connection=connection)
+        if not user.exists():
+            print("Error: User does not exist: {0}".format(args['name']))
+            sys.exit(1)
+
+        methods = inspect.getmembers(user, predicate=inspect.ismethod)
+        jumptable = {}
+        for (name, func) in methods:
+            if name.startswith('set_'):
+                jumptable[name] = func
+
+        if 'properties' in args:
+            for prop in args['properties']:
+                try:
+                    name, value = re.split("=", prop)
+                except ValueError:
+                    print ("Additional properties must be name=value pairs: {0}"
+                           .format(prop))
+                    sys.exit(1)
+                if value == "false" or value == "true":
+                    value = (value == "true")
+                else:
+                    pass
+
+                key = "set_" + name.replace("-","_")
+                if key in jumptable:
+                    jumptable[key](value)
+                else:
+                    print("Unsupported property: {0}".format(prop))
+                    sys.exit(1)
+
+        print("Modify user {0}...".format(args['name']))
+        user.update(connection)
 
     def delete(self, args, config, connection):
         user = User.lookup(connection, args['name'])
