@@ -39,7 +39,7 @@ class ForestManager(Manager):
     def __init__(self):
         pass
 
-    def create(self, args, connection):
+    def create(self, args, config, connection):
         forest = Forest(args['name'], args['forest_host'], connection=connection)
         if forest.exists():
             print("Error: Forest already exists: {0}".format(args['name']))
@@ -83,13 +83,14 @@ class ForestManager(Manager):
         else:
             database = None
 
+        print("Create forest {0}...".format(args['name']))
         forest.create()
 
         if database is not None:
             database.add_forest_name(forest.forest_name())
             database.update(connection)
 
-    def delete(self, args, connection):
+    def delete(self, args, config, connection):
         forest = Forest(args['name'], args['forest_host'], connection=connection)
         if not forest.exists():
             return
@@ -97,6 +98,7 @@ class ForestManager(Manager):
         level = args['level']
         replicas = args['replicas']
 
+        print("Delete forest {0}...".format(args['name']))
         forest.delete(level,replicas,connection)
 
 

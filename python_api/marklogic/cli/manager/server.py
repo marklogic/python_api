@@ -39,7 +39,7 @@ class ServerManager(Manager):
     def __init__(self):
         pass
 
-    def create(self, args, connection):
+    def create(self, args, config, connection):
         stype = args['type']
         if stype == 'http':
             server = HttpServer(args['name'], args['group'], args['port'],
@@ -82,7 +82,7 @@ class ServerManager(Manager):
 
         server.create()
 
-    def delete(self, args, connection):
+    def delete(self, args, config, connection):
         server = Server.lookup(connection, args['name'], args['group'])
         if server is None:
             return

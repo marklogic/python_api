@@ -38,7 +38,7 @@ class DatabaseManager(Manager):
     def __init__(self):
         pass
 
-    def create(self, args, connection):
+    def create(self, args, config, connection):
         database = Database(args['name'], args['forest_host'],
                             connection=connection)
         if database.exists():
@@ -69,13 +69,15 @@ class DatabaseManager(Manager):
         if len(forests) > 0:
             database.set_forest_names(forests)
 
+        print("Create database {0}...".format(args['name']))
         database.create()
 
-    def delete(self, args, connection):
+    def delete(self, args, config, connection):
         database = Database(args['name'], connection=connection)
         if not database.exists():
             return
 
+        print("Delete database {0}...".format(args['name']))
         forest_delete = args['forest_delete']
         database.delete(forest_delete,connection)
 
