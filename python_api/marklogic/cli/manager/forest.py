@@ -24,10 +24,7 @@
 A class to create forests
 """
 
-import json
-import logging
-import re
-import sys
+import inspect, json, logging, re, sys
 from marklogic.cli.manager import Manager
 from marklogic.models.forest import Forest
 from marklogic.models.database import Database
@@ -89,6 +86,41 @@ class ForestManager(Manager):
         if database is not None:
             database.add_forest_name(forest.forest_name())
             database.update(connection)
+
+    def modify(self, args, config, connection):
+        forest = Forest(args['name'], connection=connection)
+        if not forest.exists():
+            print("Error: Forest does not exist: {0}".format(args['name']))
+            sys.exit(1)
+
+        methods = inspect.getmembers(forest, predicate=inspect.ismethod)
+        jumptable = {}
+        for (name, func) in methods:
+            if name.startswith('set_'):
+                jumptable[name] = func
+
+        if 'properties' in args:
+            for prop in args['properties']:
+                try:
+                    name, value = re.split("=", prop)
+                except ValueError:
+                    print ("Additional properties must be name=value pairs: {0}"
+                           .format(prop))
+                    sys.exit(1)
+                if value == "false" or value == "true":
+                    value = (value == "true")
+                else:
+                    pass
+
+                key = "set_" + name.replace("-","_")
+                if key in jumptable:
+                    jumptable[key](value)
+                else:
+                    print("Unsupported property: {0}".format(prop))
+                    sys.exit(1)
+
+        print("Modify forest {0}...".format(args['name']))
+        forest.update()
 
     def delete(self, args, config, connection):
         forest = Forest(args['name'], args['forest_host'], connection=connection)

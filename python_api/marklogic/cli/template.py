@@ -58,6 +58,10 @@ class Template:
                                      'database': {'code': db_mgr.create},
                                      'server':   {'code': srv_mgr.create},
                                      'user':     {'code': user_mgr.create}},
+                         'modify':  {'forest':   {'code': f_mgr.modify},
+                                     'database': {'code': db_mgr.modify},
+                                     'server':   {'code': srv_mgr.modify},
+                                     'user':     {'code': user_mgr.modify}},
                          'delete':  {'forest':   {'code': f_mgr.delete},
                                      'database': {'code': db_mgr.delete},
                                      'server':   {'code': srv_mgr.delete},
@@ -160,11 +164,45 @@ class Template:
                             help='Additional user properties')
         self._parsers["create"]["user"]["parser"] = parser
 
+        parser = self._make_parser('modify','forest','Modify a forest')
+        parser.add_argument('name',
+                            help='The forest name')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional forest properties')
+        self._parsers["modify"]["forest"]["parser"] = parser
+
+        parser = self._make_parser('modify','database','Modify a database')
+        parser.add_argument('name',
+                            help='The database name')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional database properties')
+        self._parsers["modify"]["database"]["parser"] = parser
+
+        parser = self._make_parser('modify','server','Modify an application server')
+        parser.add_argument('name',
+                            help='The server name')
+        parser.add_argument('--group', default="Default",
+                            help='The group')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional server properties')
+        self._parsers["modify"]["server"]["parser"] = parser
+
+        parser = self._make_parser('modify','user','Modify a user')
+        parser.add_argument('name',
+                            help='The user name')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional user properties')
+        self._parsers["modify"]["user"]["parser"] = parser
+
         parser = self._make_parser('delete','forest','Delete a forest')
         parser.add_argument('name',
                             help='The forest name')
         parser.add_argument('--forest-host', default='$ML-LOCALHOST',
-                            help='The host on which to create the forest')
+                            help='The host on which to delete the forest')
         parser.add_argument('--level', choices=['full','config-only'],
                             default='full',
                             help='Level of deletion')

@@ -24,10 +24,7 @@
 A class to manage databases.
 """
 
-import json
-import logging
-import re
-import sys
+import inspect, json, logging, re, sys
 from marklogic.cli.manager import Manager
 from marklogic.models.database import Database
 
@@ -71,6 +68,48 @@ class DatabaseManager(Manager):
 
         print("Create database {0}...".format(args['name']))
         database.create()
+
+    def modify(self, args, config, connection):
+        database = Database(args['name'], connection=connection)
+        if not database.exists():
+            print("Error: Database does not exist: {0}".format(args['name']))
+            sys.exit(1)
+
+        forests = []
+
+        methods = inspect.getmembers(database, predicate=inspect.ismethod)
+        jumptable = {}
+        for (name, func) in methods:
+            if name.startswith('set_'):
+                jumptable[name] = func
+
+        if 'properties' in args:
+            for prop in args['properties']:
+                try:
+                    name, value = re.split("=", prop)
+                except ValueError:
+                    print ("Additional properties must be name=value pairs: {0}"
+                           .format(prop))
+                    sys.exit(1)
+                if value == "false" or value == "true":
+                    value = (value == "true")
+                else:
+                    pass
+
+                if name == 'forest':
+                    forests.append(value)
+                else:
+                    key = "set_" + name.replace("-","_")
+                    if key in jumptable:
+                        jumptable[key](value)
+                    else:
+                        print("Unsupported property: {0}".format(prop))
+                        sys.exit(1)
+
+        database.set_forest_names(forests)
+
+        print("Modify database {0}...".format(args['name']))
+        database.update()
 
     def delete(self, args, config, connection):
         database = Database(args['name'], connection=connection)
