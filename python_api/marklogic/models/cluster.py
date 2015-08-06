@@ -102,6 +102,38 @@ class Cluster:
 
         return self
 
+    def restart(self, connection=None):
+        if connection is None:
+            connection = self.connection
+        uri = "http://{0}:{1}/manage/v2".format(
+            connection.host, connection.management_port)
+
+        headers = {'accept': 'application/json'}
+        response = requests.post(uri, json={'operation':'restart-local-cluster'},
+                                 auth=connection.auth,
+                                 headers=headers)
+
+        if response.status_code > 299:
+            raise UnexpectedManagementAPIResponse(response.text)
+
+        return None
+
+    def shutdown(self, connection=None):
+        if connection is None:
+            connection = self.connection
+        uri = "http://{0}:{1}/manage/v2".format(
+            connection.host, connection.management_port)
+
+        headers = {'accept': 'application/json'}
+        response = requests.post(uri, json={'operation':'shutdown-local-cluster'},
+                                 auth=connection.auth,
+                                 headers=headers)
+
+        if response.status_code > 299:
+            raise UnexpectedManagementAPIResponse(response.text)
+
+        return None
+
     @classmethod
     def lookup(cls, connection):
         uri = "http://{0}:{1}/manage/v2/properties".format(
