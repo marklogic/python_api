@@ -187,6 +187,57 @@ class Host:
 
         return self
 
+    def restart(self, connection=None):
+        """
+        Restart the host.
+
+        :param connection:The server connection
+
+        :return: The host object
+        """
+        if connection is None:
+            connection = self.connection
+        uri = "http://{0}:{1}/manage/v2/hosts/{2}" \
+          .format(connection.host, connection.management_port,
+                  self.name)
+
+        headers = {'accept': 'application/json'}
+        response = requests.post(uri, json={'operation':'restart'},
+                                 auth=connection.auth,
+                                 headers=headers)
+
+        if response.status_code > 299:
+            raise UnexpectedManagementAPIResponse(response.text)
+
+        if response.status_code == 202:
+            data = json.loads(response.text)
+            Host.wait_for_restart(connection,
+                                  data["restart"]["last-startup"][0]["value"])
+
+    def shutdown(self, connection=None):
+        """
+        Shutdown the host.
+
+        :param connection:The server connection
+
+        :return: None
+        """
+        if connection is None:
+            connection = self.connection
+        uri = "http://{0}:{1}/manage/v2/hosts/{2}" \
+          .format(connection.host, connection.management_port,
+                  self.name)
+
+        headers = {'accept': 'application/json'}
+        response = requests.post(uri, json={'operation':'shutdown'},
+                                 auth=connection.auth,
+                                 headers=headers)
+
+        if response.status_code > 299:
+            raise UnexpectedManagementAPIResponse(response.text)
+
+        return None
+
     @classmethod
     def lookup(cls, connection, name):
         """
