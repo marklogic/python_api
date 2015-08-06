@@ -229,7 +229,6 @@ class Forest(Model,PropertyLists):
         return self._get_config_property('updates-allowed')
 
     def set_updates_allowed(self, allowed):
-        validate_boolean(allowed)
         return self._set_config_property('updates-allowed', allowed)
 
     def exists(self, connection=None):
