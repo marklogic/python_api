@@ -21,11 +21,12 @@
 #
 
 import argparse
-from marklogic.cli.manager.forest import ForestManager
 from marklogic.cli.manager.database import DatabaseManager
+from marklogic.cli.manager.forest import ForestManager
+from marklogic.cli.manager.marklogic import MarkLogicManager
+from marklogic.cli.manager.role import RoleManager
 from marklogic.cli.manager.server import ServerManager
 from marklogic.cli.manager.user import UserManager
-from marklogic.cli.manager.marklogic import MarkLogicManager
 
 """
 Templates for the command line interface.
@@ -36,11 +37,12 @@ class Template:
     command line options.
     """
     def __init__(self):
-        f_mgr = ForestManager()
         db_mgr = DatabaseManager()
+        f_mgr = ForestManager()
+        ml_mgr = MarkLogicManager()
+        role_mgr = RoleManager()
         srv_mgr = ServerManager()
         user_mgr = UserManager()
-        ml_mgr = MarkLogicManager()
 
         self._parsers = {'start':                {'code': ml_mgr.start},
                          'status':               {'code': ml_mgr.status},
@@ -57,15 +59,18 @@ class Template:
                          'create':  {'forest':   {'code': f_mgr.create},
                                      'database': {'code': db_mgr.create},
                                      'server':   {'code': srv_mgr.create},
-                                     'user':     {'code': user_mgr.create}},
+                                     'user':     {'code': user_mgr.create},
+                                     'role':     {'code': role_mgr.create}},
                          'modify':  {'forest':   {'code': f_mgr.modify},
                                      'database': {'code': db_mgr.modify},
                                      'server':   {'code': srv_mgr.modify},
-                                     'user':     {'code': user_mgr.modify}},
+                                     'user':     {'code': user_mgr.modify},
+                                     'role':     {'code': role_mgr.modify}},
                          'delete':  {'forest':   {'code': f_mgr.delete},
                                      'database': {'code': db_mgr.delete},
                                      'server':   {'code': srv_mgr.delete},
-                                     'user':     {'code': user_mgr.delete}}}
+                                     'user':     {'code': user_mgr.delete},
+                                     'role':     {'code': role_mgr.delete}}}
 
         parser = self._make_parser('start',None,'Start the server')
         self._parsers["start"]["parser"] = parser
@@ -164,6 +169,14 @@ class Template:
                             help='Additional user properties')
         self._parsers["create"]["user"]["parser"] = parser
 
+        parser = self._make_parser('create','role','Create a role')
+        parser.add_argument('name',
+                            help='The role name')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional user properties')
+        self._parsers["create"]["role"]["parser"] = parser
+
         parser = self._make_parser('modify','forest','Modify a forest')
         parser.add_argument('name',
                             help='The forest name')
@@ -197,6 +210,14 @@ class Template:
                             metavar="property=value",
                             help='Additional user properties')
         self._parsers["modify"]["user"]["parser"] = parser
+
+        parser = self._make_parser('modify','role','Modify a role')
+        parser.add_argument('name',
+                            help='The role name')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional user properties')
+        self._parsers["modify"]["role"]["parser"] = parser
 
         parser = self._make_parser('delete','forest','Delete a forest')
         parser.add_argument('name',
@@ -233,6 +254,11 @@ class Template:
                             help='The user name')
         self._parsers["delete"]["user"]["parser"] = parser
 
+        parser = self._make_parser('delete','role','Delete a role')
+        parser.add_argument('name',
+                            help='The role name')
+        self._parsers["delete"]["role"]["parser"] = parser
+
     def _make_parser(self, command, artifact, description=""):
         parser = argparse.ArgumentParser(description=description)
         parser.add_argument(command, choices=[command], metavar=command,
@@ -249,6 +275,9 @@ class Template:
         parser.add_argument('--debug', action='store_true',
                             help='Enable debug logging')
         return parser
+
+    def parsers(self):
+        return self._parsers
 
     def command_template(self,command):
         if command in self._parsers:
