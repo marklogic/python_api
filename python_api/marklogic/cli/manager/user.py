@@ -41,33 +41,10 @@ class UserManager(Manager):
             print("Error: User already exists: {0}".format(args['name']))
             sys.exit(1)
 
-        if 'properties' in args:
-            for prop in args['properties']:
-                try:
-                    name, value = re.split("=", prop)
-                except ValueError:
-                    print ("Additional properties must be name=value pairs: {0}"
-                           .format(prop))
-                    sys.exit(1)
-                if value == "false" or value == "true":
-                    value = (value == "true")
-                else:
-                    pass
-
-                if name == "description":
-                    user.set_description(value)
-                elif name == "external-name":
-                    user.add_external_name(value)
-                elif name == "role":
-                    user.add_role_name(value)
-                elif name == "permission":
-                    print ("Permissions aren't supported yet!")
-                elif name == "collection":
-                    user.add_collection(value)
-                else:
-                    print ("User create does not support property: {0}"
-                           .format(name))
-                    sys.exit(1)
+        self.roles = []
+        self._properties(user, args)
+        if len(self.roles) > 0:
+            user.set_role_names(self.roles)
 
         print("Create user {0}...".format(args['name']))
         user.create()
@@ -78,31 +55,10 @@ class UserManager(Manager):
             print("Error: User does not exist: {0}".format(args['name']))
             sys.exit(1)
 
-        methods = inspect.getmembers(user, predicate=inspect.ismethod)
-        jumptable = {}
-        for (name, func) in methods:
-            if name.startswith('set_'):
-                jumptable[name] = func
-
-        if 'properties' in args:
-            for prop in args['properties']:
-                try:
-                    name, value = re.split("=", prop)
-                except ValueError:
-                    print ("Additional properties must be name=value pairs: {0}"
-                           .format(prop))
-                    sys.exit(1)
-                if value == "false" or value == "true":
-                    value = (value == "true")
-                else:
-                    pass
-
-                key = "set_" + name.replace("-","_")
-                if key in jumptable:
-                    jumptable[key](value)
-                else:
-                    print("Unsupported property: {0}".format(prop))
-                    sys.exit(1)
+        self.roles = []
+        self._properties(user, args)
+        if len(self.roles) > 0:
+            user.set_role_names(self.roles)
 
         print("Modify user {0}...".format(args['name']))
         user.update(connection)
@@ -115,3 +71,8 @@ class UserManager(Manager):
         print("Delete user {0}...".format(args['name']))
         user.delete(connection)
 
+    def _special_property(self, name, value):
+        if name == 'role':
+            self.roles.append(value)
+        else:
+            super()._special_property(name,value)

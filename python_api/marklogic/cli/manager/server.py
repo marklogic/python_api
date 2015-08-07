@@ -62,21 +62,7 @@ class ServerManager(Manager):
                   .format(args['name'], args['group']))
             sys.exit(1)
 
-        if 'properties' in args:
-            for prop in args['properties']:
-                try:
-                    name, value = re.split("=", prop)
-                except ValueError:
-                    print ("Additional properties must be name=value pairs: {0}"
-                           .format(prop))
-                    sys.exit(1)
-                if value == "false" or value == "true":
-                    value = (value == "true")
-                else:
-                    pass
-                print("Unsupported property: {0}".format(prop))
-                sys.exit(1)
-
+        self._properties(server, args)
         server.create()
 
     def modify(self, args, config, connection):
@@ -86,32 +72,7 @@ class ServerManager(Manager):
                   .format(args['name'], args['group']))
             sys.exit(1)
 
-        methods = inspect.getmembers(server, predicate=inspect.ismethod)
-        jumptable = {}
-        for (name, func) in methods:
-            if name.startswith('set_'):
-                jumptable[name] = func
-
-        if 'properties' in args:
-            for prop in args['properties']:
-                try:
-                    name, value = re.split("=", prop)
-                except ValueError:
-                    print ("Additional properties must be name=value pairs: {0}"
-                           .format(prop))
-                    sys.exit(1)
-                if value == "false" or value == "true":
-                    value = (value == "true")
-                else:
-                    pass
-
-                key = "set_" + name.replace("-","_")
-                if key in jumptable:
-                    jumptable[key](value)
-                else:
-                    print("Unsupported property: {0}".format(prop))
-                    sys.exit(1)
-
+        self._properties(server, args)
         server.update(connection=connection)
 
     def delete(self, args, config, connection):

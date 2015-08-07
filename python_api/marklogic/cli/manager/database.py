@@ -42,29 +42,10 @@ class DatabaseManager(Manager):
             print("Error: Database already exists: {0}".format(args['name']))
             sys.exit(1)
 
-        forests = []
-
-        if 'properties' in args:
-            for prop in args['properties']:
-                try:
-                    name, value = re.split("=", prop)
-                except ValueError:
-                    print ("Additional properties must be name=value pairs: {0}"
-                           .format(prop))
-                    sys.exit(1)
-                if value == "false" or value == "true":
-                    value = (value == "true")
-                else:
-                    pass
-
-                if name == 'forest':
-                    forests.append(value)
-                else:
-                    print("Unsupported property: {0}".format(prop))
-                    sys.exit(1)
-
-        if len(forests) > 0:
-            database.set_forest_names(forests)
+        self.forests = []
+        self._properties(database, args)
+        if len(self.forests) > 0:
+            database.set_forest_names(self.forests)
 
         print("Create database {0}...".format(args['name']))
         database.create()
@@ -75,38 +56,10 @@ class DatabaseManager(Manager):
             print("Error: Database does not exist: {0}".format(args['name']))
             sys.exit(1)
 
-        forests = []
-
-        methods = inspect.getmembers(database, predicate=inspect.ismethod)
-        jumptable = {}
-        for (name, func) in methods:
-            if name.startswith('set_'):
-                jumptable[name] = func
-
-        if 'properties' in args:
-            for prop in args['properties']:
-                try:
-                    name, value = re.split("=", prop)
-                except ValueError:
-                    print ("Additional properties must be name=value pairs: {0}"
-                           .format(prop))
-                    sys.exit(1)
-                if value == "false" or value == "true":
-                    value = (value == "true")
-                else:
-                    pass
-
-                if name == 'forest':
-                    forests.append(value)
-                else:
-                    key = "set_" + name.replace("-","_")
-                    if key in jumptable:
-                        jumptable[key](value)
-                    else:
-                        print("Unsupported property: {0}".format(prop))
-                        sys.exit(1)
-
-        database.set_forest_names(forests)
+        self.forests = []
+        self._properties(database, args)
+        if len(self.forests) > 0:
+            database.set_forest_names(self.forests)
 
         print("Modify database {0}...".format(args['name']))
         database.update()
@@ -120,4 +73,8 @@ class DatabaseManager(Manager):
         forest_delete = args['forest_delete']
         database.delete(forest_delete,connection)
 
-
+    def _special_property(self, name, value):
+        if name == 'forest':
+            self.forests.append(value)
+        else:
+            super()._special_property(name,value)
