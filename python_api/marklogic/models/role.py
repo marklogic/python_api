@@ -37,7 +37,7 @@ class Role(PropertyLists):
     allow IDEs with tooling to provide auto-completion hints.
     """
 
-    def __init__(self, name, connection=None, save_connection=None):
+    def __init__(self, name, connection=None, save_connection=True):
         self._config = {}
         self._config['role-name'] = name
         self.name = name
@@ -267,13 +267,16 @@ class Role(PropertyLists):
             struct[key] = self._config[key];
         return struct
 
-    def create(self, connection):
+    def create(self, connection=None):
         """
         Creates the Role on the MarkLogic server.
 
         :param connection: The connection to a MarkLogic server
         :return: The Role object
         """
+        if connection == None:
+            connection = self.connection
+
         uri = "http://{0}:{1}/manage/v2/roles" \
           .format(connection.host, connection.management_port)
 
@@ -369,27 +372,18 @@ class Role(PropertyLists):
 
         return results
 
-    @classmethod
-    def exists(cls, connection, name):
+    def exists(self, connection=None):
         """
-        Returns true if (and only if) the specified role exits.
+        Returns true if (and only if) the role exits.
 
         :param connection: The connection to the MarkLogic database
-        :param name: The name of the role
         :return: The role
         """
-        uri = "http://{0}:{1}/manage/v2/roles/{2}/properties" \
-          .format(connection.host, connection.management_port, name)
+        if connection == None:
+            connection = self.connection
 
-        response = requests.head(uri, auth=connection.auth,
-                                 headers={'accept': 'application/json'})
-
-        if response.status_code == 200:
-            return True
-        elif response.status_code == 404:
-            return False
-        else:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+        role = Role.lookup(connection, self.role_name())
+        return role is not None
 
     @classmethod
     def lookup(cls, connection, name):
