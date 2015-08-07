@@ -20,6 +20,7 @@
 #
 
 from abc import ABCMeta, abstractmethod
+import inspect, logging, re, sys
 
 class Manager:
     """
@@ -28,3 +29,33 @@ class Manager:
     This is an abstract class.
     """
     __metaclass__ = ABCMeta
+
+    def _special_property(self, name, value):
+        print("Unsupported property: {0}={1}".format(name,value))
+        sys.exit(1)
+
+    def _properties(self, obj, args):
+        methods = inspect.getmembers(obj, predicate=inspect.ismethod)
+        jumptable = {}
+        for (name, func) in methods:
+            if name.startswith('set_'):
+                jumptable[name] = func
+
+        if 'properties' in args:
+            for prop in args['properties']:
+                try:
+                    name, value = re.split("=", prop)
+                except ValueError:
+                    print ("Additional properties must be name=value pairs: {0}"
+                           .format(prop))
+                    sys.exit(1)
+                if value == "false" or value == "true":
+                    value = (value == "true")
+                else:
+                    pass
+
+                key = "set_" + name.replace("-","_")
+                if key in jumptable:
+                    jumptable[key](value)
+                else:
+                    self._special_property(name, value)

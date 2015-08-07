@@ -21,55 +21,55 @@
 #
 
 """
-A class to manage users.
+A class to manage roles.
 """
 
 import inspect, json, logging, re, sys
 from marklogic.cli.manager import Manager
-from marklogic.models.user import User
+from marklogic.models.role import Role
 
-class UserManager(Manager):
+class RoleManager(Manager):
     """
-    The UserManager performs operations on users.
+    The RoleManager performs operations on roles.
     """
     def __init__(self):
         pass
 
     def create(self, args, config, connection):
-        user = User(args['name'], args['password'], connection=connection)
-        if user.exists():
-            print("Error: User already exists: {0}".format(args['name']))
+        role = Role(args['name'], connection=connection)
+        if role.exists():
+            print("Error: Role already exists: {0}".format(args['name']))
             sys.exit(1)
 
         self.roles = []
-        self._properties(user, args)
+        self._properties(role, args)
         if len(self.roles) > 0:
-            user.set_role_names(self.roles)
+            role.set_role_names(self.roles)
 
-        print("Create user {0}...".format(args['name']))
-        user.create()
+        print("Create role {0}...".format(args['name']))
+        role.create()
 
     def modify(self, args, config, connection):
-        user = User(args['name'], connection=connection)
-        if not user.exists():
-            print("Error: User does not exist: {0}".format(args['name']))
+        role = Role(args['name'], connection=connection)
+        if not role.exists():
+            print("Error: Role does not exist: {0}".format(args['name']))
             sys.exit(1)
 
         self.roles = []
-        self._properties(user, args)
+        self._properties(role, args)
         if len(self.roles) > 0:
-            user.set_role_names(self.roles)
+            role.set_role_names(self.roles)
 
-        print("Modify user {0}...".format(args['name']))
-        user.update(connection)
+        print("Modify role {0}...".format(args['name']))
+        role.update(connection)
 
     def delete(self, args, config, connection):
-        user = User.lookup(connection, args['name'])
-        if user is None:
+        role = Role.lookup(connection, args['name'])
+        if role is None:
             return
 
-        print("Delete user {0}...".format(args['name']))
-        user.delete(connection)
+        print("Delete role {0}...".format(args['name']))
+        role.delete(connection)
 
     def _special_property(self, name, value):
         if name == 'role':

@@ -34,45 +34,17 @@ class ForestManager(Manager):
     The ForestManager performs operations on forests.
     """
     def __init__(self):
+        self.logger = logging.getLogger("marklogic.cli")
         pass
 
     def create(self, args, config, connection):
         forest = Forest(args['name'], args['forest_host'], connection=connection)
         if forest.exists():
-            print("Error: Forest already exists: {0}".format(args['name']))
+            self.logger.error("Forest already exists: {0}".format(args['name']))
             sys.exit(1)
 
-        dbname = None
-
-        if 'properties' in args:
-            for prop in args['properties']:
-                try:
-                    name, value = re.split("=", prop)
-                except ValueError:
-                    print ("Additional properties must be name=value pairs: {0}"
-                           .format(prop))
-                    sys.exit(1)
-                if value == "false" or value == "true":
-                    value = (value == "true")
-                else:
-                    pass
-
-                if name == 'database':
-                  dbname = value
-                elif name == 'data-directory':
-                  forest.set_data_directory(value)
-                elif name == 'large-data-directory':
-                  forest.set_large_data_directory(value)
-                elif name == 'fast-data-directory':
-                  forest.set_fast_data_directory(value)
-                elif name == 'availability':
-                  forest.set_availability(value)
-                elif name == 'rebalancer-enable':
-                  forest.set_rebalancer_enable(value)
-                else:
-                  print ("Forest create does not support property: {0}"
-                         .format(name))
-                  sys.exit(1)
+        self._properties(forest, args)
+        dbname = forest.database()
 
         if dbname is not None:
             database = Database(dbname)
@@ -80,7 +52,7 @@ class ForestManager(Manager):
         else:
             database = None
 
-        print("Create forest {0}...".format(args['name']))
+        self.logger.info("Create forest {0}...".format(args['name']))
         forest.create()
 
         if database is not None:
@@ -93,31 +65,7 @@ class ForestManager(Manager):
             print("Error: Forest does not exist: {0}".format(args['name']))
             sys.exit(1)
 
-        methods = inspect.getmembers(forest, predicate=inspect.ismethod)
-        jumptable = {}
-        for (name, func) in methods:
-            if name.startswith('set_'):
-                jumptable[name] = func
-
-        if 'properties' in args:
-            for prop in args['properties']:
-                try:
-                    name, value = re.split("=", prop)
-                except ValueError:
-                    print ("Additional properties must be name=value pairs: {0}"
-                           .format(prop))
-                    sys.exit(1)
-                if value == "false" or value == "true":
-                    value = (value == "true")
-                else:
-                    pass
-
-                key = "set_" + name.replace("-","_")
-                if key in jumptable:
-                    jumptable[key](value)
-                else:
-                    print("Unsupported property: {0}".format(prop))
-                    sys.exit(1)
+        self._properties(forest, args)
 
         print("Modify forest {0}...".format(args['name']))
         forest.update()
@@ -132,5 +80,4 @@ class ForestManager(Manager):
 
         print("Delete forest {0}...".format(args['name']))
         forest.delete(level,replicas,connection)
-
 
