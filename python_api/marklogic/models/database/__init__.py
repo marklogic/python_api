@@ -56,7 +56,10 @@ from marklogic.models.database.namelist import NameList
 from marklogic.models.database.through import PhraseThrough, PhraseAround
 from marklogic.models.database.through import ElementWordQueryThrough
 from marklogic.models.database.ruleset import RuleSet
+from marklogic.models.database.replicas import ForeignReplica,ForeignMaster
 from marklogic.models.database.field import Field, RootField, PathField, FieldPath, WordQuery, IncludedElement, ExcludedElement
+from marklogic.models.database.assignpol import BucketAssignmentPolicy, LegacyAssignmentPolicy, StatisticalAssignmentPolicy, RangeAssignmentPolicy
+from marklogic.models.database.ctsref import ElementReference
 
 class Database(PropertyLists):
     """
@@ -3533,7 +3536,19 @@ class Database(PropertyLists):
             if key in atomic:
                 pass
             elif key == 'assignment-policy':
-                logger.warn("Unhandled property: " + key)
+                policy = result._config[key]
+                name = policy['assignment-policy-name']
+                if name == 'statistical':
+                    result._config[key] = StatisticalAssignmentPolicy()
+                elif name == 'legacy':
+                    result._config[key] = LegacyAssignmentPolicy()
+                elif name == 'bucket':
+                    result._config[key] = BucketAssignmentPolicy()
+                elif name == 'range':
+                    result._config[key] = RangeAssignmentPolicy.unmarshal(policy)
+                else:
+                    raise UnsupportedOperation("Unexpected assignment policy: "
+                                               + name)
             elif key == 'database-backup':
                 for backup in result._config['database-backup']:
                     incremental = None
@@ -3631,11 +3646,27 @@ class Database(PropertyLists):
                     olist.append(temp)
                 result._config['database-backup'] = olist
             elif key == 'database-replication':
-                logger.warn("Unhandled property: " + key)
+                if result._config[key] is None:
+                    pass
+                elif 'foreign-replica' in result._config[key]:
+                    for replica in result._config[key]['foreign-replica']:
+                        fr = ForeignReplica(replica['foreign-cluster-name'],
+                                            replica['foreign-database-name'],
+                                            replica['connect-forests-by-name'],
+                                            replica['lag-limit'],
+                                            replica['replication-enabled'],
+                                            replica['queue-size'])
+                        olist.append(fr)
+                    result._config[key] = olist
+                else:
+                    replica = result._config[key]['foreign-master']
+                    fm = ForeignMaster(replica['foreign-cluster-name'],
+                                       replica['foreign-database-name'],
+                                       replica['connect-forests-by-name'])
+                    result._config[key] = fm
             elif key == 'default-ruleset':
                 for path in result._config['default-ruleset']:
-                    temp = RuleSet(
-                        path['location'])
+                    temp = RuleSet(path['location'])
                     olist.append(temp)
                 result._config['default-ruleset'] = olist
             elif key == 'element-attribute-word-lexicon':
@@ -3893,7 +3924,21 @@ class Database(PropertyLists):
                 for index in self._config[key]:
                     jlist.append(index._config)
                 struct[key] = jlist
-            elif key == "field":
+            elif key == 'database-replication':
+                if self._config[key] is None:
+                    struct[key] = None
+                elif isinstance(self._config[key], ForeignMaster):
+                    struct[key] = {}
+                    struct[key]['foreign-master'] = self._config[key]._config
+                else:
+                    jlist = []
+                    for index in self._config[key]:
+                        jlist.append(index._config)
+                    struct[key] = {}
+                    struct[key]['foreign-replica'] = jlist
+            elif key == 'assignment-policy':
+                struct[key] = self._config[key].marshal()
+            elif key == 'field':
                 fstruct = []
                 for field in self._config['field']:
                     fstruct.append(field.marshal())

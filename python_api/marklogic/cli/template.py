@@ -56,6 +56,11 @@ class Template:
                                      'cluster':  {'code': ml_mgr.stop}},
                          'restart': {'host':     {'code': ml_mgr.restart},
                                      'cluster':  {'code': ml_mgr.restart}},
+                         'get':     {'forest':   {'code': f_mgr.get},
+                                     'database': {'code': db_mgr.get},
+                                     'server':   {'code': srv_mgr.get},
+                                     'user':     {'code': user_mgr.get},
+                                     'role':     {'code': role_mgr.get}},
                          'create':  {'forest':   {'code': f_mgr.create},
                                      'database': {'code': db_mgr.create},
                                      'server':   {'code': srv_mgr.create},
@@ -258,6 +263,33 @@ class Template:
         parser.add_argument('name',
                             help='The role name')
         self._parsers["delete"]["role"]["parser"] = parser
+
+        parser = self._make_parser('get','forest','Get forest properties')
+        parser.add_argument('name',
+                            help='The forest name')
+        self._parsers["get"]["forest"]["parser"] = parser
+
+        parser = self._make_parser('get','database','Get database properties')
+        parser.add_argument('name',
+                            help='The database name')
+        self._parsers["get"]["database"]["parser"] = parser
+
+        parser = self._make_parser('get','server','Get server properties')
+        parser.add_argument('name',
+                            help='The server name')
+        parser.add_argument('--group', default="Default",
+                            help='The group')
+        self._parsers["get"]["server"]["parser"] = parser
+
+        parser = self._make_parser('get','user','Get user properties')
+        parser.add_argument('name',
+                            help='The user name')
+        self._parsers["get"]["user"]["parser"] = parser
+
+        parser = self._make_parser('get','role','Get role properties')
+        parser.add_argument('name',
+                            help='The role name')
+        self._parsers["get"]["role"]["parser"] = parser
 
     def _make_parser(self, command, artifact, description=""):
         parser = argparse.ArgumentParser(description=description)

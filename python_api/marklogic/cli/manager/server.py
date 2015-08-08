@@ -89,3 +89,10 @@ class ServerManager(Manager):
 
         server.delete(connection)
 
+    def get(self, args, config, connection):
+        server = Server.lookup(connection, args['name'], args['group'])
+        if server is None:
+            print("Error: Server does not exist: {0} in group {1}"
+                  .format(args['name'], args['group']))
+            sys.exit(1)
+        print(json.dumps(server.marshal()))

@@ -71,6 +71,15 @@ class UserManager(Manager):
         print("Delete user {0}...".format(args['name']))
         user.delete(connection)
 
+    def get(self, args, config, connection):
+        user = User(args['name'], connection=connection)
+        if not user.exists():
+            print("Error: User does not exist: {0}".format(args['name']))
+            sys.exit(1)
+
+        user.read()
+        print(json.dumps(user.marshal()))
+
     def _special_property(self, name, value):
         if name == 'role':
             self.roles.append(value)
