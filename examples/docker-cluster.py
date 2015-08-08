@@ -397,7 +397,7 @@ def main():
             docker.set_name(arg)
         if opt == "couple":
             docker.set_couple(arg)
-        if opt == "couple-credentials":
+        if opt == "couple_credentials":
             try:
                 adminuser, adminpass = re.split(":", arg)
                 docker.set_couple_credentials(adminuser,adminpass)
