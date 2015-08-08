@@ -81,3 +81,11 @@ class ForestManager(Manager):
         print("Delete forest {0}...".format(args['name']))
         forest.delete(level,replicas,connection)
 
+    def get(self, args, config, connection):
+        forest = Forest(args['name'], connection=connection)
+        if not forest.exists():
+            print("Error: Forest does not exist: {0}".format(args['name']))
+            sys.exit(1)
+
+        forest.read()
+        print(json.dumps(forest.marshal()))

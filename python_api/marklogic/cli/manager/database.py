@@ -73,6 +73,15 @@ class DatabaseManager(Manager):
         forest_delete = args['forest_delete']
         database.delete(forest_delete,connection)
 
+    def get(self, args, config, connection):
+        database = Database(args['name'], connection=connection)
+        if not database.exists():
+            print("Error: Database does not exist: {0}".format(args['name']))
+            sys.exit(1)
+
+        database.read()
+        print(json.dumps(database.marshal()))
+
     def _special_property(self, name, value):
         if name == 'forest':
             self.forests.append(value)

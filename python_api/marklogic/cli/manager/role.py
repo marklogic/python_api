@@ -71,6 +71,15 @@ class RoleManager(Manager):
         print("Delete role {0}...".format(args['name']))
         role.delete(connection)
 
+    def get(self, args, config, connection):
+        role = Role(args['name'], connection=connection)
+        if not role.exists():
+            print("Error: Role does not exist: {0}".format(args['name']))
+            sys.exit(1)
+
+        role.read()
+        print(json.dumps(role.marshal()))
+
     def _special_property(self, name, value):
         if name == 'role':
             self.roles.append(value)
