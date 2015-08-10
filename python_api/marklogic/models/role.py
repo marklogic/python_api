@@ -286,7 +286,7 @@ class Role(PropertyLists):
 
         return self
 
-    def read(self, connection):
+    def read(self, connection=None):
         """
         Loads the Role from the MarkLogic server. This will refresh
         the properties of the object.
@@ -294,6 +294,9 @@ class Role(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The Role object
         """
+        if connection is None:
+            connection = self.connection
+
         role = Role.lookup(connection, self._config['role-name'])
         if role is None:
             return None

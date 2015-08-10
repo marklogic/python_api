@@ -3264,9 +3264,10 @@ class Database(PropertyLists):
                     raise UnsupportedOperation("Unexpected object in forests")
 
         self._config['forest'] = forest_names
+        struct = self.marshal()
 
         self.logger.debug("Creating database: {0}".format(self.database_name()))
-        response = requests.post(uri, json=self._config, auth=connection.auth)
+        response = requests.post(uri, json=struct, auth=connection.auth)
         if response.status_code > 299:
             raise UnexpectedManagementAPIResponse(response.text)
 
