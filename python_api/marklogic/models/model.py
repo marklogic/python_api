@@ -20,6 +20,8 @@
 #
 
 from abc import ABCMeta, abstractmethod
+from marklogic.utilities.validators import ValidationError
+from marklogic.exceptions import UnsupportedOperation
 
 class Model:
     """
@@ -38,3 +40,35 @@ class Model:
     def _set_config_property(self, key, value):
         self._config[key] = value
         return self
+
+    def _validate(self, value, vtype):
+        if isinstance(vtype, list):
+            if value not in vtype:
+                raise ValidationError("Not in list: {0}".format(", ".join(vtype)),
+                                      value)
+        elif isinstance(vtype, dict):
+            try:
+                value = int(value)
+            except ValueError:
+                raise ValidationError("Not an integer", value)
+            if 'min' in vtype and value < vtype['min']:
+                raise ValidationError("Value too small (min={0})"
+                                      .format(vtype['min']), value)
+            if 'max' in vtype and value > vtype['max']:
+                raise ValidationError("Value too large (max={0})"
+                                      .format(vtype['max']), value)
+        elif vtype == 'boolean':
+            if value != 'true' and value != 'false':
+                raise ValidationError("Not a boolean", value)
+        elif vtype == 'integer':
+            try:
+                value = int(value)
+            except ValueError:
+                raise ValidationError("Not an integer", value)
+            if value != 'true' and value != 'false':
+                raise ValidationError("Not a boolean", value)
+        elif vtype == 'string':
+            pass
+        else:
+            raise UnsupportedOperation("Unexpected type: {0}".format(vtype))
+
