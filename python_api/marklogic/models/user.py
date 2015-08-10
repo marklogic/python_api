@@ -17,8 +17,7 @@
 # File History
 # ------------
 #
-# Paul Hoehne       04/02/2015     Initial development
-# Norman Walsh      04/29/2015     Hacked role.py into user.py
+# Norman Walsh      08/09/2015     Initial development
 #
 
 """

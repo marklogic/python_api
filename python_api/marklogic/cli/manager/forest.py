@@ -37,11 +37,19 @@ class ForestManager(Manager):
         self.logger = logging.getLogger("marklogic.cli")
         pass
 
+    def list(self, args, config, connection):
+        print(Forest.list(connection))
+
     def create(self, args, config, connection):
         forest = Forest(args['name'], args['forest_host'], connection=connection)
         if forest.exists():
             self.logger.error("Forest already exists: {0}".format(args['name']))
             sys.exit(1)
+
+        if args['json'] is not None:
+            forest = self._read(args['name'], args['json'])
+            if forest.host() is None:
+                forest.set_host(args['forest_host'])
 
         self._properties(forest, args)
         dbname = forest.database()
@@ -53,22 +61,26 @@ class ForestManager(Manager):
             database = None
 
         self.logger.info("Create forest {0}...".format(args['name']))
-        forest.create()
+        forest.create(connection=connection)
 
         if database is not None:
             database.add_forest_name(forest.forest_name())
             database.update(connection)
 
     def modify(self, args, config, connection):
-        forest = Forest(args['name'], connection=connection)
+        forest = Database(args['name'], connection=connection)
         if not forest.exists():
             print("Error: Forest does not exist: {0}".format(args['name']))
             sys.exit(1)
 
-        self._properties(forest, args)
+        if args['json'] is not None:
+            forest = self._read(args['name'], args['json'])
+            if forest.host() is None:
+                forest.set_host(args['forest_host'])
 
+        self._properties(forest, args)
         print("Modify forest {0}...".format(args['name']))
-        forest.update()
+        forest.update(connection=connection)
 
     def delete(self, args, config, connection):
         forest = Forest(args['name'], args['forest_host'], connection=connection)
@@ -88,4 +100,11 @@ class ForestManager(Manager):
             sys.exit(1)
 
         forest.read()
-        print(json.dumps(forest.marshal()))
+        self.jprint(forest)
+
+    def _read(self, name, jsonfile):
+        jf = open(jsonfile).read()
+        data = json.loads(jf)
+        data['forest-name'] = name
+        forest = Forest.unmarshal(data)
+        return forest

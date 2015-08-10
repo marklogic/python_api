@@ -1673,18 +1673,16 @@ class Server(PropertyLists):
         """
         name = config['server-name']
         group = config['group-name']
-        root = config['root']
-        port = config['port']
 
         result = None
         if config['server-type'] == 'http':
-            result = HttpServer(name, group, port, root)
+            result = HttpServer(name, group)
         if config['server-type'] == 'odbc':
-            result = OdbcServer(name, group, port, root)
+            result = OdbcServer(name, group)
         if config['server-type'] == 'xdbc':
-            result = XdbcServer(name, group, port, root)
+            result = XdbcServer(name, group)
         if config['server-type'] == 'webdav':
-            result = WebDAVServer(name, group, port, root)
+            result = WebDAVServer(name, group)
 
         if result is None:
             raise UnexpectedManagementAPIResponse("Unexpected server type")
@@ -1792,7 +1790,7 @@ class Server(PropertyLists):
         return struct
 
 class HttpServer(Server):
-    def __init__(self, name, group="Default", port=0, root='/',
+    def __init__(self, name, group="Default", port=None, root=None,
                  content_db_name=None, modules_db_name=None,
                  connection=None, save_connection=True):
         super(Server, self).__init__()
@@ -1809,10 +1807,12 @@ class HttpServer(Server):
         self._config = {
             'server-name': name,
             'server-type': 'http',
-            'port': port,
-            'root': root,
             'group-name': group
         }
+        if port is not None:
+            self._config['port'] = port
+        if root  is not None:
+            self._config['root'] = root
         if content_db_name is not None:
             self._config['content-database'] = content_db_name
         if modules_db_name is not None:
@@ -2274,7 +2274,7 @@ class HttpServer(Server):
         return Server._list(connection,kind="http")
 
 class OdbcServer(Server):
-    def __init__(self, name, group='Default', port=0, root='/',
+    def __init__(self, name, group='Default', port=None, root=None,
                  content_db_name=None, modules_db_name=None,
                  connection=None, save_connection=True):
         super(Server, self).__init__()
@@ -2291,10 +2291,12 @@ class OdbcServer(Server):
         self._config = {
             'server-name': name,
             'server-type': 'odbc',
-            'port': port,
-            'root': root,
             'group-name': group
         }
+        if port is not None:
+            self._config['port'] = port
+        if root  is not None:
+            self._config['root'] = root
         if content_db_name is not None:
             self._config['content-database'] = content_db_name
         if modules_db_name is not None:
@@ -2403,7 +2405,7 @@ class OdbcServer(Server):
         return Server._list(connection,kind="odbc")
 
 class XdbcServer(Server):
-    def __init__(self, name, group='Default', port=0, root='/',
+    def __init__(self, name, group='Default', port=None, root=None,
                  content_db_name=None, modules_db_name=None,
                  connection=None, save_connection=True):
         super(Server, self).__init__()
@@ -2420,10 +2422,12 @@ class XdbcServer(Server):
         self._config = {
             'server-name': name,
             'server-type': 'xdbc',
-            'port': port,
-            'root': root,
             'group-name': group
         }
+        if port is not None:
+            self._config['port'] = port
+        if root  is not None:
+            self._config['root'] = root
         if content_db_name is not None:
             self._config['content-database'] = content_db_name
         if modules_db_name is not None:
@@ -2620,7 +2624,7 @@ class XdbcServer(Server):
         return Server._list(connection,kind="xdbc")
 
 class WebDAVServer(Server):
-    def __init__(self, name, group='Default', port=0, root='/',
+    def __init__(self, name, group='Default', port=None, root=None,
                  content_db_name=None, connection=None,
                  save_connection=True):
         super(Server, self).__init__()
@@ -2637,10 +2641,12 @@ class WebDAVServer(Server):
         self._config = {
             'server-name': name,
             'server-type': 'webdav',
-            'port': port,
-            'root': root,
             'group-name': group
         }
+        if port is not None:
+            self._config['port'] = port
+        if root  is not None:
+            self._config['root'] = root
         # Yes, modules-database is intentional here!
         if content_db_name is not None:
             self._config['modules-database'] = content_db_name

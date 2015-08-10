@@ -35,11 +35,17 @@ class RoleManager(Manager):
     def __init__(self):
         pass
 
+    def list(self, args, config, connection):
+        print(Role.list(connection))
+
     def create(self, args, config, connection):
         role = Role(args['name'], connection=connection)
         if role.exists():
             print("Error: Role already exists: {0}".format(args['name']))
             sys.exit(1)
+
+        if args['json'] is not None:
+            role = self._read(args['name'], args['json'])
 
         self.roles = []
         self._properties(role, args)
@@ -47,7 +53,7 @@ class RoleManager(Manager):
             role.set_role_names(self.roles)
 
         print("Create role {0}...".format(args['name']))
-        role.create()
+        role.create(connection)
 
     def modify(self, args, config, connection):
         role = Role(args['name'], connection=connection)
@@ -55,13 +61,16 @@ class RoleManager(Manager):
             print("Error: Role does not exist: {0}".format(args['name']))
             sys.exit(1)
 
+        if args['json'] is not None:
+            role = self._read(args['name'], args['json'])
+
         self.roles = []
         self._properties(role, args)
         if len(self.roles) > 0:
             role.set_role_names(self.roles)
 
         print("Modify role {0}...".format(args['name']))
-        role.update(connection)
+        role.update(connection=connection)
 
     def delete(self, args, config, connection):
         role = Role.lookup(connection, args['name'])
@@ -78,10 +87,17 @@ class RoleManager(Manager):
             sys.exit(1)
 
         role.read()
-        print(json.dumps(role.marshal()))
+        self.jprint(role)
 
     def _special_property(self, name, value):
         if name == 'role':
             self.roles.append(value)
         else:
             super()._special_property(name,value)
+
+    def _read(self, name, jsonfile):
+        jf = open(jsonfile).read()
+        data = json.loads(jf)
+        data['role-name'] = name
+        role = Role.unmarshal(data)
+        return role
