@@ -11,6 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   groups.rst
    databases.rst
    servers.rst
    roles.rst
