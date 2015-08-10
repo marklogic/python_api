@@ -27,6 +27,7 @@ from marklogic.cli.manager.marklogic import MarkLogicManager
 from marklogic.cli.manager.role import RoleManager
 from marklogic.cli.manager.server import ServerManager
 from marklogic.cli.manager.user import UserManager
+from marklogic.cli.manager.group import GroupManager
 
 """
 Templates for the command line interface.
@@ -43,6 +44,7 @@ class Template:
         role_mgr = RoleManager()
         srv_mgr = ServerManager()
         user_mgr = UserManager()
+        g_mgr = GroupManager()
 
         self._parsers = {'start':                {'code': ml_mgr.start},
                          'status':               {'code': ml_mgr.status},
@@ -58,90 +60,114 @@ class Template:
                                      'cluster':  {'code': ml_mgr.restart}},
                          'get':     {'forest':   {'code': f_mgr.get},
                                      'database': {'code': db_mgr.get},
+                                     'group':    {'code': g_mgr.get},
                                      'server':   {'code': srv_mgr.get},
                                      'user':     {'code': user_mgr.get},
                                      'role':     {'code': role_mgr.get}},
                          'create':  {'forest':   {'code': f_mgr.create},
                                      'database': {'code': db_mgr.create},
+                                     'group':    {'code': g_mgr.create},
                                      'server':   {'code': srv_mgr.create},
                                      'user':     {'code': user_mgr.create},
                                      'role':     {'code': role_mgr.create}},
+                         'list':    {'forests':   {'code': f_mgr.list},
+                                     'databases': {'code': db_mgr.list},
+                                     'groups':    {'code': g_mgr.list},
+                                     'servers':   {'code': srv_mgr.list},
+                                     'users':     {'code': user_mgr.list},
+                                     'roles':     {'code': role_mgr.list}},
                          'modify':  {'forest':   {'code': f_mgr.modify},
                                      'database': {'code': db_mgr.modify},
+                                     'group':    {'code': g_mgr.modify},
                                      'server':   {'code': srv_mgr.modify},
                                      'user':     {'code': user_mgr.modify},
                                      'role':     {'code': role_mgr.modify}},
                          'delete':  {'forest':   {'code': f_mgr.delete},
                                      'database': {'code': db_mgr.delete},
+                                     'group':    {'code': g_mgr.delete},
                                      'server':   {'code': srv_mgr.delete},
                                      'user':     {'code': user_mgr.delete},
                                      'role':     {'code': role_mgr.delete}}}
 
         parser = self._make_parser('start',None,'Start the server')
-        self._parsers["start"]["parser"] = parser
+        self._parsers['start']['parser'] = parser
 
         parser = self._make_parser('status',None,'Report server status')
-        self._parsers["status"]["parser"] = parser
+        self._parsers['status']['parser'] = parser
 
         parser = self._make_parser('init',None,'Initialize server')
         parser.add_argument('--realm', default='public',
                             help='The realm')
-        self._parsers["init"]["parser"] = parser
+        self._parsers['init']['parser'] = parser
 
         parser = self._make_parser('stop','host','Stop the host')
-        self._parsers["stop"]["host"]["parser"] = parser
+        self._parsers['stop']['host']['parser'] = parser
 
         parser = self._make_parser('stop','cluster','Stop the cluster')
-        self._parsers["stop"]["cluster"]["parser"] = parser
+        self._parsers['stop']['cluster']['parser'] = parser
 
         parser = self._make_parser('restart','host','Restart the host')
-        self._parsers["restart"]["host"]["parser"] = parser
+        self._parsers['restart']['host']['parser'] = parser
 
         parser = self._make_parser('restart','cluster','Restart the cluster')
-        self._parsers["restart"]["cluster"]["parser"] = parser
+        self._parsers['restart']['cluster']['parser'] = parser
 
         parser = self._make_parser('save',None,'Save configuration')
         parser.add_argument('--archive', required=True,
                             help='The name of the archive file')
-        self._parsers["save"]["parser"] = parser
+        self._parsers['save']['parser'] = parser
 
         parser = self._make_parser('switch',None,'Switch configuration')
         parser.add_argument('--archive', required=True,
                             help='The name of the archive file')
-        self._parsers["switch"]["parser"] = parser
+        self._parsers['switch']['parser'] = parser
 
         parser = self._make_parser('clear',None,'Clear configuration')
-        self._parsers["clear"]["parser"] = parser
+        self._parsers['clear']['parser'] = parser
 
         parser = self._make_parser('log',None,'Show logs')
         parser.add_argument('--logfile', default="ErrorLog.txt",
                             help='The name of the log file')
-        self._parsers["log"]["parser"] = parser
+        self._parsers['log']['parser'] = parser
 
         parser = self._make_parser('run',None,'Switch configuration')
         parser.add_argument('--script', required=True,
                             help='The name of the script file')
-        self._parsers["run"]["parser"] = parser
+        self._parsers['run']['parser'] = parser
 
         parser = self._make_parser('create','forest','Create a forest')
         parser.add_argument('name',
                             help='The forest name')
         parser.add_argument('--forest-host', default='$ML-LOCALHOST',
                             help='The host on which to create the forest')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional forest properties')
-        self._parsers["create"]["forest"]["parser"] = parser
+        self._parsers['create']['forest']['parser'] = parser
 
         parser = self._make_parser('create','database','Create a database')
         parser.add_argument('name',
                             help='The database name')
         parser.add_argument('--forest-host', default='$ML-LOCALHOST',
                             help='The host on which to create forests')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional database properties')
-        self._parsers["create"]["database"]["parser"] = parser
+        self._parsers['create']['database']['parser'] = parser
+
+        parser = self._make_parser('create','group','Create a group')
+        parser.add_argument('name',
+                            help='The group name')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional database properties')
+        self._parsers['create']['group']['parser'] = parser
 
         parser = self._make_parser('create','server','Create an application server')
         parser.add_argument('name',
@@ -159,10 +185,12 @@ class Template:
                             help='The content database')
         parser.add_argument('--modules', default=None,
                             help='The modules database')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional server properties')
-        self._parsers["create"]["server"]["parser"] = parser
+        self._parsers['create']['server']['parser'] = parser
 
         parser = self._make_parser('create','user','Create a user')
         parser.add_argument('name',
@@ -172,57 +200,101 @@ class Template:
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional user properties')
-        self._parsers["create"]["user"]["parser"] = parser
+        self._parsers['create']['user']['parser'] = parser
 
         parser = self._make_parser('create','role','Create a role')
         parser.add_argument('name',
                             help='The role name')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional user properties')
-        self._parsers["create"]["role"]["parser"] = parser
+        self._parsers['create']['role']['parser'] = parser
 
         parser = self._make_parser('modify','forest','Modify a forest')
         parser.add_argument('name',
                             help='The forest name')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional forest properties')
-        self._parsers["modify"]["forest"]["parser"] = parser
+        self._parsers['modify']['forest']['parser'] = parser
 
         parser = self._make_parser('modify','database','Modify a database')
         parser.add_argument('name',
                             help='The database name')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional database properties')
-        self._parsers["modify"]["database"]["parser"] = parser
+        self._parsers['modify']['database']['parser'] = parser
+
+        parser = self._make_parser('modify','group','Modify a group')
+        parser.add_argument('name',
+                            help='The group name')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional database properties')
+        self._parsers['modify']['group']['parser'] = parser
 
         parser = self._make_parser('modify','server','Modify an application server')
         parser.add_argument('name',
                             help='The server name')
         parser.add_argument('--group', default="Default",
                             help='The group')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional server properties')
-        self._parsers["modify"]["server"]["parser"] = parser
+        self._parsers['modify']['server']['parser'] = parser
 
         parser = self._make_parser('modify','user','Modify a user')
         parser.add_argument('name',
                             help='The user name')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional user properties')
-        self._parsers["modify"]["user"]["parser"] = parser
+        self._parsers['modify']['user']['parser'] = parser
 
         parser = self._make_parser('modify','role','Modify a role')
         parser.add_argument('name',
                             help='The role name')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional user properties')
-        self._parsers["modify"]["role"]["parser"] = parser
+        self._parsers['modify']['role']['parser'] = parser
+
+        parser = self._make_parser('list','forests','List forests')
+        self._parsers['list']['forests']['parser'] = parser
+
+        parser = self._make_parser('list','databases','List databases')
+        self._parsers['list']['databases']['parser'] = parser
+
+        parser = self._make_parser('list','groups','List groups')
+        self._parsers['list']['groups']['parser'] = parser
+
+        parser = self._make_parser('list','servers','List application servers')
+        parser.add_argument('--group', default="Default",
+                            help='The group')
+        parser.add_argument('--type', choices=['http','odbc','xdbc','webdav'],
+                            help='The type of server')
+        self._parsers['list']['servers']['parser'] = parser
+
+        parser = self._make_parser('list','users','List users')
+        self._parsers['list']['users']['parser'] = parser
+
+        parser = self._make_parser('list','roles','List roles')
+        self._parsers['list']['roles']['parser'] = parser
 
         parser = self._make_parser('delete','forest','Delete a forest')
         parser.add_argument('name',
@@ -235,7 +307,7 @@ class Template:
         parser.add_argument('--replicas', choices=['detach','delete'],
                             default='detach',
                             help='Processing for attached replicas')
-        self._parsers["delete"]["forest"]["parser"] = parser
+        self._parsers['delete']['forest']['parser'] = parser
 
         parser = self._make_parser('delete','database','Delete a database')
         parser.add_argument('name',
@@ -243,7 +315,12 @@ class Template:
         parser.add_argument('--forest-delete', choices=['data','configuration'],
                             default='data',
                             help='How to delete attached forests')
-        self._parsers["delete"]["database"]["parser"] = parser
+        self._parsers['delete']['database']['parser'] = parser
+
+        parser = self._make_parser('delete','group','Delete a group')
+        parser.add_argument('name',
+                            help='The group name')
+        self._parsers['delete']['group']['parser'] = parser
 
         parser = self._make_parser('delete','server','Delete a server')
         parser.add_argument('name',
@@ -252,44 +329,49 @@ class Template:
                             help='The group')
         parser.add_argument('--type', choices=['http','odbc','xdbc','webdav'],
                             help='The type of server')
-        self._parsers["delete"]["server"]["parser"] = parser
+        self._parsers['delete']['server']['parser'] = parser
 
         parser = self._make_parser('delete','user','Delete a user')
         parser.add_argument('name',
                             help='The user name')
-        self._parsers["delete"]["user"]["parser"] = parser
+        self._parsers['delete']['user']['parser'] = parser
 
         parser = self._make_parser('delete','role','Delete a role')
         parser.add_argument('name',
                             help='The role name')
-        self._parsers["delete"]["role"]["parser"] = parser
+        self._parsers['delete']['role']['parser'] = parser
 
         parser = self._make_parser('get','forest','Get forest properties')
         parser.add_argument('name',
                             help='The forest name')
-        self._parsers["get"]["forest"]["parser"] = parser
+        self._parsers['get']['forest']['parser'] = parser
 
         parser = self._make_parser('get','database','Get database properties')
         parser.add_argument('name',
                             help='The database name')
-        self._parsers["get"]["database"]["parser"] = parser
+        self._parsers['get']['database']['parser'] = parser
+
+        parser = self._make_parser('get','group','Get group properties')
+        parser.add_argument('name', default='Default',
+                            help='The group name')
+        self._parsers['get']['group']['parser'] = parser
 
         parser = self._make_parser('get','server','Get server properties')
         parser.add_argument('name',
                             help='The server name')
         parser.add_argument('--group', default="Default",
                             help='The group')
-        self._parsers["get"]["server"]["parser"] = parser
+        self._parsers['get']['server']['parser'] = parser
 
         parser = self._make_parser('get','user','Get user properties')
         parser.add_argument('name',
                             help='The user name')
-        self._parsers["get"]["user"]["parser"] = parser
+        self._parsers['get']['user']['parser'] = parser
 
         parser = self._make_parser('get','role','Get role properties')
         parser.add_argument('name',
                             help='The role name')
-        self._parsers["get"]["role"]["parser"] = parser
+        self._parsers['get']['role']['parser'] = parser
 
     def _make_parser(self, command, artifact, description=""):
         parser = argparse.ArgumentParser(description=description)

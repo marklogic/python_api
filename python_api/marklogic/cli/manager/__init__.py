@@ -20,7 +20,7 @@
 #
 
 from abc import ABCMeta, abstractmethod
-import inspect, logging, re, sys
+import inspect, json, logging, re, sys
 
 class Manager:
     """
@@ -49,13 +49,12 @@ class Manager:
                     print ("Additional properties must be name=value pairs: {0}"
                            .format(prop))
                     sys.exit(1)
-                if value == "false" or value == "true":
-                    value = (value == "true")
-                else:
-                    pass
 
                 key = "set_" + name.replace("-","_")
                 if key in jumptable:
                     jumptable[key](value)
                 else:
                     self._special_property(name, value)
+
+    def jprint(self, obj):
+        print(json.dumps(obj.marshal(), sort_keys=True, indent=2))

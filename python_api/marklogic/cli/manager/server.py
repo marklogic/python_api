@@ -36,6 +36,30 @@ class ServerManager(Manager):
     def __init__(self):
         pass
 
+    def list(self, args, config, connection):
+        stype = args['type']
+        if stype == None:
+            slist = Server.list(connection)
+        elif stype == 'http':
+            slist = HttpServer.list(connection)
+        elif stype == 'odbc':
+            slist = OdbcServer.list(connection)
+        elif stype == 'xdbc':
+            slist = XdbcServer.list(connection)
+        elif stype == 'webdav':
+            slist = WebDAVServer.list(connection)
+        else:
+            print("Unexpected server type: {0}".format(stype))
+            sys.exit(1)
+
+        names = []
+        for key in slist:
+            (group,name) = key.split('|')
+            if group == args['group']:
+                names.append(name)
+
+        print(json.dumps(names,sort_keys=True, indent=2))
+
     def create(self, args, config, connection):
         stype = args['type']
         if stype == 'http':
@@ -62,7 +86,11 @@ class ServerManager(Manager):
                   .format(args['name'], args['group']))
             sys.exit(1)
 
+        if args['json'] is not None:
+            server = self._read(args['name'], args['group'], stype, args['json'])
+
         self._properties(server, args)
+
         server.create()
 
     def modify(self, args, config, connection):
@@ -72,7 +100,14 @@ class ServerManager(Manager):
                   .format(args['name'], args['group']))
             sys.exit(1)
 
+        if args['json'] is not None:
+            server = self._read(args['name'], args['group'],
+                                server.server_type(), args['json'])
+
         self._properties(server, args)
+
+        print("Modify server {0} in group {1}..."
+              .format(args['name'], args['group']))
         server.update(connection=connection)
 
     def delete(self, args, config, connection):
@@ -95,4 +130,26 @@ class ServerManager(Manager):
             print("Error: Server does not exist: {0} in group {1}"
                   .format(args['name'], args['group']))
             sys.exit(1)
-        print(json.dumps(server.marshal()))
+        self.jprint(server)
+
+    def _read(self, name, group, stype, jsonfile):
+        jf = open(jsonfile).read()
+        data = json.loads(jf)
+        data['server-name'] = name
+        data['group-name'] = group
+        data['server-type'] = stype
+
+        if stype == 'http':
+            server = HttpServer(name, group)
+        elif stype == 'odbc':
+            server = OdbcServer(name, group)
+        elif stype == 'xdbc':
+            server = XdbcServer(name, group)
+        elif stype == 'webdav':
+            server = WebDAVServer(name, group)
+        else:
+            print("Unexpected server type: {0}".format(stype))
+            sys.exit(1)
+
+        server = server.unmarshal(data)
+        return server

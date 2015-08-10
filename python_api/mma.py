@@ -74,9 +74,12 @@ class MMA():
     # Hack for the server case
     if artifact in ['http','xdbc','odbc','webdav']:
       stype = artifact
-      artifact = 'server'
-      positional[1] = 'server'
-      if positional[2] == 'server':
+      if command == 'list':
+        artifact = 'servers'
+      else:
+        artifact = 'server'
+      positional[1] = artifact
+      if positional[2] == artifact:
         del(positional[2])
       options.append("--type")
       options.append(stype)

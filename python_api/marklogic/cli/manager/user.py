@@ -35,11 +35,17 @@ class UserManager(Manager):
     def __init__(self):
         pass
 
+    def list(self, args, config, connection):
+        print(User.list(connection))
+
     def create(self, args, config, connection):
         user = User(args['name'], args['password'], connection=connection)
         if user.exists():
             print("Error: User already exists: {0}".format(args['name']))
             sys.exit(1)
+
+        if args['json'] is not None:
+            user = self._read(args['name'], args['json'])
 
         self.roles = []
         self._properties(user, args)
@@ -54,6 +60,9 @@ class UserManager(Manager):
         if not user.exists():
             print("Error: User does not exist: {0}".format(args['name']))
             sys.exit(1)
+
+        if args['json'] is not None:
+            user = self._read(args['name'], args['json'])
 
         self.roles = []
         self._properties(user, args)
@@ -78,10 +87,17 @@ class UserManager(Manager):
             sys.exit(1)
 
         user.read()
-        print(json.dumps(user.marshal()))
+        self.jprint(user)
 
     def _special_property(self, name, value):
         if name == 'role':
             self.roles.append(value)
         else:
             super()._special_property(name,value)
+
+    def _read(self, name, jsonfile):
+        jf = open(jsonfile).read()
+        data = json.loads(jf)
+        data['user-name'] = name
+        user = User.unmarshal(data)
+        return user

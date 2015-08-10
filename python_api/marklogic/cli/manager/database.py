@@ -35,12 +35,18 @@ class DatabaseManager(Manager):
     def __init__(self):
         pass
 
+    def list(self, args, config, connection):
+        print(Database.list(connection))
+
     def create(self, args, config, connection):
         database = Database(args['name'], args['forest_host'],
                             connection=connection)
         if database.exists():
             print("Error: Database already exists: {0}".format(args['name']))
             sys.exit(1)
+
+        if args['json'] is not None:
+            database = self._read(args['name'], args['json'])
 
         self.forests = []
         self._properties(database, args)
@@ -56,13 +62,16 @@ class DatabaseManager(Manager):
             print("Error: Database does not exist: {0}".format(args['name']))
             sys.exit(1)
 
+        if args['json'] is not None:
+            database = self._read(args['name'], args['json'])
+
         self.forests = []
         self._properties(database, args)
         if len(self.forests) > 0:
             database.set_forest_names(self.forests)
 
         print("Modify database {0}...".format(args['name']))
-        database.update()
+        database.update(connection=connection)
 
     def delete(self, args, config, connection):
         database = Database(args['name'], connection=connection)
@@ -80,10 +89,17 @@ class DatabaseManager(Manager):
             sys.exit(1)
 
         database.read()
-        print(json.dumps(database.marshal()))
+        self.jprint(database)
 
     def _special_property(self, name, value):
         if name == 'forest':
             self.forests.append(value)
         else:
             super()._special_property(name,value)
+
+    def _read(self, name, jsonfile):
+        jf = open(jsonfile).read()
+        data = json.loads(jf)
+        data['database-name'] = name
+        database = Database.unmarshal(data)
+        return database
