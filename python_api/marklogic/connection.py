@@ -22,6 +22,7 @@
 import json, logging, requests, time
 from http.client import BadStatusLine
 from marklogic.exceptions import UnexpectedManagementAPIResponse
+from marklogic.exceptions import UnauthorizedAPIRequest
 from requests.auth import HTTPDigestAuth
 from requests.exceptions import ConnectionError
 from requests.packages.urllib3.exceptions import ProtocolError

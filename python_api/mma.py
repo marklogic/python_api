@@ -57,7 +57,7 @@ class MMA():
     try:
       command = positional[0]
     except IndexError:
-      print("Usage: {0} command artifact ...".format(script))
+      print("Usage: {0} command artifact ...".format(self.script))
       sys.exit(1)
 
     empty_artifact_commands = {'start','status', 'stop', 'init',
@@ -68,7 +68,7 @@ class MMA():
       if command in empty_artifact_commands:
         pass
       else:
-        print("Usage: {0} command artifact ...".format(script))
+        print("Usage: {0} command artifact ...".format(self.script))
         sys.exit(1)
 
     # Hack for the server case
