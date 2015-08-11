@@ -378,7 +378,7 @@ def main():
 
     for opt in args:
         arg = args[opt]
-        if opt == "credentials":
+        if opt == "credentials" and arg is not None:
             try:
                 adminuser, adminpass = re.split(":", arg)
                 docker.set_credentials(adminuser,adminpass)
@@ -397,7 +397,7 @@ def main():
             docker.set_name(arg)
         if opt == "couple":
             docker.set_couple(arg)
-        if opt == "couple_credentials":
+        if opt == "couple_credentials" and arg is not None:
             try:
                 adminuser, adminpass = re.split(":", arg)
                 docker.set_couple_credentials(adminuser,adminpass)
