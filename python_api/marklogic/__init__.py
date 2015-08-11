@@ -23,7 +23,7 @@ import requests
 import json
 import logging
 from marklogic.connection import Connection
-from marklogic.models.cluster import Cluster
+from marklogic.models.cluster import LocalCluster
 from marklogic.models.host import Host
 from marklogic.models.user import User
 from marklogic.models.role import Role
@@ -51,9 +51,9 @@ class MarkLogic:
 
     def cluster(self, connection=None):
         if connection is None:
-            cluster = Cluster(self.connection, self.save_connection)
+            cluster = LocalCluster(self.connection, self.save_connection)
         else:
-            cluster = Cluster(connection, False)
+            cluster = LocalCluster(connection, False)
 
         return cluster.read()
 
@@ -295,31 +295,29 @@ class MarkLogic:
         """
         conn = Connection(host, None)
 
-        uri = "http://{0}:8001/admin/v1/init".format(conn.host)
+        uri = "{0}://{1}:8001/admin/v1/init".format(conn.protocol,conn.host)
 
         logger = logging.getLogger("marklogic")
         logger.debug("Initializing {0}".format(host))
-        response = requests.post(uri, auth=conn.auth,
-                                 headers={'content-type':
-                                          'application/x-www-form-urlencoded',
-                                          'accept':
-                                          'application/json'})
 
-        if response.status_code == 401:
-            raise UnauthorizedAPIRequest(response.text)
-
-        if response.status_code == 400:
-            err = json.loads(response.text)
-            if "errorResponse" in err:
-                if "messageCode" in err["errorResponse"]:
-                    if err["errorResponse"]["messageCode"] == "MANAGE-ALREADYINIT":
-                        return Host(host)
+        # This call is a little odd; we special case the 400 error that
+        # occurs if the host has alreadya been initialized.
+        try:
+            response = conn.post(uri,
+                                 content_type='application/x-www-form-urlencoded')
+        except UnexpectedManagementAPIResponse:
+            response = conn.response
+            if response.status_code == 400:
+                err = json.loads(response.text)
+                if "errorResponse" in err:
+                    if "messageCode" in err["errorResponse"]:
+                        if err["errorResponse"]["messageCode"] == "MANAGE-ALREADYINIT":
+                            return Host(host)
+            raise
 
         if response.status_code != 202:
             raise UnexpectedManagementAPIResponse(response.text)
 
-        data = json.loads(response.text)
-        Host.wait_for_restart(conn, data["restart"]["last-startup"][0]["value"])
         return Host(host)._set_just_initialized()
 
     @classmethod
@@ -340,10 +338,13 @@ class MarkLogic:
             'realm': realm
             }
 
-        uri = "http://{0}:8001/admin/v1/instance-admin".format(conn.host)
+        uri = "{0}://{1}:8001/admin/v1/instance-admin".format(
+            conn.protocol, conn.host)
 
         logger = logging.getLogger("marklogic")
         logger.debug("Initializing security for {0}".format(host))
+
+        # N.B. Can't use conn.post here because we don't need auth yet
         response = requests.post(uri, json=payload,
                                  headers={'content-type': 'application/json',
                                           'accept': 'application/json'})
@@ -354,4 +355,4 @@ class MarkLogic:
         # From now on connections require auth...
         conn = Connection(host, HTTPDigestAuth(admin, password))
         data = json.loads(response.text)
-        Host.wait_for_restart(conn, data["restart"]["last-startup"][0]["value"])
+        conn.wait_for_restart(data["restart"]["last-startup"][0]["value"])

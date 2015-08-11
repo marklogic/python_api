@@ -57,8 +57,6 @@ class TestRequest(unittest.TestCase):
         temp.delete(connection)
 
         self.assertIsNotNone(temp)
-        self.assertIsNone(temp.template_id())
-
 
 if __name__ == "__main__":
     unittest.main()

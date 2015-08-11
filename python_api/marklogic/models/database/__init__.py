@@ -26,7 +26,7 @@ Database related classes for manipulating MarkLogic databases
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import json, logging, requests, sys
+import json, logging, sys
 from marklogic.models.forest import Forest
 from marklogic.utilities import files
 from marklogic.utilities import PropertyLists
@@ -58,7 +58,7 @@ from marklogic.models.database.through import ElementWordQueryThrough
 from marklogic.models.database.ruleset import RuleSet
 from marklogic.models.database.replicas import ForeignReplica,ForeignMaster
 from marklogic.models.database.field import Field, RootField, PathField, FieldPath, WordQuery, IncludedElement, ExcludedElement
-from marklogic.models.database.assignpol import BucketAssignmentPolicy, LegacyAssignmentPolicy, StatisticalAssignmentPolicy, RangeAssignmentPolicy
+from marklogic.models.database.assignpol import AssignmentPolicy, BucketAssignmentPolicy, LegacyAssignmentPolicy, StatisticalAssignmentPolicy, RangeAssignmentPolicy
 from marklogic.models.database.ctsref import ElementReference
 
 class Database(PropertyLists):
@@ -2773,7 +2773,7 @@ class Database(PropertyLists):
             return self._config['rebalancer-throttle']
         return None
 
-    def set_assignment_policy(self, which='bucket'):
+    def set_assignment_policy(self, policy):
         """
         Sets the policy to use for assignment and rebalancing.
 
@@ -2788,11 +2788,9 @@ class Database(PropertyLists):
         to the "partition key" of the database.
 
         :param which:The policy for assignment and rebalancing
-
         :return: The database object
         """
-        validate_assignment_policy_options(which)
-        self._config['assignment-policy'] = {"assignment-policy-name": which}
+        self._config['assignment-policy'] = assert_type(policy, AssignmentPolicy)
         return self
 
     def assignment_policy(self):
@@ -3158,68 +3156,34 @@ class Database(PropertyLists):
                                        journal_archiving, journal_archive_path,
                                        incremental, incremental_dir)
 
-    def clear(self, connection=None):
+    def operation(self, payload, connection=None):
         """
-        Clear the database.
+        Perform the operation described by 'payload' on the database.
         """
         if connection is None:
             connection = self.connection
 
-        payload = {'operation': 'clear-database'}
+        uri = connection.uri("databases", self.name)
+        response = connection.post(uri, payload=payload)
+        return self
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(connection.host, connection.management_port, self.name)
-
-        response = requests.post(uri, json=payload, auth=connection.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        return
+    def clear(self, connection=None):
+        """
+        Clear the database.
+        """
+        self.operation({'operation': 'clear-database'}, connection)
 
     def merge(self, connenection=None):
         """
         Initiate a merge on the database.
         """
-        if connection is None:
-            connection = self.connection
-
-        payload = {'operation': 'merge-database'}
-
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(connection.host, connection.management_port, self.name)
-
-        response = requests.post(uri, json=payload, auth=connection.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        return
+        self.operation({'operation': 'merge-database'}, connection)
 
     def reindex(self, connection=None):
         """
         Initiate a re-index on the database.
         """
-        if connection is None:
-            connection = self.connection
-
-        payload = {'operation': 'reindex-database'}
-
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(connection.host, connection.management_port, self.name)
-
-        response = requests.post(uri, json=payload, auth=connection.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        return
+        self.operation({'operation': 'reindex-database'}, connection)
 
     # ============================================================
 
@@ -3247,8 +3211,7 @@ class Database(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/databases" \
-          .format(connection.host, connection.management_port)
+        uri = connection.uri("databases")
 
         forest_names = []
         if 'forest' in self._config:
@@ -3267,10 +3230,8 @@ class Database(PropertyLists):
         struct = self.marshal()
 
         self.logger.debug("Creating database: {0}".format(self.database_name()))
-        response = requests.post(uri, json=struct, auth=connection.auth)
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
 
+        response = connection.post(uri, payload=struct)
         return self
 
     def read(self, connection=None):
@@ -3304,23 +3265,13 @@ class Database(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}/properties" \
-          .format(connection.host, connection.management_port, self.name)
-
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
+        uri = connection.uri('databases', self.name)
 
         struct = self.marshal()
-        response = requests.put(uri, json=struct, auth=connection.auth,
-                                headers=headers)
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        response = connection.put(uri, payload=struct, etag=self.etag)
 
         # In case we renamed it
         self.name = self._config['database-name']
-
         return self
 
     def delete(self, forest_delete="data", connection=None):
@@ -3334,14 +3285,9 @@ class Database(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}?forest-delete={3}" \
-          .format(connection.host, connection.management_port,
-                  self.name, forest_delete)
-        response = requests.delete(uri, auth=connection.auth)
-
-        if response.status_code > 299 and not response.status_code == 404:
-            raise UnexpectedManagementAPIResponse(response.text)
-
+        uri = connection.uri("databases", self.name, properties=None,
+                             parameters=["forest-delete="+forest_delete])
+        response = connection.delete(uri)
         return self
 
     def load_file(self, path, uri, collections=None,
@@ -3438,13 +3384,10 @@ class Database(PropertyLists):
         """
         logger = logging.getLogger("marklogic")
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}/properties" \
-          .format(connection.host, connection.management_port, name)
+        uri = connection.uri("databases", name)
 
         logger.debug("Reading database configuration: {0}".format(name))
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        response = connection.get(uri)
 
         result = None
         if response.status_code == 200:
@@ -3452,25 +3395,21 @@ class Database(PropertyLists):
             if 'etag' in response.headers:
                 result.etag = response.headers['etag']
 
-        elif response.status_code != 404:
-            raise UnexpectedManagementAPIResponse(response.text)
-
         return result
 
     @classmethod
     def list(cls, connection):
-        uri = "http://{0}:{1}/manage/v2/databases".format(
-            connection.host, connection.management_port)
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("databases")
+        response = connection.get(uri)
 
         if response.status_code == 200:
             response_json = json.loads(response.text)
-            db_count = response_json['database-default-list']['list-items']['list-count']['value']
+            list_items = response_json['database-default-list']['list-items']
+            db_count = list_items['list-count']['value']
 
             result = []
             if db_count > 0:
-                for item in response_json['database-default-list']['list-items']['list-item']:
+                for item in list_items['list-item']:
                     result.append(item['nameref'])
         else:
             raise UnexpectedManagementAPIResponse(response.text)

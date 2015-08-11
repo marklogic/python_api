@@ -26,7 +26,7 @@ Authority related classes for manipulating Certificate Authorities
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import json, requests
+import json
 from marklogic.exceptions import UnexpectedManagementAPIResponse
 from marklogic.utilities.validators import assert_boolean
 
@@ -44,6 +44,7 @@ class Authority:
         authority, really.
         """
         self._config = {'id': certid}
+        self.id = certid
 
     def certificate_id(self):
         """
@@ -116,22 +117,17 @@ class Authority:
 
         :return: The Authority object
         """
-        uri = "http://{0}:{1}/manage/v2/certificate-authorities" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.post(uri, data=pem, auth=connection.auth,
-                                 headers={"content-type": "text/plain"})
-
-        if response.status_code not in [200, 201, 204]:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("certificate-authorities")
+        response = connection.post(uri, payload=pem,
+                                   content_type="text/plain")
 
         # All well and good, but we need to know what ID was assigned
-        uri = "http://{0}:{1}{2}/properties" \
-          .format(connection.host, connection.management_port,
+        uri = "{0}://{1}:{2}{3}/properties" \
+          .format(connection.protocol, connection.host,
+                  connection.management_port,
                   response.headers['location'])
 
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        response = connection.get(uri)
 
         if response.status_code == 200:
             result = Authority.unmarshal(json.loads(response.text))
@@ -149,11 +145,12 @@ class Authority:
 
         :return: The Authority object
         """
-        auth = Authority.lookup(self._config['certificate-id'])
+        auth = Authority.lookup(self.id)
         if auth is None:
             return None
         else:
             self._config = auth._config
+            self.id = auth._config['certificate-id']
             return self
 
     def delete(self, connection):
@@ -168,17 +165,11 @@ class Authority:
 
         :return: None
         """
-        uri = "http://{0}:{1}/manage/v2/certificate-authorities/{2}" \
-          .format(connection.host, connection.management_port,
-                  self._config['certificate-id'])
+        uri = connection.uri("certificate-authorities", self.id,
+                             properties=None)
 
-        response = requests.delete(uri, auth=connection.auth)
-
-        if (response.status_code not in [200, 204]
-            and not response.status_code == 404):
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        return None
+        response = connection.delete(uri)
+        return self
 
     @classmethod
     def list(cls, connection, include_names=False):
@@ -195,11 +186,8 @@ class Authority:
         :return: A list of certificate authority IDs.
         """
 
-        uri = "http://{0}:{1}/manage/v2/certificate-authorities" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("certificate-authorities")
+        response = connection.get(uri)
 
         if response.status_code != 200:
             raise UnexpectedManagementAPIResponse(response.text)
@@ -224,16 +212,11 @@ class Authority:
 
         :return: The Authority object
         """
-        uri = "http://{0}:{1}/manage/v2/certificate-authorities/{2}/properties" \
-          .format(connection.host, connection.management_port, certid)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("certificate-authorities", certid)
+        response = connection.get(uri)
 
         if response.status_code == 200:
             result = Authority.unmarshal(json.loads(response.text))
             return result
-        elif response.status_code == 404:
-            return None
         else:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+            return None
