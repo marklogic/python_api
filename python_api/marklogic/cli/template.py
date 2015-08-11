@@ -28,6 +28,8 @@ from marklogic.cli.manager.role import RoleManager
 from marklogic.cli.manager.server import ServerManager
 from marklogic.cli.manager.user import UserManager
 from marklogic.cli.manager.group import GroupManager
+from marklogic.cli.manager.cluster import ClusterManager
+from marklogic.cli.manager.foreigncluster import ForeignClusterManager
 
 """
 Templates for the command line interface.
@@ -45,6 +47,8 @@ class Template:
         srv_mgr = ServerManager()
         user_mgr = UserManager()
         g_mgr = GroupManager()
+        cl_mgr = ClusterManager()
+        fcl_mgr = ForeignClusterManager()
 
         self._parsers = {'start':                {'code': ml_mgr.start},
                          'status':               {'code': ml_mgr.status},
@@ -58,8 +62,14 @@ class Template:
                                      'cluster':  {'code': ml_mgr.stop}},
                          'restart': {'host':     {'code': ml_mgr.restart},
                                      'cluster':  {'code': ml_mgr.restart}},
+                         'bootstrap': {'hosts':  {'code': cl_mgr.bootstrap_hosts}},
+                         'join':    {'cluster':  {'code': cl_mgr.join}},
+                         'leave':   {'cluster':  {'code': cl_mgr.leave}},
+                         'couple':  {'clusters': {'code': cl_mgr.couple}},
                          'get':     {'forest':   {'code': f_mgr.get},
                                      'database': {'code': db_mgr.get},
+                                     'cluster':  {'code': cl_mgr.get},
+                                     'foreign':  {'code': fcl_mgr.get},
                                      'group':    {'code': g_mgr.get},
                                      'server':   {'code': srv_mgr.get},
                                      'user':     {'code': user_mgr.get},
@@ -72,16 +82,20 @@ class Template:
                                      'role':     {'code': role_mgr.create}},
                          'list':    {'forests':   {'code': f_mgr.list},
                                      'databases': {'code': db_mgr.list},
+                                     'foreign':   {'code': fcl_mgr.list},
                                      'groups':    {'code': g_mgr.list},
                                      'servers':   {'code': srv_mgr.list},
                                      'users':     {'code': user_mgr.list},
                                      'roles':     {'code': role_mgr.list}},
                          'modify':  {'forest':   {'code': f_mgr.modify},
                                      'database': {'code': db_mgr.modify},
+                                     'cluster':  {'code': cl_mgr.modify},
+                                     'foreign':  {'code': fcl_mgr.modify},
                                      'group':    {'code': g_mgr.modify},
                                      'server':   {'code': srv_mgr.modify},
                                      'user':     {'code': user_mgr.modify},
                                      'role':     {'code': role_mgr.modify}},
+                         'perform': {'database': {'code': db_mgr.perform}},
                          'delete':  {'forest':   {'code': f_mgr.delete},
                                      'database': {'code': db_mgr.delete},
                                      'group':    {'code': g_mgr.delete},
@@ -111,6 +125,26 @@ class Template:
 
         parser = self._make_parser('restart','cluster','Restart the cluster')
         self._parsers['restart']['cluster']['parser'] = parser
+
+        parser = self._make_parser('bootstrap','hosts','List the bootstrap hosts')
+        self._parsers['bootstrap']['hosts']['parser'] = parser
+
+        parser = self._make_parser('couple','clusters','Couple two clusters')
+        parser.add_argument('--host',
+                            help='A bootstrap host of the foreign cluster')
+        parser.add_argument('--couple-credentials', default='admin:admin',
+                            help='Login credentials for other cluster')
+        self._parsers['couple']['clusters']['parser'] = parser
+
+        parser = self._make_parser('join','cluster','Join a cluster')
+        parser.add_argument('host',
+                            help='A bootstrap host of the cluster')
+        self._parsers['join']['cluster']['parser'] = parser
+
+        parser = self._make_parser('leave','cluster','Leave a cluster')
+        parser.add_argument('host',
+                            help='A bootstrap host of the cluster')
+        self._parsers['leave']['cluster']['parser'] = parser
 
         parser = self._make_parser('save',None,'Save configuration')
         parser.add_argument('--archive', required=True,
@@ -197,6 +231,8 @@ class Template:
                             help='The user name')
         parser.add_argument('--password', required=True,
                             help='The user password')
+        parser.add_argument('--json',
+                            help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
                             help='Additional user properties')
@@ -231,6 +267,24 @@ class Template:
                             metavar="property=value",
                             help='Additional database properties')
         self._parsers['modify']['database']['parser'] = parser
+
+        parser = self._make_parser('modify','cluster','Modify a cluster')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional database properties')
+        self._parsers['modify']['cluster']['parser'] = parser
+
+        parser = self._make_parser('modify','foreign','Modify a foreign cluster')
+        parser.add_argument('name',
+                            help='The foreign cluster name')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional database properties')
+        self._parsers['modify']['foreign']['parser'] = parser
 
         parser = self._make_parser('modify','group','Modify a group')
         parser.add_argument('name',
@@ -274,11 +328,21 @@ class Template:
                             help='Additional user properties')
         self._parsers['modify']['role']['parser'] = parser
 
+        parser = self._make_parser('perform','database','Operate on a database')
+        parser.add_argument('name',
+                            help='The database name')
+        parser.add_argument('--json', required=True,
+                            help='The operation')
+        self._parsers['perform']['database']['parser'] = parser
+
         parser = self._make_parser('list','forests','List forests')
         self._parsers['list']['forests']['parser'] = parser
 
         parser = self._make_parser('list','databases','List databases')
         self._parsers['list']['databases']['parser'] = parser
+
+        parser = self._make_parser('list','foreign','List foreign clusters')
+        self._parsers['list']['foreign']['parser'] = parser
 
         parser = self._make_parser('list','groups','List groups')
         self._parsers['list']['groups']['parser'] = parser
@@ -350,6 +414,14 @@ class Template:
         parser.add_argument('name',
                             help='The database name')
         self._parsers['get']['database']['parser'] = parser
+
+        parser = self._make_parser('get','cluster','Get cluster properties')
+        self._parsers['get']['cluster']['parser'] = parser
+
+        parser = self._make_parser('get','foreign','Get foriegn cluster properties')
+        parser.add_argument('name',
+                            help='The cluster name')
+        self._parsers['get']['foreign']['parser'] = parser
 
         parser = self._make_parser('get','group','Get group properties')
         parser.add_argument('name', default='Default',

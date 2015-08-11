@@ -31,7 +31,7 @@ from requests.exceptions import ConnectionError
 from marklogic.cli.manager import Manager
 from marklogic.models.user import User
 from marklogic.models.host import Host
-from marklogic.models.cluster import Cluster
+from marklogic.models.cluster import LocalCluster
 from marklogic import MarkLogic
 
 class MarkLogicManager(Manager):
@@ -128,7 +128,7 @@ class MarkLogicManager(Manager):
                 hostname = connection.host
                 if hostname == 'localhost':
                     hostname = socket.gethostname()
-                cluster = Cluster(connection=connection).read()
+                cluster = LocalCluster(connection=connection).read()
                 print("Restarting cluster...")
                 cluster.restart()
 
@@ -150,7 +150,7 @@ class MarkLogicManager(Manager):
                 hostname = connection.host
                 if hostname == 'localhost':
                     hostname = socket.gethostname()
-                cluster = Cluster(connection=connection).read()
+                cluster = LocalCluster(connection=connection).read()
                 print("Shutting down cluster...")
                 cluster.shutdown()
             else:

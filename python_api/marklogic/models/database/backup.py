@@ -23,7 +23,6 @@
 Classes for dealing with scheduled backups
 """
 
-import requests
 import json
 from marklogic.utilities.validators import *
 from marklogic.exceptions import *
@@ -71,15 +70,8 @@ class DatabaseBackup:
         if incremental:
             payload['incremental-dir'] = assert_type(incremental_dir, str)
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, database_name)
-
-        response = requests.post(uri, json=payload, auth=conn.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("databases", database_name, properties=None)
+        response = connection.post(uri, payload=payload)
 
         result = json.loads(response.text)
         host_name = None
@@ -118,15 +110,8 @@ class DatabaseBackup:
         if self.host_name is not None:
             payload['host-name'] = self.host_name
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.database_name)
-
-        response = requests.post(uri, json=payload, auth=conn.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("databases", database_name, properties=None)
+        response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
 
@@ -139,15 +124,8 @@ class DatabaseBackup:
             'job-id': self.job_id
             }
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.database_name)
-
-        response = requests.post(uri, json=payload, auth=conn.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("databases", database_name, properties=None)
+        response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
 
@@ -161,15 +139,8 @@ class DatabaseBackup:
         for key in self.settings:
             payload[key] = self.settings[key]
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.database_name)
-
-        response = requests.post(uri, json=payload, auth=conn.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("databases", database_name, properties=None)
+        response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
 
@@ -185,15 +156,8 @@ class DatabaseBackup:
             'keep-num-backups': assert_type(keep_num, int)
             }
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.database_name)
-
-        response = requests.post(uri, json=payload, auth=conn.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("databases", database_name, properties=None)
+        response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
 
@@ -238,15 +202,8 @@ class DatabaseRestore:
         if incremental:
             payload['incremental-dir'] = assert_type(incremental_dir, str)
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, database_name)
-
-        response = requests.post(uri, json=payload, auth=conn.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("databases", database_name, properties=None)
+        response = connection.post(uri, payload=payload)
 
         result = json.loads(response.text)
         host_name = None
@@ -284,15 +241,8 @@ class DatabaseRestore:
         if self.host_name is not None:
             payload['host-name'] = self.host_name
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.database_name)
-
-        response = requests.post(uri, json=payload, auth=conn.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("databases", database_name, properties=None)
+        response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
 
@@ -305,15 +255,8 @@ class DatabaseRestore:
             'job-id': self.job_id
             }
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.database_name)
-
-        response = requests.post(uri, json=payload, auth=conn.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("databases", database_name, properties=None)
+        response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
 
@@ -327,14 +270,7 @@ class DatabaseRestore:
         for key in self.settings:
             payload[key] = self.settings[key]
 
-        uri = "http://{0}:{1}/manage/v2/databases/{2}" \
-          .format(conn.host, conn.management_port, self.database_name)
-
-        response = requests.post(uri, json=payload, auth=conn.auth,
-                                 headers={'content-type': 'application/json',
-                                          'accept': 'application/json'})
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("databases", database_name, properties=None)
+        response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)

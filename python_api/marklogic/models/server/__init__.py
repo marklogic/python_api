@@ -23,7 +23,7 @@ Server related classes for manipulating MarkLogic databases
 """
 
 from abc import ABCMeta, abstractmethod
-import json, logging, re, requests, time
+import json, logging, re, time
 from marklogic.exceptions import UnexpectedManagementAPIResponse
 from marklogic.utilities.validators import validate_custom
 from marklogic.utilities import PropertyLists
@@ -1447,15 +1447,9 @@ class Server(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/servers" \
-          .format(connection.host, connection.management_port)
-
-        self.logger.debug("Creating server: {0}|{1}" \
-                          .format(self.group_name(), self.server_name()))
-        response = requests.post(uri, json=self._config, auth=connection.auth)
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
-
+        uri = connection.uri("servers")
+        struct = self.marshal()
+        response = connection.post(uri, payload=struct)
         return self
 
     def read(self, connection=None):
@@ -1486,30 +1480,14 @@ class Server(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/servers/{2}/properties?group-id={3}" \
-          .format(connection.host, connection.management_port,
-                  self.name, self.group_name())
-
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
-
-        self.logger.debug("Updating server: {0}|{1}" \
-                          .format(self.group_name(), self.server_name()))
+        uri = connection.uri("servers", self.name,
+                             parameters=["group-id="+self.group_name()])
         struct = self.marshal()
-        response = requests.put(uri, json=struct, auth=connection.auth,
-                                headers=headers)
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
+        response = connection.put(uri, payload=struct, etag=self.etag)
 
         self.name = self._config['server-name']
         if 'etag' in response.headers:
                 self.etag = response.headers['etag']
-
-        if response.status_code == 202:
-            Server.wait_for_restart(connection, response)
-
         return self
 
     def delete(self, connection=None):
@@ -1522,36 +1500,15 @@ class Server(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/servers/{2}?group-id={3}" \
-          .format(connection.host, connection.management_port,
-                  self.server_name(), self.group_name())
-
-        headers = {'accept': 'application/json'}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
-
-        self.logger.debug("Deleting server: {0}|{1}" \
-                          .format(self.group_name(), self.server_name()))
-        response = requests.delete(uri, auth=connection.auth, headers=headers)
-
-        if response.status_code > 299 and not response.status_code == 404:
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        if response.status_code == 202:
-            Server.wait_for_restart(connection, response)
-
+        uri = connection.uri("servers", self.name, properties=None,
+                             parameters=["group-id="+self.group_name()])
+        response = connection.delete(uri, etag=self.etag)
         return self
 
     @classmethod
     def _list(cls, connection, kind=None):
-        uri = "http://{0}:{1}/manage/v2/servers" \
-          .format(connection.host, connection.port)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
-
-        if response.status_code != 200:
-            raise UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("servers")
+        response = connection.get(uri)
 
         results = []
         json_doc = json.loads(response.text)
@@ -1598,67 +1555,17 @@ class Server(PropertyLists):
         else:
             raise validate_custom("Unparseable server name")
 
-        uri = "http://{0}:{1}/manage/v2/servers/{2}/properties?group-id={3}" \
-          .format(connection.host, connection.management_port, name, group)
+        uri = connection.uri("servers", name, parameters=["group-id="+group])
+        response = connection.get(uri)
 
-        logging.debug("Reading server configuration: {0}[{1}]" \
-                      .format(name,group))
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={u'accept': u'application/json'})
-
-        if response.status_code > 299 and not response.status_code == 404:
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        result = None
-
-        if response.status_code == 404:
+        if response.status_code == 200:
+            result = Server.unmarshal(json.loads(response.text))
+            if 'etag' in response.headers:
+                result.etag = response.headers['etag']
+            result.name = result._config['server-name']
             return result
-
-        if response.status_code != 200:
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        result = Server.unmarshal(json.loads(response.text))
-        if 'etag' in response.headers:
-            result.etag = response.headers['etag']
-
-        return result
-
-    # FIXME: refactor to have only the version in host?
-    @classmethod
-    def wait_for_restart(cls, connection, response):
-        """
-        Waits for the server to restart.
-
-        Some operations (removing a server, changing a server's port, etc.)
-        require a restart. On receipt of a 202 response from the server,
-        you can pass that response to this method and it will wait until
-        the server has restarted.
-        """
-        rconfig = json.loads(response.text)
-        timestamp = rconfig['restart']['last-startup'][0]['value']
-        uri = "http://localhost:8001/admin/v1/timestamp"
-        waiting = True
-        while waiting:
-            waiting = False
-            stamp = None
-            try:
-                response = requests.get(uri, auth=connection.auth)
-                stamp = response.text
-            except requests.exceptions.ConnectionError as e:
-                waiting = True
-                time.sleep(2)
-                pass
-            except http.client.BadStatusLine as e:
-                waiting = True
-                time.sleep(2)
-                pass
-
-            if not(waiting):
-                if re.match(r"\d\d\d\d-\d\d-\d\dT", stamp):
-                    waiting = (stamp <= timestamp)
-                else:
-                    waiting = True
+        else:
+            return None
 
     @classmethod
     def unmarshal(cls, config):

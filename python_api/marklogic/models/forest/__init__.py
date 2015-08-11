@@ -22,7 +22,7 @@ from __future__ import unicode_literals, print_function, absolute_import
 # Paul Hoehne       03/01/2015     Initial development
 #
 
-import json, logging, requests
+import json, logging
 import marklogic.exceptions
 from marklogic.utilities.validators import *
 from marklogic.models.model import Model
@@ -254,21 +254,10 @@ class Forest(Model,PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/forests".format(
-            connection.host, connection.management_port)
-
-        headers = {}
-
-        self.logger.debug("Creating forest: {0}".format(self.forest_name()))
+        uri = connection.uri("forests")
         struct = self.marshal()
-
-        response = requests.post(uri, json=struct, auth=connection.auth,
-                                 headers=headers)
-
-        if response.status_code > 299:
-            raise Exception(response.text)
-
-        return Forest.lookup(connection, self._config['forest-name'])
+        response = connection.post(uri, payload=struct)
+        return self
 
     def read(self, connection=None):
         """
@@ -298,22 +287,12 @@ class Forest(Model,PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/forests/{2}/properties".format(
-            connection.host, connection.management_port, self.name)
-
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
-
-        self.logger.debug("Updating forest: {0}".format(self.forest_name()))
+        uri = connection.uri("forests", self.name)
         struct = self.marshal()
-        response = requests.put(uri, json=struct, auth=connection.auth)
+        response = connection.put(uri, payload=struct, etag=self.etag)
 
-        if response.status_code > 299:
-            raise Exception(response.text)
-
-        # FIXME: rename forest?
-
+        # In case we renamed it
+        self.name = self._config['forest-name']
         return self
 
     def delete(self, level="full", replicas="delete", connection=None):
@@ -326,15 +305,11 @@ class Forest(Model,PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/forests/{2}?level={3}&replicas={4}" \
-          .format(connection.host, connection.management_port,
-                  self.name, level, replicas)
+        uri = connection.uri("forests", self.name, properties=None,
+                             parameters=["level="+level,
+                                         "replicas="+replicas])
 
-        response = requests.delete(uri, auth=connection.auth)
-
-        if response.status_code > 299 and not response.status_code == 404:
-            raise Exception(response.text)
-
+        response = connection.delete(uri)
         return self
 
     @classmethod
@@ -348,13 +323,8 @@ class Forest(Model,PropertyLists):
         """
         logger = logging.getLogger("marklogic")
 
-        uri = "http://{0}:{1}/manage/v2/forests/{2}/properties" \
-          .format(connection.host, connection.management_port, name)
-
-        logger.debug("Reading forest configuration: {0}".format(name))
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("forests", name)
+        response = connection.get(uri)
 
         result = None
         if response.status_code == 200:
@@ -363,31 +333,26 @@ class Forest(Model,PropertyLists):
             if 'etag' in response.headers:
                 result.etag = response.headers['etag']
 
-        elif response.status_code != 404:
-            raise UnexpectedManagementAPIResponse(response.text)
-
         return result
 
     @classmethod
     def list(cls, connection):
-        uri = "http://{0}:{1}/manage/v2/forests".format(
-            connection.host, connection.management_port)
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("forests")
+        response = connection.get(uri)
 
         if response.status_code == 200:
             response_json = json.loads(response.text)
-            db_count = response_json['forest-default-list']['list-items']['list-count']['value']
+            list_items = response_json['forest-default-list']['list-items']
+            db_count = list_items['list-count']['value']
 
             result = []
             if db_count > 0:
-                for item in response_json['forest-default-list']['list-items']['list-item']:
+                for item in list_items['list-item']:
                     result.append(item['nameref'])
         else:
             raise UnexpectedManagementAPIResponse(response.text)
 
         return result
-
 
     @classmethod
     def unmarshal(cls, config):

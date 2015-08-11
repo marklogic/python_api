@@ -91,6 +91,19 @@ class DatabaseManager(Manager):
         database.read()
         self.jprint(database)
 
+    def perform(self, args, config, connection):
+        database = Database(args['name'], connection=connection)
+        if not database.exists():
+            print("Error: Database does not exist: {0}".format(args['name']))
+            sys.exit(1)
+
+        jf = open(args['json']).read()
+        data = json.loads(jf)
+
+        print("Perform {0} on database {0}..."
+              .format(data['operation'],args['name']))
+        database.operation(data, connection=connection)
+
     def _special_property(self, name, value):
         if name == 'forest':
             self.forests.append(value)

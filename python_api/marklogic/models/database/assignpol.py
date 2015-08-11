@@ -114,6 +114,17 @@ class RangeAssignmentPolicy(AssignmentPolicy):
     def set_partition_key(self, value):
         return self._set_config_property('partition-key', value)
 
+    def marshal(self):
+        struct = {}
+        for key in self._config:
+            if isinstance(self._config[key], BaseReference):
+                struct[key] = self._config[key].marshal()
+            elif isinstance(self._config[key], PartitionKey):
+                struct[key] = self._config[key].marshal()
+            else:
+                struct[key] = self._config[key]
+        return struct
+
     @classmethod
     def unmarshal(cls, config):
         logger = logging.getLogger("marklogic")
@@ -197,6 +208,14 @@ class PartitionKey(Model):
             self._set_config_property('element-reference', cts_reference)
         else:
             raise UnsupportedOperation("Only element references are supported")
+
+    def marshal(self):
+        if 'element-reference' in self._config:
+            er = self._config['element-reference']
+            struct = er.marshal()
+        else:
+            struct = {'x':'y'}
+        return struct
 
     @classmethod
     def unmarshal(cls, config):

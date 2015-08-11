@@ -25,11 +25,8 @@ Host related classes for manipulating MarkLogic hosts
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-import json, logging, requests, time
-from http.client import BadStatusLine
+import json, logging, time
 from marklogic.connection import Connection
-from requests.packages.urllib3.exceptions import ProtocolError
-from requests.exceptions import ConnectionError
 from marklogic.exceptions import *
 
 class Host:
@@ -162,28 +159,15 @@ class Host:
         """
         if connection is None:
             connection = self.connection
-        uri = "http://{0}:{1}/manage/v2/hosts/{2}/properties" \
-          .format(connection.host, connection.management_port,
-                  self.name)
 
-        headers = {'accept': 'application/json'}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
-
+        uri = connection.uri("hosts", self.name)
         struct = self.marshal()
-        response = requests.put(uri, json=struct, auth=connection.auth,
-                                headers=headers)
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        if response.status_code == 202:
-            data = json.loads(response.text)
-            Host.wait_for_restart(connection,
-                                  data["restart"]["last-startup"][0]["value"])
+        response = connection.put(uri, payload=struct, etag=self.etag)
 
         # In case we renamed it
         self.name = self._config['host-name']
+        if 'etag' in response.headers:
+                self.etag = response.headers['etag']
 
         return self
 
@@ -197,22 +181,11 @@ class Host:
         """
         if connection is None:
             connection = self.connection
-        uri = "http://{0}:{1}/manage/v2/hosts/{2}" \
-          .format(connection.host, connection.management_port,
-                  self.name)
 
-        headers = {'accept': 'application/json'}
-        response = requests.post(uri, json={'operation':'restart'},
-                                 auth=connection.auth,
-                                 headers=headers)
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        if response.status_code == 202:
-            data = json.loads(response.text)
-            Host.wait_for_restart(connection,
-                                  data["restart"]["last-startup"][0]["value"])
+        uri = connection.uri(hosts, self.name, properties=None)
+        struct = {'operation':'restart'}
+        response = connection.post(uri, payload=struct)
+        return self
 
     def shutdown(self, connection=None):
         """
@@ -224,18 +197,10 @@ class Host:
         """
         if connection is None:
             connection = self.connection
-        uri = "http://{0}:{1}/manage/v2/hosts/{2}" \
-          .format(connection.host, connection.management_port,
-                  self.name)
 
-        headers = {'accept': 'application/json'}
-        response = requests.post(uri, json={'operation':'shutdown'},
-                                 auth=connection.auth,
-                                 headers=headers)
-
-        if response.status_code > 299:
-            raise UnexpectedManagementAPIResponse(response.text)
-
+        uri = connection.uri("hosts", self.name, properties=None)
+        struct = {'operation':'shutdown'}
+        response = connection.post(uri, payload=struct)
         return None
 
     @classmethod
@@ -247,17 +212,15 @@ class Host:
         :param connection: A connection to a MarkLogic server
         :return: The host information
         """
-        uri = "http://{0}:{1}/manage/v2/hosts/{2}/properties".format(connection.host, connection.management_port,
-                                                                     name)
-        result = None
-        response = requests.get(uri, auth=connection.auth, headers={'accept': 'application/json'})
+        uri = connection.uri("hosts", name)
+        response = connection.get(uri)
         if response.status_code == 200:
             result = Host.unmarshal(json.loads(response.text))
             if 'etag' in response.headers:
                 result.etag = response.headers['etag']
-        elif response.status_code != 404:
-            raise UnexpectedManagementAPIResponse(response.text)
-        return result
+            return result
+        else:
+            return None
 
     @classmethod
     def list(cls, connection):
@@ -267,11 +230,9 @@ class Host:
         :param connection: A connection to a MarkLogic server
         :return: A list of host names
         """
-        uri = "http://{0}:{1}/manage/v2/hosts" \
-          .format(connection.host, connection.management_port)
 
-        response = requests.get(uri, auth=connection.auth,
-                                headers={u'accept': u'application/json'})
+        uri = connection.uri("hosts")
+        response = connection.get(uri)
 
         if response.status_code == 200:
             response_json = json.loads(response.text)
@@ -318,11 +279,7 @@ class Host:
         """
         connection = Connection(self.host_name(), None)
         uri = "http://{0}:8001/admin/v1/server-config".format(connection.host)
-
-        self.logger.debug("Reading server configuration from {0}"
-                          .format(connection.host))
-        response = requests.get(uri)
-
+        response = connection.get(uri, accept="application/xml")
         if response.status_code != 200:
             raise UnexpectedManagementAPIResponse(response.text)
 
@@ -337,61 +294,13 @@ class Host:
         :param connection: The connection credentials to use
         :param cfgzip: The ZIP payload from post_server_config()
         """
-        uri = "http://{0}:8001/admin/v1/cluster-config".format(connection.host)
+        uri = "{0}://{1}:8001/admin/v1/cluster-config" \
+          .format(connection.protocol, connection.host)
 
-        self.logger.debug("Posting cluster configuration to {0}"
-                          .format(connection.host))
-        response = requests.post(uri, data=cfgzip, auth=connection.auth,
-                                 headers={'content-type': 'application/zip',
-                                          'accept': 'application/json'})
+        response = connection.post(uri, payload=cfgzip,
+                                   content_type="application/zip")
 
         if response.status_code != 202:
             raise UnexpectedManagementAPIResponse(response.text)
 
         data = json.loads(response.text)
-        Host.wait_for_restart(connection,
-                              data["restart"]["last-startup"][0]["value"])
-
-    @classmethod
-    def wait_for_restart(cls, connection, last_startup,
-                         timestamp_uri="/admin/v1/timestamp"):
-        """
-        Wait for the host to restart.
-
-        :param connection: A connection to a MarkLogic server
-        :param last_startup: The last startup time reported in the restart message
-        """
-
-        logger = logging.getLogger("marklogic.host")
-        uri = "http://{0}:8001{1}".format(connection.host, timestamp_uri)
-
-        done = False
-        count = 24
-        while not done:
-            try:
-                logger.debug("Waiting for restart of {0}".format(connection.host))
-                response = requests.get(uri, auth=connection.auth,
-                                        headers={u'accept': u'application/json'})
-                done = response.status_code == 200 and response.text != last_startup
-            except TypeError:
-                logger.debug("{0}: {1}".format(response.status_code,
-                                               response.text))
-                pass
-            except BadStatusLine:
-                logger.debug("{0}: {1}".format(response.status_code,
-                                               response.text))
-                pass
-            except ProtocolError:
-                logger.debug("{0}: {1}".format(response.status_code,
-                                               response.text))
-                pass
-            except ConnectionError:
-                logger.debug("Connection error...")
-                pass
-            time.sleep(4) # Sleep one more time even after success...
-            count -= 1
-
-            if count <= 0:
-                raise UnexpectedManagementAPIResponse("Restart hung?")
-
-        logger.debug("{0} restarted".format(connection.host))

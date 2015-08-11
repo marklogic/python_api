@@ -26,7 +26,7 @@ Classes for manipulating MarkLogic privileges.
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-import json, logging, requests
+import json, logging
 import marklogic.exceptions
 from marklogic.utilities.validators import validate_custom
 from marklogic.utilities.validators import validate_privilege_kind
@@ -38,7 +38,7 @@ class Privilege(PropertyLists):
     """
     PRIVLIST = None
 
-    def __init__(self, name, action, kind):
+    def __init__(self, name, action, kind, connection=None, save_connection=True):
         validate_privilege_kind(kind)
 
         self._config = {}
@@ -46,7 +46,13 @@ class Privilege(PropertyLists):
         self._config['action'] = action
         self.the_kind = kind
         self.etag = None
+        self.name = name
         self.logger = logging.getLogger("marklogic.privilege")
+        self.save_connection = save_connection
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
 
     def privilege_name(self):
         """
@@ -161,6 +167,7 @@ class Privilege(PropertyLists):
 
         result = Privilege("temp", "http://example.com/", kind)
         result._config = config
+        result.name = config['privilege-name']
         result.the_kind = kind
         return result
 
@@ -171,15 +178,15 @@ class Privilege(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The Privilege object
         """
-        uri = "http://{0}:{1}/manage/v2/privileges".format(connection.host, connection.management_port)
+        if connection is None:
+            connection = self.connection
+
+        uri = connection.uri("privileges")
 
         post_config = self._config
         post_config['kind'] = self.kind()
 
-        response = requests.post(uri, json=post_config, auth=connection.auth)
-        if response.status_code not in [200, 201, 204]:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
+        response = connection.post(uri, payload=post_config)
         return self
 
     def read(self, connection):
@@ -205,22 +212,15 @@ class Privilege(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The Privilege object
         """
-        uri = "http://{0}:{1}/manage/v2/privileges/{2}/properties?kind={3}" \
-          .format(connection.host, connection.management_port,
-                  self.privilege_name(), self.kind())
+        if connection is None:
+            connection = self.connection
 
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
+        uri = connection.uri("privileges", self.name,
+                             parameters=["kind="+self.kind()])
 
-        response = requests.put(uri, json=self._config, auth=connection.auth,
-                                headers=headers)
+        response = connection.put(uri, payload=self._config, etag=self.etag)
 
-        if response.status_code not in [200, 204]:
-            self.logger.debug("Update priv returned {0}: {1}"
-                              .format(response.status_code, response.text))
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
+        self.name = self._config['privilege-name']
         if 'etag' in response.headers:
                 self.etag = response.headers['etag']
 
@@ -233,20 +233,13 @@ class Privilege(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The Privilege object
         """
-        uri = "http://{0}:{1}/manage/v2/privileges/{2}?kind={3}" \
-          .format(connection.host, connection.management_port,
-                  self.privilege_name(), self.kind())
+        if connection is None:
+            connection = self.connection
 
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
+        uri = connection.uri("privileges", self.name, properties=None,
+                             parameters=["kind="+self.kind()])
 
-        response = requests.delete(uri, auth=connection.auth, headers=headers)
-
-        if (response.status_code not in [200, 204]
-            and not response.status_code == 404):
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
+        response = connection.delete(uri, etag=self.etag)
         return self
 
     @classmethod
@@ -262,11 +255,8 @@ class Privilege(PropertyLists):
         :return: A list of Privilege names.
         """
 
-        uri = "http://{0}:{1}/manage/v2/privileges" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("privileges")
+        response = connection.get(uri)
 
         if response.status_code != 200:
             raise exceptions.UnexpectedManagementAPIResponse(response.text)
@@ -309,10 +299,10 @@ class Privilege(PropertyLists):
         else:
             raise validate_custom("Unparseable privilege name")
 
-        uri = "http://{0}:{1}/manage/v2/privileges/{2}/properties?kind={3}" \
-          .format(connection.host, connection.management_port, name, kind)
+        uri = connection.uri("privileges", name,
+                             parameters=["kind="+kind])
 
-        response = requests.head(uri, auth=connection.auth)
+        response = connection.head(uri)
 
         if response.status_code == 200:
         	return True
@@ -370,21 +360,15 @@ class Privilege(PropertyLists):
         if name is None:
             return cls._lookup_action(connection, action, kind)
         else:
-            uri = "http://{0}:{1}/manage/v2/privileges/{2}/properties?kind={3}" \
-              .format(connection.host, connection.management_port, name, kind)
-
-            response = requests.get(uri, auth=connection.auth,
-                                    headers={'accept': 'application/json'})
-
+            uri = connection.uri("privileges", name, parameters=["kind="+kind])
+            response = connection.get(uri)
             if response.status_code == 200:
                 result = Privilege.unmarshal(json.loads(response.text))
                 if 'etag' in response.headers:
                     result.etag = response.headers['etag']
                 return result
-            elif response.status_code == 404:
-                return None
             else:
-                raise exceptions.UnexpectedManagementAPIResponse(response.text)
+                return None
 
     @classmethod
     def _lookup_action(cls, conn, action, kind):

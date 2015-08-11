@@ -26,7 +26,7 @@ Class for manipulating MarkLogic groups
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import json, logging, requests
+import json, logging
 import marklogic.exceptions
 from marklogic.models.model import Model
 from marklogic.models.host import Host
@@ -208,14 +208,9 @@ class Group(Model):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/groups" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.post(uri, json=self._config, auth=connection.auth)
-
-        if response.status_code not in [200, 201, 204]:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
+        uri = connection.uri("groups")
+        struct = self.marshall()
+        response = connection.post(uri, payload=struct)
         return self
 
     def read(self, connection=None):
@@ -247,23 +242,9 @@ class Group(Model):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/groups/{2}/properties" \
-          .format(connection.host, connection.management_port,self.name)
-
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
-
-        response = requests.put(uri, json=self._config, auth=connection.auth,
-                                headers=headers)
-
-        if response.status_code not in [200, 202, 204]:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
-        if response.status_code == 202:
-            data = json.loads(response.text)
-            Host.wait_for_restart(connection,
-                                  data["restart"]["last-startup"][0]["value"])
+        uri = connection.uri("groups", self.name)
+        struct = self.marshal()
+        response = connection.put(uri, payload=struct, etag=self.etag)
 
         self.name = self._config['group-name']
         if 'etag' in response.headers:
@@ -281,24 +262,8 @@ class Group(Model):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/groups/{2}" \
-          .format(connection.host, connection.management_port, self.name)
-
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
-
-        response = requests.delete(uri, auth=connection.auth, headers=headers)
-
-        if (response.status_code not in [200, 202, 204]
-            and not response.status_code == 404):
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
-        if response.status_code == 202:
-            data = json.loads(response.text)
-            Host.wait_for_restart(connection,
-                                  data["restart"]["last-startup"][0]["value"])
-
+        uri = connection.uri("groups", self.name, properties=None)
+        response = connection.delete(uri, etag=self.etag)
         return self
 
     @classmethod
@@ -310,14 +275,8 @@ class Group(Model):
         :return: A list of group names
         """
 
-        uri = "http://{0}:{1}/manage/v2/groups" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
-
-        if response.status_code != 200:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("groups")
+        response = connection.get(uri)
 
         results = []
         json_doc = json.loads(response.text)
@@ -336,21 +295,16 @@ class Group(Model):
         :param connection: The connection to the MarkLogic database
         :return: The group
         """
-        uri = "http://{0}:{1}/manage/v2/groups/{2}/properties" \
-          .format(connection.host, connection.port, name)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("groups", name)
+        response = connection.get(uri)
 
         if response.status_code == 200:
             result = Group.unmarshal(json.loads(response.text))
             if 'etag' in response.headers:
                 result.etag = response.headers['etag']
             return result
-        elif response.status_code == 404:
-            return None
         else:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+            return None
 
     # Below this point are machine generated methods for getting
     # and setting atomic values
@@ -447,7 +401,7 @@ class Group(Model):
 
     def security_database(self):
         """
-        
+        The name of the security database.
 
         :return: The security-database.
         """
@@ -555,7 +509,7 @@ class Group(Model):
 
     def meters_database(self):
         """
-        
+        The name of the meters database
 
         :return: The meters-database.
         """
@@ -717,7 +671,7 @@ class Group(Model):
 
     def group_name(self):
         """
-        An internet email address.
+        The name of a group.
 
         :return: The group-name.
         """

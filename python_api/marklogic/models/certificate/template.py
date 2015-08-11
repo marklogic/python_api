@@ -26,7 +26,6 @@ Template related classes for manipulating Certificate Templates
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import requests
 import json
 from marklogic.exceptions import UnexpectedManagementAPIResponse
 from marklogic.utilities.validators import assert_type
@@ -291,22 +290,17 @@ class Template:
         :param connection: The connection to a MarkLogic server
         :return: The Template object
         """
-        uri = "http://{0}:{1}/manage/v2/certificate-templates" \
-          .format(connection.host, connection.management_port)
-
+        uri = connection.uri("certificate-templates")
         struct = self.marshal()
-        response = requests.post(uri, json=struct, auth=connection.auth)
-
-        if response.status_code not in [200, 201, 204]:
-            raise UnexpectedManagementAPIResponse(response.text)
+        response = connection.post(uri, payload=struct)
 
         # All well and good, but we need to know what ID was assigned
-        uri = "http://{0}:{1}{2}/properties" \
-          .format(connection.host, connection.management_port,
+        uri = "{0}://{1}:{2}{3}/properties" \
+          .format(connection.protocol, connection.host,
+                  connection.management_port,
                   response.headers['location'])
 
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        response = connection.get(uri)
 
         if response.status_code == 200:
             result = Template.unmarshal(json.loads(response.text))
@@ -343,17 +337,13 @@ class Template:
         :param connection: The connection to a MarkLogic server
         :return: The Template object
         """
-        uri = "http://{0}:{1}/manage/v2/certificate-templates/{2}/properties" \
-          .format(connection.host, connection.management_port,self.template_id())
+        uri = connection.uri("certificate-templates", self.template_id())
 
-        payload = self.marshal()
-        del payload['template-version']
-        del payload['template-id']
-        response = requests.put(uri, json=payload, auth=connection.auth)
+        struct = self.marshal()
+        del struct['template-version']
+        del struct['template-id']
 
-        if response.status_code not in [200, 204]:
-            raise UnexpectedManagementAPIResponse(response.text)
-
+        response = connection.put(uri, payload=struct)
         return self
 
     def delete(self, connection):
@@ -364,17 +354,10 @@ class Template:
 
         :return: None
         """
-        uri = "http://{0}:{1}/manage/v2/certificate-templates/{2}" \
-          .format(connection.host, connection.management_port,
-                  self.template_id())
+        uri = connection.uri("certificate-templates", self.template_id(),
+                             properties=None)
 
-        response = requests.delete(uri, auth=connection.auth)
-
-        if (response.status_code not in [200, 204]
-            and not response.status_code == 404):
-            raise UnexpectedManagementAPIResponse(response.text)
-
-        del self._config['template-id']
+        response = connection.delete(uri, etag=self.etag)
         return self
 
     # ============================================================
@@ -387,17 +370,15 @@ class Template:
 
         :return: The Template object.
         """
-        payload = {
+        struct = {
             'operation': 'generate-template-certificate-authority',
             'valid-for': assert_type(valid_for, int)
             }
 
-        uri = "http://{0}:{1}/manage/v2/certificate-templates/{2}" \
-          .format(connection.host, connection.management_port,
-                  self.template_id())
+        uri = connection.uri("certificate-templates", self.template_id(),
+                             properties=None)
 
-        response = requests.post(uri, json=payload, auth=connection.auth,
-                                 headers={'accept': 'application/json'})
+        response = connection.post(uri, payload=struct)
 
         if response.status_code != 201:
             raise UnexpectedManagementAPIResponse(response.text)
@@ -422,7 +403,7 @@ class Template:
 
         :return: The Template object.
         """
-        payload = {
+        struct = {
             'operation': 'generate-temporary-certificate',
             'valid-for': assert_type(valid_for, int),
             'common-name': common_name,
@@ -431,12 +412,9 @@ class Template:
             'if-necessary': 'true' if if_necessary else 'false'
             }
 
-        uri = "http://{0}:{1}/manage/v2/certificate-templates/{2}" \
-          .format(connection.host, connection.management_port,
-                  self.template_id())
-
-        response = requests.post(uri, json=payload, auth=connection.auth,
-                                 headers={'accept': 'application/json'})
+        uri = connection.uri("certificate-templates", self.template_id(),
+                             properties=None)
+        response = connection.post(uri, payload=struct)
 
         if response.status_code != 201:
             raise UnexpectedManagementAPIResponse(response.text)
@@ -454,30 +432,25 @@ class Template:
 
         :return: The certificate or None if it isn't found.
         """
-        payload = {
+        struct = {
             'operation': 'get-certificate',
             'common-name': common_name
             }
 
         if dns_name is not None:
-            payload['dns-name'] = dns_name
+            struct['dns-name'] = dns_name
 
         if ip-addr is not None:
-            payload['ip-addr'] = ip_addr
+            struct['ip-addr'] = ip_addr
 
-        uri = "http://{0}:{1}/manage/v2/certificate-templates/{2}" \
-          .format(connection.host, connection.management_port,
-                  self.template_id())
-
-        response = requests.post(uri, json=payload, auth=connection.auth,
-                                 headers={'accept': 'application/json'})
+        uri = connection.uri("certificate-templates", self.template_id(),
+                             properties=None)
+        response = connection.post(uri, payload=struct)
 
         if response.status_code == 200:
             return json.loads(response.text)
-        elif response.status_code == 404:
-            return None
         else:
-            raise UnexpectedManagementAPIResponse(response.text)
+            return None
 
     def get_certificates_for_template(self, connection):
         """
@@ -485,23 +458,19 @@ class Template:
 
         :return: The certificate list.
         """
-        payload = {
+        struct = {
             'operation': 'get-certificates-for-template',
             }
 
-        uri = "http://{0}:{1}/manage/v2/certificate-templates/{2}" \
-          .format(connection.host, connection.management_port,
-                  self.template_id())
+        uri = connection.uri("certificate-templates", self.template_id(),
+                             properties=None)
 
-        response = requests.post(uri, json=payload, auth=connection.auth,
-                                 headers={'accept': 'application/json'})
+        response = connection.post(uri, payload=struct)
 
         if response.status_code == 200:
             return json.loads(response.text)
-        elif response.status_code == 404:
-            return None
         else:
-            raise UnexpectedManagementAPIResponse(response.text)
+            return None
 
     def get_pending_certificate_request(self, connection,
                                         common_name, dns_name=None, ip_addr=None):
@@ -521,8 +490,6 @@ class Template:
     def get_template_certificate_authority(self, connection):
         pass
 
-
-
     # ============================================================
 
     @classmethod
@@ -540,11 +507,8 @@ class Template:
         :return: A list of certificate template IDs.
         """
 
-        uri = "http://{0}:{1}/manage/v2/certificate-templates" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("certificate-templates")
+        response = connection.get(uri)
 
         if response.status_code != 200:
             raise UnexpectedManagementAPIResponse(response.text)
@@ -569,16 +533,11 @@ class Template:
 
         :return: The Template object
         """
-        uri = "http://{0}:{1}/manage/v2/certificate-templates/{2}/properties" \
-          .format(connection.host, connection.management_port, tempid)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("certificate-templates", tempid)
+        response = connection.get(uri)
 
         if response.status_code == 200:
             result = Template.unmarshal(json.loads(response.text))
             return result
-        elif response.status_code == 404:
-            return None
         else:
-            raise UnexpectedManagementAPIResponse(response.text)
+            return None

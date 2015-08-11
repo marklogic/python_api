@@ -26,12 +26,13 @@ User related classes for manipulating MarkLogic users
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import json, requests
+import json
 import marklogic.exceptions
+from marklogic.models.model import Model
 from marklogic.models.permission import Permission
 from marklogic.utilities import PropertyLists
 
-class User(PropertyLists):
+class User(Model,PropertyLists):
     """
     The User class encapsulates a MarkLogic user.  It provides
     methods to set/get database attributes.  The use of methods will
@@ -49,55 +50,6 @@ class User(PropertyLists):
         else:
             self.connection = None
         self.name = name
-
-    def user_name(self):
-        """
-        Return the name of the user.
-
-        :return: The user name
-        """
-        return self._config['user-name']
-
-    def set_user_name(self, name):
-        """
-        Set the name of the user.
-
-        :return: The user object
-        """
-        self._config['user-name'] = name
-        return self
-
-    def set_password(self, psw):
-        """
-        Set the password of the user.
-
-        There is no method to get the password.
-
-        :return: The user object
-        """
-        self._config['password'] = psw
-        return self
-
-    def description(self):
-        """
-        Returns the description for the user.
-
-        :return: The user description
-        """
-        if 'description' not in self._config:
-            return None
-        return self._config['description']
-
-    def set_description(self, description):
-        """
-        Set the description for the user
-
-        :param description: A description for the user
-
-        :return: The user object
-        """
-        self._config['description'] = description
-        return self
 
     def role_names(self):
         """
@@ -302,14 +254,8 @@ class User(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/users" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.post(uri, json=self._config, auth=connection.auth)
-
-        if response.status_code not in [200, 201, 204]:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
+        uri = connection.uri("users")
+        response = connection.post(uri, payload=self._config)
         return self
 
     def read(self, connection):
@@ -335,18 +281,11 @@ class User(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The User object
         """
-        uri = "http://{0}:{1}/manage/v2/users/{2}/properties" \
-          .format(connection.host, connection.management_port,self.name)
+        if connection is None:
+            connection = self.connection
 
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
-
-        response = requests.put(uri, json=self._config, auth=connection.auth,
-                                headers=headers)
-
-        if response.status_code not in [200, 204]:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("users", self.name)
+        response = connection.put(uri, payload=self._config, etag=self.etag)
 
         self.name = self._config['user-name']
         if 'etag' in response.headers:
@@ -361,19 +300,11 @@ class User(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The User object
         """
-        uri = "http://{0}:{1}/manage/v2/users/{2}" \
-          .format(connection.host, connection.management_port, self.name)
+        if connection is None:
+            connection = self.connection
 
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
-
-        response = requests.delete(uri, auth=connection.auth, headers=headers)
-
-        if (response.status_code not in [200, 204]
-            and not response.status_code == 404):
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
+        uri = connection.uri("users", self.name, properties=None)
+        response = connection.delete(uri, etag=self.etag)
         return self
 
     @classmethod
@@ -385,14 +316,8 @@ class User(PropertyLists):
         :return: A list of user names
         """
 
-        uri = "http://{0}:{1}/manage/v2/users" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
-
-        if response.status_code != 200:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("users")
+        response = connection.get(uri)
 
         results = []
         json_doc = json.loads(response.text)
@@ -411,16 +336,63 @@ class User(PropertyLists):
         :param connection: The connection to the MarkLogic database
         :return: The user
         """
-        uri = "http://{0}:{1}/manage/v2/users/{2}/properties".format(connection.host, connection.port,
-                                                                     name)
-        response = requests.get(uri, auth=connection.auth, headers={'accept': 'application/json'})
+        uri = connection.uri("users", name)
+        response = connection.get(uri)
 
         if response.status_code == 200:
             result = User.unmarshal(json.loads(response.text))
             if 'etag' in response.headers:
                 result.etag = response.headers['etag']
             return result
-        elif response.status_code == 404:
-            return None
         else:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+            return None
+
+    # Below this point are machine generated methods for getting
+    # and setting atomic values
+
+    def user_name(self):
+        """
+        The user name.
+
+        :return: The user-name.
+        """
+        return self._get_config_property('user-name')
+
+    def set_user_name(self,value):
+        """
+        Set the user-name.
+
+        :param value: The user-name.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, 'string')
+        return self._set_config_property('user-name', value)
+
+    def set_password(self,value):
+        """
+        Set the password.
+
+        :param value: The password.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, 'string')
+        return self._set_config_property('password', value)
+
+    def description(self):
+        """
+        The user description.
+
+        :return: The description.
+        """
+        return self._get_config_property('description')
+
+    def set_description(self,value):
+        """
+        Set the description.
+
+        :param value: The description.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, 'string')
+        return self._set_config_property('description', value)
+

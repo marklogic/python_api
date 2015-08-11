@@ -26,7 +26,7 @@ Role related classes for manipulating MarkLogic roles
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import json, requests
+import json
 import marklogic.exceptions
 from marklogic.utilities import PropertyLists
 
@@ -277,13 +277,8 @@ class Role(PropertyLists):
         if connection == None:
             connection = self.connection
 
-        uri = "http://{0}:{1}/manage/v2/roles" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.post(uri, json=self._config, auth=connection.auth)
-        if response.status_code not in [200, 201, 204]:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
+        uri = connection.uri("roles")
+        response = connection.post(uri, payload=self._config)
         return self
 
     def read(self, connection=None):
@@ -312,18 +307,8 @@ class Role(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The Role object
         """
-        uri = "http://{0}:{1}/manage/v2/roles/{2}/properties" \
-          .format(connection.host, connection.management_port,self.name)
-
-        headers = {}
-        if self.etag is not None:
-            headers['if-match'] = self.etag
-
-        response = requests.put(uri, json=self._config, auth=connection.auth,
-                                headers=headers)
-
-        if response.status_code not in [200, 204]:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+        uri = connection.uri("roles", self.name)
+        response = connection.put(uri, payload=self._config, etag=self.etag)
 
         self.name = self._config['role-name']
         if 'etag' in response.headers:
@@ -338,15 +323,8 @@ class Role(PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The Role object
         """
-        uri = "http://{0}:{1}/manage/v2/roles/{2}" \
-          .format(connection.host, connection.management_port, self.name)
-
-        response = requests.delete(uri, auth=connection.auth)
-
-        if (response.status_code not in [200, 204]
-            and not response.status_code == 404):
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
-
+        uri = connection.uri("roles", self.name, properties=None)
+        response = connection.delete(uri)
         return self
 
     @classmethod
@@ -358,11 +336,8 @@ class Role(PropertyLists):
         :return: A list of Roles
         """
 
-        uri = "http://{0}:{1}/manage/v2/roles" \
-          .format(connection.host, connection.management_port)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("roles")
+        response = connection.get(uri)
 
         if response.status_code != 200:
             raise exceptions.UnexpectedManagementAPIResponse(response.text)
@@ -397,18 +372,13 @@ class Role(PropertyLists):
         :param name: The name of the role
         :return: The role
         """
-        uri = "http://{0}:{1}/manage/v2/roles/{2}/properties" \
-          .format(connection.host, connection.management_port, name)
-
-        response = requests.get(uri, auth=connection.auth,
-                                headers={'accept': 'application/json'})
+        uri = connection.uri("roles", name)
+        response = connection.get(uri)
 
         if response.status_code == 200:
             result = Role.unmarshal(json.loads(response.text))
             if 'etag' in response.headers:
                 result.etag = response.headers['etag']
             return result
-        elif response.status_code == 404:
-            return None
         else:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+            return None
