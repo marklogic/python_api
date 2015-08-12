@@ -3163,9 +3163,10 @@ class Database(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = connection.uri("databases", self.name)
+        uri = connection.uri("databases", self.name, properties=None)
         response = connection.post(uri, payload=payload)
-        return self
+        data = json.loads(response.text)
+        return data
 
     def clear(self, connection=None):
         """
