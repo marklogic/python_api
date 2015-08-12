@@ -147,6 +147,9 @@ class LocalCluster(Model):
         if connection is None:
             connection = self.connection
 
+        if isinstance(host, str):
+            host = Host(host)
+
         xml = host._get_server_config()
         cfgzip = self._post_server_config(xml,connection)
 

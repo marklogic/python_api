@@ -100,9 +100,10 @@ class DatabaseManager(Manager):
         jf = open(args['json']).read()
         data = json.loads(jf)
 
-        print("Perform {0} on database {0}..."
+        print("Perform {0} on database {1}..."
               .format(data['operation'],args['name']))
-        database.operation(data, connection=connection)
+        response = database.operation(data, connection=connection)
+        print(json.dumps(response, sort_keys=True, indent=2))
 
     def _special_property(self, name, value):
         if name == 'forest':

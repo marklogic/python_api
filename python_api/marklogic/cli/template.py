@@ -164,7 +164,7 @@ class Template:
                             help='The name of the log file')
         self._parsers['log']['parser'] = parser
 
-        parser = self._make_parser('run',None,'Switch configuration')
+        parser = self._make_parser('run',None,'Run a script')
         parser.add_argument('--script', required=True,
                             help='The name of the script file')
         self._parsers['run']['parser'] = parser

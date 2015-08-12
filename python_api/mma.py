@@ -60,8 +60,8 @@ class MMA():
       print("Usage: {0} command artifact ...".format(self.script))
       sys.exit(1)
 
-    empty_artifact_commands = {'start','status', 'stop', 'init',
-                               'save', 'switch', 'clear', 'log'}
+    empty_artifact_commands = {'start','status', 'stop', 'restart', 'init',
+                               'save', 'switch', 'clear', 'log', 'run'}
     try:
       artifact = positional[1]
     except IndexError:
@@ -84,8 +84,8 @@ class MMA():
       options.append("--type")
       options.append(stype)
 
-    # Hack for the stop case
-    if command == 'stop' and artifact is None:
+    # Hack for the stop and restart cases
+    if (command == 'stop' or command == 'restart') and artifact is None:
       positional.append('host')
       artifact = 'host'
 
