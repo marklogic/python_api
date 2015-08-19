@@ -27,6 +27,7 @@ import marklogic.exceptions
 from marklogic.utilities.validators import *
 from marklogic.models.model import Model
 from marklogic.models.forest.scheduledbackup import ScheduledForestBackup
+from marklogic.models.forest.replica import ForestReplica
 from marklogic.utilities import PropertyLists
 
 """
@@ -185,12 +186,20 @@ class Forest(Model,PropertyLists):
         return self._set_config_property('forest-name', name)
 
     def forest_replicas(self):
-        # FIXME:
+        """
+        Forest replicas.
+        """
         return self._get_config_property('forest-replica')
 
     def set_forest_replicas(self, replicas):
-        # FIXME:
-        return self._set_config_property('forest-replica', replicas)
+        return self.set_property_list('forest-replica', replicas, ForestReplica)
+
+    def add_forest_replica(self, replica):
+        return self.add_to_property_list('forest-replica', replica, ForestReplica)
+
+    def remove_forest_replicas(self, replica):
+        return self.remove_from_property_list('forest-replica',
+                                              replica, ForestReplica)
 
     def host(self):
         """
@@ -362,48 +371,69 @@ class Forest(Model,PropertyLists):
 
         logger = logging.getLogger("marklogic.forest")
 
-        olist = []
-        if 'forest-backup' in result._config:
-            for backup in result._config['forest-backup']:
-                #logger.debug(backup)
-                temp = None
-                if (backup['backup-type'] == 'minutely'):
-                    temp = ScheduledForestBackup.minutely(
-                        backup['backup-directory'],
-                        backup['backup-period'])
-                elif (backup['backup-type'] == 'hourly'):
-                    minute = int(backup['backup-start-time'].split(':')[1])
-                    temp = ScheduledForestBackup.hourly(
-                        backup['backup-directory'],
-                        backup['backup-period'],
-                        minute)
-                elif (backup['backup-type'] == 'daily'):
-                    temp = ScheduledForestBackup.daily(
-                        backup['backup-directory'],
-                        backup['backup-period'],
-                        backup['backup-start-time'])
-                elif (backup['backup-type'] == 'weekly'):
-                    temp = ScheduledForestBackup.weekly(
-                        backup['backup-directory'],
-                        backup['backup-period'],
-                        backup['backup-day'],
-                        backup['backup-start-time'])
-                elif (backup['backup-type'] == 'monthly'):
-                    temp = ScheduledForestBackup.monthly(
-                        backup['backup-directory'],
-                        backup['backup-period'],
-                        backup['backup-month-day'],
-                        backup['backup-start-time'])
-                elif (backup['backup-type'] == 'once'):
-                    temp = ScheduledForestBackup.once(
-                        backup['backup-directory'],
-                        backup['backup-start-date'],
-                        backup['backup-start-time'])
-                else:
-                    raise UnexpectedManagementAPIResponse("Unparseable backup")
-                temp._config['backup-id'] = backup['backup-id']
-                olist.append(temp)
-        result._config['forest-backup'] = olist
+        atomic = {'availability', 'data-directory',
+                  'database-replication', 'enabled',
+                  'failover-enable', 'fast-data-directory',
+                  'forest-name', 'host', 'large-data-directory',
+                  'range', 'rebalancer-enable', 'updates-allowed'
+                  }
+
+        for key in result._config:
+            olist = []
+
+            if key in atomic:
+                pass
+            elif key == 'forest-backup':
+                for backup in result._config['forest-backup']:
+                    #logger.debug(backup)
+                    temp = None
+                    if (backup['backup-type'] == 'minutely'):
+                        temp = ScheduledForestBackup.minutely(
+                            backup['backup-directory'],
+                            backup['backup-period'])
+                    elif (backup['backup-type'] == 'hourly'):
+                        minute = int(backup['backup-start-time'].split(':')[1])
+                        temp = ScheduledForestBackup.hourly(
+                            backup['backup-directory'],
+                            backup['backup-period'],
+                            minute)
+                    elif (backup['backup-type'] == 'daily'):
+                        temp = ScheduledForestBackup.daily(
+                            backup['backup-directory'],
+                            backup['backup-period'],
+                            backup['backup-start-time'])
+                    elif (backup['backup-type'] == 'weekly'):
+                        temp = ScheduledForestBackup.weekly(
+                            backup['backup-directory'],
+                            backup['backup-period'],
+                            backup['backup-day'],
+                            backup['backup-start-time'])
+                    elif (backup['backup-type'] == 'monthly'):
+                        temp = ScheduledForestBackup.monthly(
+                            backup['backup-directory'],
+                            backup['backup-period'],
+                            backup['backup-month-day'],
+                            backup['backup-start-time'])
+                    elif (backup['backup-type'] == 'once'):
+                        temp = ScheduledForestBackup.once(
+                            backup['backup-directory'],
+                            backup['backup-start-date'],
+                            backup['backup-start-time'])
+                    else:
+                        raise UnexpectedManagementAPIResponse("Unparseable backup")
+                    temp._config['backup-id'] = backup['backup-id']
+                    olist.append(temp)
+                result._config['forest-backup'] = olist
+            elif key == 'forest-replica':
+                for rep in result._config['forest-replica']:
+                    temp = ForestReplica(rep['replica-name'], rep['host'],
+                                         rep['data-directory'],
+                                         rep['large-data-directory'],
+                                         rep['fast-data-directory'])
+                    olist.append(temp)
+                result._config['forest-replica'] = olist
+            else:
+                logger.warn("Unexpected forest property: " + key)
 
         return result
 
@@ -411,6 +441,11 @@ class Forest(Model,PropertyLists):
         struct = { }
         for key in self._config:
             if (key == 'forest-backup'):
+                jlist = []
+                for index in self._config[key]:
+                    jlist.append(index._config)
+                struct[key] = jlist
+            elif (key == 'forest-replica'):
                 jlist = []
                 for index in self._config[key]:
                     jlist.append(index._config)

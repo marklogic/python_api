@@ -22,6 +22,7 @@
 import json, logging, requests, time
 from http.client import BadStatusLine
 from marklogic.exceptions import UnexpectedManagementAPIResponse
+from marklogic.exceptions import UnauthorizedAPIRequest
 from requests.auth import HTTPDigestAuth
 from requests.exceptions import ConnectionError
 from requests.packages.urllib3.exceptions import ProtocolError
@@ -47,6 +48,8 @@ class Connection:
         self.version = version
         self.logger = logging.getLogger("marklogic")
 
+    # You'd expect parameters to be a dictionary, but then it couldn't
+    # have repeated keys, so it's an array.
     def uri(self, relation, name=None,
             protocol=None, host=None, port=None, root=None, version=None,
             properties="/properties", parameters=None):

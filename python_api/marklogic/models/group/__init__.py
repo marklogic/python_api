@@ -28,12 +28,13 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import json, logging
 import marklogic.exceptions
+from marklogic.utilities import PropertyLists
 from marklogic.models.model import Model
 from marklogic.models.host import Host
 from marklogic.models.group.audit import Audit, AuditEvent, AuditRestriction
 from marklogic.models.group.schema import Schema
 
-class Group(Model):
+class Group(Model,PropertyLists):
     """
     The Group class encapsulates a MarkLogic group.  It provides
     methods to set/get group attributes.  The use of methods will
@@ -49,6 +50,18 @@ class Group(Model):
         else:
             self.connection = None
         self.name = name
+
+    def events(self):
+        return self.get_property_list('event')
+
+    def set_events(self, events):
+        return self.set_property_list('event', events, str)
+
+    def add_event(self, event):
+        return self.add_to_property_list('event', event, str)
+
+    def remove_event(self, event):
+        return self.remove_from_property_list('event', event, str)
 
     def marshal(self):
         """

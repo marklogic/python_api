@@ -17,7 +17,7 @@ class MMA():
 
     self.config = configparser.ConfigParser()
     self.config.read(inifile)
-    self. cli = Template()
+    self.cli = Template()
 
   def main(self):
     self.argv = sys.argv
@@ -57,18 +57,19 @@ class MMA():
     try:
       command = positional[0]
     except IndexError:
-      print("Usage: {0} command artifact ...".format(script))
+      print("Usage: {0} command artifact ...".format(self.script))
       sys.exit(1)
 
-    empty_artifact_commands = {'start','status', 'stop', 'init',
-                               'save', 'switch', 'clear', 'log'}
+    empty_artifact_commands = {'start','status', 'stop', 'restart', 'init',
+                               'save', 'switch', 'clear', 'log', 'run',
+                               'debug'}
     try:
       artifact = positional[1]
     except IndexError:
       if command in empty_artifact_commands:
         pass
       else:
-        print("Usage: {0} command artifact ...".format(script))
+        print("Usage: {0} command artifact ...".format(self.script))
         sys.exit(1)
 
     # Hack for the server case
@@ -84,8 +85,8 @@ class MMA():
       options.append("--type")
       options.append(stype)
 
-    # Hack for the stop case
-    if command == 'stop' and artifact is None:
+    # Hack for the stop and restart cases
+    if (command == 'stop' or command == 'restart') and artifact is None:
       positional.append('host')
       artifact = 'host'
 

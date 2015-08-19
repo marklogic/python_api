@@ -57,4 +57,7 @@ class Manager:
                     self._special_property(name, value)
 
     def jprint(self, obj):
-        print(json.dumps(obj.marshal(), sort_keys=True, indent=2))
+        if isinstance(obj, dict) or isinstance(obj, list):
+            print(json.dumps(obj, sort_keys=True, indent=2))
+        else:
+            print(json.dumps(obj.marshal(), sort_keys=True, indent=2))

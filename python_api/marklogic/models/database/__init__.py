@@ -50,6 +50,7 @@ from marklogic.models.database.scheduledbackup import ScheduledDatabaseBackup, S
 from marklogic.models.database.scheduledbackup import ScheduledDatabaseBackupWeekly
 from marklogic.models.database.backup import DatabaseBackup, DatabaseRestore
 from marklogic.models.database.path import PathNamespace
+from marklogic.models.database.subdatabase import Subdatabase
 from marklogic.models.database.lexicon import ElementWordLexicon
 from marklogic.models.database.lexicon import AttributeWordLexicon
 from marklogic.models.database.namelist import NameList
@@ -221,22 +222,6 @@ class Database(PropertyLists):
         if 'schema-database' in self._config:
             return self._config['schema-database']
         return None
-
-    def set_forest_names(self, forests):
-        """
-        Sets the names of the forests of the database.
-
-        If a database is created from this database object, the named
-        forests will be attached to the database. The forests will be
-        created if necessary.
-
-        :param forests: A list of forest names
-
-        :return: The database object
-        """
-        validate_list_of_strings(forests)
-        self._config['forest'] = forests
-        return self
 
     def add_forest_name(self, forest):
         """
@@ -2845,6 +2830,18 @@ class Database(PropertyLists):
                     raise ValidationError("List of paths expected.", repr(path))
             self._config['path-namespace'] = paths
 
+    def subdatabases(self):
+        return self.get_property_list('subdatabase')
+
+    def set_subdatabases(self, subdbs):
+        return self.set_property_list('subdatabase', subdbs, Subdatabase)
+
+    def add_subdatabase(self, subdb):
+        return self.add_to_property_list('subdatabase', subdb, Subdatabase)
+
+    def remove_subdatabase(self, subdb):
+        return self.remove_from_property_list('subdatabase', subdb, Subdatabase)
+
     def element_word_lexicons(self):
         """
         Return the word lexicons defined or None, if no lexicons
@@ -3163,9 +3160,23 @@ class Database(PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = connection.uri("databases", self.name)
+        uri = connection.uri("databases", self.name, properties=None)
         response = connection.post(uri, payload=payload)
-        return self
+        data = json.loads(response.text)
+        return data
+
+    def view(self, view, connection=None):
+        """
+        Get the requested view.
+        """
+        if connection is None:
+            connection = self.connection
+
+        uri = connection.uri("databases", self.name, properties=None,
+                             parameters=["view="+view])
+        response = connection.get(uri)
+        data = json.loads(response.text)
+        return data
 
     def clear(self, connection=None):
         """
@@ -3777,6 +3788,15 @@ class Database(PropertyLists):
                         path['namespace-uri'])
                     olist.append(temp)
                 result._config['path-namespace'] = olist
+            elif key == 'subdatabase':
+                for subdb in result._config['subdatabase']:
+                    if 'cluster-name' in subdb:
+                        temp = Subdatabase(subdb['database-name'],
+                                           cluster=subdb['cluster-name'])
+                    else:
+                        temp = Subdatabase(subdb['database-name'])
+                    olist.append(temp)
+                result._config['subdatabase'] = olist
             elif key == 'phrase-around':
                 for path in result._config['phrase-around']:
                     temp = PhraseAround(
@@ -3858,6 +3878,7 @@ class Database(PropertyLists):
                 or key == 'phrase-around'
                 or key == 'default-ruleset'
                 or key == 'path-namespace'
+                or key == 'subdatabase'
                 or key == 'database-backup'
                 or key == 'merge-blackout'):
                 jlist = []

@@ -36,7 +36,8 @@ class DatabaseManager(Manager):
         pass
 
     def list(self, args, config, connection):
-        print(Database.list(connection))
+        names = Database.list(connection)
+        print(json.dumps(names,sort_keys=True, indent=2))
 
     def create(self, args, config, connection):
         database = Database(args['name'], args['forest_host'],
@@ -88,8 +89,12 @@ class DatabaseManager(Manager):
             print("Error: Database does not exist: {0}".format(args['name']))
             sys.exit(1)
 
-        database.read()
-        self.jprint(database)
+        if args['view'] == None:
+            database.read(connection)
+            self.jprint(database)
+        else:
+            results = database.view(args['view'])
+            print(json.dumps(results, sort_keys=True, indent=2))
 
     def perform(self, args, config, connection):
         database = Database(args['name'], connection=connection)
@@ -100,9 +105,10 @@ class DatabaseManager(Manager):
         jf = open(args['json']).read()
         data = json.loads(jf)
 
-        print("Perform {0} on database {0}..."
+        print("Perform {0} on database {1}..."
               .format(data['operation'],args['name']))
-        database.operation(data, connection=connection)
+        response = database.operation(data, connection=connection)
+        print(json.dumps(response, sort_keys=True, indent=2))
 
     def _special_property(self, name, value):
         if name == 'forest':

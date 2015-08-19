@@ -58,7 +58,7 @@ class Model:
                 raise ValidationError("Value too large (max={0})"
                                       .format(vtype['max']), value)
         elif vtype == 'boolean':
-            if value != 'true' and value != 'false':
+            if not isinstance(value, bool):
                 raise ValidationError("Not a boolean", value)
         elif vtype == 'integer':
             try:

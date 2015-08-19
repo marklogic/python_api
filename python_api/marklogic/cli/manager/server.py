@@ -130,7 +130,13 @@ class ServerManager(Manager):
             print("Error: Server does not exist: {0} in group {1}"
                   .format(args['name'], args['group']))
             sys.exit(1)
-        self.jprint(server)
+
+        if args['view'] == None:
+            server.read(connection)
+            self.jprint(server)
+        else:
+            results = server.view(args['view'], connection)
+            print(json.dumps(results, sort_keys=True, indent=2))
 
     def _read(self, name, group, stype, jsonfile):
         jf = open(jsonfile).read()

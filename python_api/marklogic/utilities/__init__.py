@@ -83,6 +83,19 @@ class PropertyLists:
             newlist.append(atom)
         return newlist
 
+    def get_property_list(self, propname):
+        """
+        Get the items in a configuration property list. Return None if
+        there aren't any.
+
+        :param: propname: The name of a configuration property list
+        :return: The list or None.
+        """
+        if propname in self._config:
+            return self._config[propname]
+        else:
+            return None
+
     def add_to_property_list(self, propname, theitem, thetype=None):
         """
         Adds an item to a configuration property list.
@@ -135,7 +148,7 @@ class PropertyLists:
         :param: objtype: The required type of the objects in the list
         :return: The calling object.
         """
-        if objlist is None or not objlist:
+        if objlist is None or not objlist or len(objlist) == 0:
             thelist = None
         else:
             if objtype is None:

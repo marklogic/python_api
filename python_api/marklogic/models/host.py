@@ -182,7 +182,7 @@ class Host:
         if connection is None:
             connection = self.connection
 
-        uri = connection.uri(hosts, self.name, properties=None)
+        uri = connection.uri("hosts", self.name, properties=None)
         struct = {'operation':'restart'}
         response = connection.post(uri, payload=struct)
         return self
