@@ -27,6 +27,7 @@ from marklogic.models.cluster import LocalCluster
 from marklogic.models.host import Host
 from marklogic.models.user import User
 from marklogic.models.role import Role
+from marklogic.models.group import Group
 from marklogic.models.database import Database
 from marklogic.models.forest import Forest
 from requests.auth import HTTPDigestAuth
@@ -56,6 +57,20 @@ class MarkLogic:
             cluster = LocalCluster(connection, False)
 
         return cluster.read()
+
+    def groups(self, connection=None):
+        if connection is None:
+            connection = self.connection
+
+        return Group.list(connection)
+
+    def group(self, group_name, connection=None):
+        if connection is None:
+            group = Group(group_name, self.connection, self.save_connection)
+        else:
+            group = Group(group_name, connection, False)
+
+        return group.read()
 
     def hosts(self, connection=None):
         if connection is None:
