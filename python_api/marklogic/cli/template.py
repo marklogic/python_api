@@ -57,6 +57,7 @@ class Template:
                          'switch':               {'code': ml_mgr.switch},
                          'clear':                {'code': ml_mgr.clear},
                          'log':                  {'code': ml_mgr.log},
+                         'debug':                {'code': ml_mgr.debug},
                          'run':                  {'code': None},
                          'stop':    {'host':     {'code': ml_mgr.stop},
                                      'cluster':  {'code': ml_mgr.stop}},
@@ -164,6 +165,11 @@ class Template:
                             help='The name of the log file')
         self._parsers['log']['parser'] = parser
 
+        parser = self._make_parser('debug',None,'Enable diagnostic events')
+        parser.add_argument('--group', default="Default",
+                            help='The group')
+        self._parsers['debug']['parser'] = parser
+
         parser = self._make_parser('run',None,'Run a script')
         parser.add_argument('--script', required=True,
                             help='The name of the script file')
@@ -178,6 +184,8 @@ class Template:
                             help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
+
+
                             help='Additional forest properties')
         self._parsers['create']['forest']['parser'] = parser
 
@@ -413,6 +421,8 @@ class Template:
         parser = self._make_parser('get','database','Get database properties')
         parser.add_argument('name',
                             help='The database name')
+        parser.add_argument('--view',
+                            help='The view')
         self._parsers['get']['database']['parser'] = parser
 
         parser = self._make_parser('get','cluster','Get cluster properties')
@@ -433,6 +443,8 @@ class Template:
                             help='The server name')
         parser.add_argument('--group', default="Default",
                             help='The group')
+        parser.add_argument('--view',
+                            help='The view')
         self._parsers['get']['server']['parser'] = parser
 
         parser = self._make_parser('get','user','Get user properties')

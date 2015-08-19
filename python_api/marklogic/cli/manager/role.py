@@ -36,7 +36,8 @@ class RoleManager(Manager):
         pass
 
     def list(self, args, config, connection):
-        print(Role.list(connection))
+        names = Role.list(connection)
+        print(json.dumps(names,sort_keys=True, indent=2))
 
     def create(self, args, config, connection):
         role = Role(args['name'], connection=connection)

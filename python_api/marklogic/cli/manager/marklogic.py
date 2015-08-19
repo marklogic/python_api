@@ -316,3 +316,27 @@ class MarkLogicManager(Manager):
                 subprocess.call(['/usr/bin/tail', datadir + "Logs/" + logfile])
         except KeyboardInterrupt:
             pass
+
+    def debug(self, args, config, connection):
+        section = config[args['config']]
+        if 'diagnostic-events' in section:
+            events = section['diagnostic-events'].strip()
+            if events == '':
+                events = []
+            else:
+                events = re.sub(r'\s+', '', events)
+                events = events.split(',')
+        else:
+            events = []
+
+        ml = MarkLogic(connection)
+        group = ml.group(args['group'])
+
+        group.set_events(events)
+
+        if len(events) == 0:
+            group.set_events_activated(False)
+        else:
+            group.set_events_activated(True)
+
+        group.update()

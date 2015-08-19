@@ -36,7 +36,8 @@ class UserManager(Manager):
         pass
 
     def list(self, args, config, connection):
-        print(User.list(connection))
+        names = User.list(connection)
+        print(json.dumps(names,sort_keys=True, indent=2))
 
     def create(self, args, config, connection):
         user = User(args['name'], args['password'], connection=connection)

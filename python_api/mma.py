@@ -17,7 +17,7 @@ class MMA():
 
     self.config = configparser.ConfigParser()
     self.config.read(inifile)
-    self. cli = Template()
+    self.cli = Template()
 
   def main(self):
     self.argv = sys.argv
@@ -61,7 +61,8 @@ class MMA():
       sys.exit(1)
 
     empty_artifact_commands = {'start','status', 'stop', 'restart', 'init',
-                               'save', 'switch', 'clear', 'log', 'run'}
+                               'save', 'switch', 'clear', 'log', 'run',
+                               'debug'}
     try:
       artifact = positional[1]
     except IndexError:
