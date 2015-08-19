@@ -1424,6 +1424,20 @@ class Server(PropertyLists):
         return self.set_property_list('request-blackout',
                                       blackouts, RequestBlackout)
 
+    def view(self, view, connection=None):
+        """
+        Get the requested view.
+        """
+        if connection is None:
+            connection = self.connection
+
+        uri = connection.uri("servers", self.name, properties=None,
+                             parameters=["group-id="+self.group_name(),
+                                         "view="+view])
+        response = connection.get(uri)
+        data = json.loads(response.text)
+        return data
+
     def exists(self, connection=None):
         """
         Checks to see if the application server exists.
