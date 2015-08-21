@@ -33,8 +33,8 @@ The installer has not been widely tested. Feedback welcome.
 
 1. Download and install MarkLogic (http://developer.marklogic.com/products)
 2. Checkout the MarkLogic python package from
-   http://github.com/marklogic/python-api
-3. Install using ``easy_install`` (``easy_install /path/to/python-api``)
+   http://github.com/marklogic/python_api
+3. Install using ``easy_install`` (``easy_install /path/to/python_api``)
 
 At this point you should be able to script away. In the near future
 you’ll be able to directly install using `easy_install` without first
