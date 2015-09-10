@@ -96,7 +96,7 @@ class LocalCluster(Model):
             connection = self.connection
 
         uri = "{0}://{1}:{2}/manage/v2".format(
-            connectin.protocol, connection.host, connection.management_port)
+            connection.protocol, connection.host, connection.management_port)
         struct = {'operation':'shutdown-local-cluster'}
         response = connection.post(uri, payload=struct)
         return None
