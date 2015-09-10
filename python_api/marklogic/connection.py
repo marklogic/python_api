@@ -25,7 +25,7 @@ from marklogic.exceptions import UnexpectedManagementAPIResponse
 from marklogic.exceptions import UnauthorizedAPIRequest
 from requests.auth import HTTPDigestAuth
 from requests.exceptions import ConnectionError
-from requests.packages.urllib3.exceptions import ProtocolError
+from requests.packages.urllib3.exceptions import ProtocolError,ReadTimeoutError
 
 """
 Connection related classes and method to connect to MarkLogic.
@@ -192,6 +192,10 @@ class Connection:
                                                response.text))
                 pass
             except ProtocolError:
+                self.logger.debug("{0}: {1}".format(response.status_code,
+                                               response.text))
+                pass
+            except ReadTimeoutError:
                 self.logger.debug("{0}: {1}".format(response.status_code,
                                                response.text))
                 pass
