@@ -31,8 +31,9 @@ from marklogic.exceptions import UnexpectedManagementAPIResponse
 from marklogic.utilities.validators import assert_type
 from marklogic.utilities.validators import validate_custom
 from marklogic.models.certificate.request import Request
+from marklogic.models.model import Model
 
-class Template:
+class Template(Model):
     """
     The Template class encapsulates a MarkLogic representation of
     a certificate template.
@@ -67,9 +68,7 @@ class Template:
 
         :return: The template ID.
         """
-        if 'template-id' in self._config:
-            return self._config['template-id']
-        return None
+        return self._get_config_property('template-id')
 
     def template_name(self):
         """
@@ -77,9 +76,7 @@ class Template:
 
         :return: The current template name.
         """
-        if 'template-name' in self._config:
-            return self._config['template-name']
-        return None
+        return self._get_config_property('template-name')
 
     def set_template_name(self, value):
         """
@@ -98,9 +95,7 @@ class Template:
 
         :return: The current template description.
         """
-        if 'template-description' in self._config:
-            return self._config['template-description']
-        return None
+        return self._get_config_property('template-description')
 
     def set_template_description(self, value):
         """
@@ -119,9 +114,7 @@ class Template:
 
         :return: The current template version.
         """
-        if 'template-version' in self._config:
-            return self._config['template-version']
-        return None
+        return self._get_config_property('template-version')
 
     def key_type(self):
         """
@@ -129,9 +122,7 @@ class Template:
 
         :return: The current key type.
         """
-        if 'key-type' in self._config:
-            return self._config['key-type']
-        return None
+        return self._get_config_property('key-type')
 
     def set_key_type(self, value):
         """
@@ -210,9 +201,7 @@ class Template:
 
         :return: The options dictionary.
         """
-        if 'options' in self._config:
-            return self._config['options']
-        return None
+        return self._get_config_property('options')
 
     def set_options(self, value):
         """
@@ -235,9 +224,7 @@ class Template:
 
         :return: The current certificate request.
         """
-        if 'req' in self._config:
-            return self._config['req']
-        return None
+        return self._get_config_property('req')
 
     def set_req(self, value):
         """

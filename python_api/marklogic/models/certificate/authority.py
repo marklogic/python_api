@@ -27,10 +27,11 @@ Authority related classes for manipulating Certificate Authorities
 from __future__ import unicode_literals, print_function, absolute_import
 
 import json
+from marklogic.models.model import Model
 from marklogic.exceptions import UnexpectedManagementAPIResponse
 from marklogic.utilities.validators import assert_boolean
 
-class Authority:
+class Authority(Model):
     """
     The Authority class encapsulates a MarkLogic representation of
     a certificate authority. Certificate authorities are created by
@@ -52,7 +53,7 @@ class Authority:
 
         :return: The id
         """
-        return self._config['certificate-id']
+        return self._get_config_property('certificate-id')
 
     def enabled(self):
         """
@@ -65,7 +66,7 @@ class Authority:
 
         :return: The state of the enabled flag, True or False
         """
-        return self._config['enabled']
+        return self._get_config_property('enabled')
 
     def properties(self):
         """
@@ -75,7 +76,7 @@ class Authority:
 
         :return: The certificate authority properties
         """
-        return self._config['cert']
+        return self._get_config_property('cert')
 
     def marshal(self):
         """

@@ -28,9 +28,10 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import json
 import marklogic.exceptions
+from marklogic.models.model import Model
 from marklogic.utilities import PropertyLists
 
-class Role(PropertyLists):
+class Role(Model,PropertyLists):
     """
     The Role class encapsulates a MarkLogic role.  It provides
     methods to set/get database attributes.  The use of methods will
@@ -56,7 +57,7 @@ class Role(PropertyLists):
 
         :return: The role name
         """
-        return self._config['role-name']
+        return self._get_config_property('role-name')
 
     def set_role_name(self, name):
         """
@@ -68,7 +69,7 @@ class Role(PropertyLists):
 
         :return: The role object
         """
-        return self._config['role-name']
+        return self._get_config_property('role-name')
 
     def compartment(self):
         """
@@ -86,9 +87,7 @@ class Role(PropertyLists):
 
         :return: The compartment name
         """
-        if 'compartment' in self._config:
-            return self._config['compartment']
-        return None
+        return self._get_config_property('compartment')
 
     def role_names(self):
         """
@@ -96,9 +95,7 @@ class Role(PropertyLists):
 
         :return: The list of roles
         """
-        if "role" not in self._config:
-            return None
-        return self._config['role']
+        return self._get_config_property('role')
 
     def set_role_names(self, roles):
         """
@@ -147,9 +144,7 @@ class Role(PropertyLists):
 
         :return: The role description
         """
-        if 'description' not in self._config:
-            return None
-        return self._config['description']
+        return self._get_config_property('description')
 
     def add_privilege(self, name, kind=None):
         """
@@ -235,9 +230,7 @@ class Role(PropertyLists):
 
         :return: The list of privileges
         """
-        if 'privilege' not in self._config:
-            return None
-        return self._config['privilege']
+        return self._get_config_property('privilege')
 
     @classmethod
     def unmarshal(cls, config):

@@ -28,8 +28,9 @@ Classes for dealing with fields.
 
 from marklogic.utilities.validators import assert_list_of_type, assert_boolean
 from marklogic.utilities import PropertyLists
+from marklogic.models.model import Model
 
-class _IncludedExcludedElement:
+class _IncludedExcludedElement(Model):
     """
     An included or excluded element. This class is abstract.
     """
@@ -40,7 +41,7 @@ class _IncludedExcludedElement:
         """
         The namespace URI"
         """
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         """
@@ -53,7 +54,7 @@ class _IncludedExcludedElement:
         """
         The localname.
         """
-        return self._config['localname']
+        return self._get_config_property('localname')
 
     def set_localname(self, localname):
         """
@@ -66,7 +67,7 @@ class _IncludedExcludedElement:
         """
         The weight.
         """
-        return self._config['weight']
+        return self._get_config_property('weight')
 
     def set_weight(self, weight):
         """
@@ -79,7 +80,7 @@ class _IncludedExcludedElement:
         """
         The attribute namespace URI.
         """
-        return self._config['attribute-namespace-uri']
+        return self._get_config_property('attribute-namespace-uri')
 
     def set_attribute_namespace_uri(self, attribute_namespace_uri):
         """
@@ -92,7 +93,7 @@ class _IncludedExcludedElement:
         """
         The attribute localname.
         """
-        return self._config['attribute-localname']
+        return self._get_config_property('attribute-localname')
 
     def set_attribute_localname(self, attribute_localname):
         """
@@ -105,7 +106,7 @@ class _IncludedExcludedElement:
         """
         The attribute value.
         """
-        return self._config['attribute-value']
+        return self._get_config_property('attribute-value')
 
     def set_attribute_value(self, attribute_value):
         """
@@ -159,7 +160,7 @@ class ExcludedElement(_IncludedExcludedElement):
             "attribute-value": "" if attribute_value is None else attribute_value
             }
 
-class TokenizerOverride:
+class TokenizerOverride(Model):
     """
     A tokenizer override.
     """
@@ -177,7 +178,7 @@ class TokenizerOverride:
         """
         The character.
         """
-        return self._config['character']
+        return self._get_config_property('character')
 
     def set_character(self, character):
         """
@@ -190,7 +191,7 @@ class TokenizerOverride:
         """
         The override class.
         """
-        return self._config['tokenizer-override']
+        return self._get_config_property('tokenizer-override')
 
     def set_tokenizer_override(self, override):
         """
@@ -199,7 +200,7 @@ class TokenizerOverride:
         self._config['tokenizer-override'] = override
         return self
 
-class FieldPath:
+class FieldPath(Model):
     """
     A field path.
     """
@@ -216,7 +217,7 @@ class FieldPath:
         """
         The path.
         """
-        return self._config['path']
+        return self._get_config_property('path')
 
     def set_path(self, path):
         """
@@ -229,7 +230,7 @@ class FieldPath:
         """
         The weight.
         """
-        return self._config['weight']
+        return self._get_config_property('weight')
 
     def set_weight(self, weight):
         """
@@ -238,7 +239,7 @@ class FieldPath:
         self._config['weight'] = weight
         return self
 
-class Field(PropertyLists):
+class Field(Model,PropertyLists):
     """
     A field. This class is abstract.
     """
@@ -249,7 +250,7 @@ class Field(PropertyLists):
         """
         The field name.
         """
-        return self._config['field-name']
+        return self._get_config_property('field-name')
 
     def set_field_name(self, name):
         """
@@ -265,7 +266,7 @@ class Field(PropertyLists):
         Word lexicons.
         """
         if 'word-lexicon' in self._config:
-            return self._config['word-lexicon']
+            return self._get_config_property('word-lexicon')
         return None
 
     def add_word_lexicons(self, collation):
@@ -290,9 +291,7 @@ class Field(PropertyLists):
         """
         The included elements.
         """
-        if 'included-element' in self._config:
-            return self._config['included-element']
-        return None
+        return self._get_config_property('included-element')
 
     def add_included_element(self, element):
         """
@@ -319,9 +318,7 @@ class Field(PropertyLists):
         """
         The excluded elements.
         """
-        if 'excluded-element' in self._config:
-            return self._config['excluded-element']
-        return None
+        return self._get_config_property('excluded-element')
 
     def add_excluded_element(self, element):
         """
@@ -348,9 +345,7 @@ class Field(PropertyLists):
         """
         The tokenizer overrides.
         """
-        if 'tokenizer-override' in self._config:
-            return self._config['tokenizer-override']
-        return None
+        return self._get_config_property('tokenizer-override')
 
     def add_tokenizer_overrides(self, override):
         """
@@ -377,9 +372,7 @@ class Field(PropertyLists):
         """
         Stemmed searches.
         """
-        if 'stemmed-searches' in self._config:
-            return self._config['stemmed-searches']
-        return None
+        return self._get_config_property('stemmed-searches')
 
     def set_stemmed_searches(self, stemmed_searches):
         """
@@ -392,9 +385,7 @@ class Field(PropertyLists):
         """
         Word searches.
         """
-        if 'word-searches' in self._config:
-            return self._config['word-searches']
-        return None
+        return self._get_config_property('word-searches')
 
     def set_word_searches(self, word_searches):
         """
@@ -407,9 +398,7 @@ class Field(PropertyLists):
         """
         Field value searches.
         """
-        if 'field-value-searches' in self._config:
-            return self._config['field-value-searches']
-        return None
+        return self._get_config_property('field-value-searches')
 
     def set_field_value_searches(self, field_value_searches):
         """
@@ -422,9 +411,7 @@ class Field(PropertyLists):
         """
         Field value positions.
         """
-        if 'field-value-positions' in self._config:
-            return self._config['field-value-positions']
-        return None
+        return self._get_config_property('field-value-positions')
 
     def set_field_value_positions(self, field_value_positions):
         """
@@ -437,9 +424,7 @@ class Field(PropertyLists):
         """
         Fast phrase searches.
         """
-        if 'fast-phrase-searches' in self._config:
-            return self._config['fast-phrase-searches']
-        return None
+        return self._get_config_property('fast-phrase-searches')
 
     def set_fast_phrase_searches(self, fast_phrase_searches):
         """
@@ -452,9 +437,7 @@ class Field(PropertyLists):
         """
         Fast case-sensitive searches.
         """
-        if 'fast-case-sensitive-searches' in self._config:
-            return self._config['fast-case-sensitive-searches']
-        return None
+        return self._get_config_property('fast-case-sensitive-searches')
 
     def set_fast_case_sensitive_searches(self, fast_case_sensitive_searches):
         """
@@ -467,9 +450,7 @@ class Field(PropertyLists):
         """
         Fast diacritic-sensitive searches.
         """
-        if 'fast-diacritic-sensitive-searches' in self._config:
-            return self._config['fast-diacritic-sensitive-searches']
-        return None
+        return self._get_config_property('fast-diacritic-sensitive-searches')
 
     def set_fast_diacritic_sensitive_searches(self, fdss):
         """
@@ -482,9 +463,7 @@ class Field(PropertyLists):
         """
         Trailing wildcard searches.
         """
-        if 'trailing_wildcard_searches' in self._config:
-            return self._config['trailing-wildcard-searches']
-        return None
+        return self._get_config_property('trailing-wildcard-searches')
 
     def set_trailing_wildcard_searches(self, trailing_wildcard_searches):
         """
@@ -497,9 +476,7 @@ class Field(PropertyLists):
         """
         Trailing wildcard word positions.
         """
-        if 'trailing_wildcard_word_positions' in self._config:
-            return self._config['trailing-wildcard-word-positions']
-        return None
+        return self._get_config_property('trailing-wildcard-word-positions')
 
     def set_trailing_wildcard_word_positions(self, trailing_wildcard_word_positions):
         """
@@ -512,9 +489,7 @@ class Field(PropertyLists):
         """
         Three character searches.
         """
-        if 'three_character_searches' in self._config:
-            return self._config['three-character-searches']
-        return None
+        return self._get_config_property('three-character-searches')
 
     def set_three_character_searches(self, three_character_searches):
         """
@@ -527,9 +502,7 @@ class Field(PropertyLists):
         """
         Three character word positions.
         """
-        if 'three_character_word_positions' in self._config:
-            return self._config['three-character-word-positions']
-        return None
+        return self._get_config_property('three-character-word-positions')
 
     def set_three_character_word_positions(self, three_character_word_positions):
         """
@@ -542,9 +515,7 @@ class Field(PropertyLists):
         """
         Two character searches.
         """
-        if 'two_character_searches' in self._config:
-            return self._config['two-character-searches']
-        return None
+        return self._get_config_property('two-character-searches')
 
     def set_two_character_searches(self, two_character_searches):
         """
@@ -557,9 +528,7 @@ class Field(PropertyLists):
         """
         One character searches.
         """
-        if 'one_character_searches' in self._config:
-            return self._config['one-character-searches']
-        return None
+        return self._get_config_property('one-character-searches')
 
     def set_one_character_searches(self, one_character_searches):
         """
@@ -695,7 +664,7 @@ class RootField(Field):
         """
         Include the root?
         """
-        return self._config['include-root']
+        return self._get_config_property('include-root')
 
     def set_include_root(self, name):
         """
@@ -748,7 +717,7 @@ class PathField(Field):
         """
         The field paths.
         """
-        return self._config['field-path']
+        return self._get_config_property('field-path')
 
     def add_field_path(self, path):
         """

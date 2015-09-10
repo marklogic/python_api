@@ -22,8 +22,9 @@
 """
 Classes for dealing with lexicons
 """
+from marklogic.models.model import Model
 
-class _Lexicon:
+class _Lexicon(Model):
     """
     A lexicon. This class is abstract.
     """
@@ -34,7 +35,7 @@ class _Lexicon:
         """
         The namespace URI.
         """
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         """
@@ -47,7 +48,7 @@ class _Lexicon:
         """
         The localname.
         """
-        return self._config['localname']
+        return self._get_config_property('localname')
 
     def set_localname(self, localname):
         """
@@ -60,7 +61,7 @@ class _Lexicon:
         """
         The collation.
         """
-        return self._config['collation']
+        return self._get_config_property('collation')
 
     def set_collation(self, collation):
         """
@@ -103,14 +104,14 @@ class AttributeWordLexicon(_Lexicon):
             }
 
     def parent_namespace_uri(self):
-        return self._config['parent-namespace-uri']
+        return self._get_config_property('parent-namespace-uri')
 
     def set_parent_namespace_uri(self, namespace_uri):
         self._config['parent-namespace-uri'] = namespace_uri
         return self
 
     def parent_localname(self):
-        return self._config['parent-localname']
+        return self._get_config_property('parent-localname')
 
     def set_parent_localname(self, localname):
         self._config['parent-localname'] = localname

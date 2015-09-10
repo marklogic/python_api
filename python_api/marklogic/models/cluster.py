@@ -50,7 +50,7 @@ class LocalCluster(Model):
         self.logger = logging.getLogger("marklogic")
 
     def bootstrap_hosts(self):
-        return self._config['bootstrap-host']
+        return self._get_config_property('bootstrap-host')
 
     def read(self, connection=None):
         if connection is None:
@@ -294,7 +294,7 @@ class ForeignCluster(Model):
         self.logger = logging.getLogger("marklogic")
 
     def bootstrap_hosts(self):
-        return self._config['foreign-bootstrap-host']
+        return self._get_config_property('foreign-bootstrap-host')
 
     def read(self, connection=None):
         if connection is None:
@@ -537,7 +537,7 @@ class ForeignCluster(Model):
         self._validate(value, 'string')
         return self._set_config_property('xdqp-ssl-ciphers', value)
 
-class BootstrapHost:
+class BootstrapHost(Model):
     """
     The BootstrapHost class encapsulates a MarkLogic cluster bootstrap host.
     """
@@ -549,10 +549,10 @@ class BootstrapHost:
         self.logger = logging.getLogger("marklogic")
 
     def host_id(self):
-        return self._config['bootstrap-host-id']
+        return self._get_config_property('bootstrap-host-id')
 
     def host_name(self):
-        return self._config['bootstrap-host-name']
+        return self._get_config_property('bootstrap-host-name')
 
     def connect_port(self):
-        return self._config['bootstrap-connect-port']
+        return self._get_config_property('bootstrap-connect-port')

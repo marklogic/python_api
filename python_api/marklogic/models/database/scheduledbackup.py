@@ -22,8 +22,9 @@
 """
 Classes for dealing with scheduled backups
 """
+from marklogic.models.model import Model
 
-class ScheduledDatabaseBackup:
+class ScheduledDatabaseBackup(Model):
     """
     A database backup. This is an abstract class.
     """
@@ -34,15 +35,13 @@ class ScheduledDatabaseBackup:
         """
         The backup id.
         """
-        if 'backup-id' in self._config:
-            return self._config['backup-id']
-        return None
+        return self._get_config_property('backup-id')
 
     def backup_enabled(self):
         """
         Backup enabled.
         """
-        return self._config['backup-enabled']
+        return self._get_config_property('backup-enabled')
 
     def set_backup_enabled(self, enabled):
         """
@@ -55,7 +54,7 @@ class ScheduledDatabaseBackup:
         """
         The backup directory.
         """
-        return self._config['backup-directory']
+        return self._get_config_property('backup-directory')
 
     def set_backup_directory(self, value):
         """
@@ -68,19 +67,19 @@ class ScheduledDatabaseBackup:
         """
         The backup type.
         """
-        return self._config['backup-type']
+        return self._get_config_property('backup-type')
 
     def backup_timestamp(self):
         """
         The backup timestamp.
         """
-        return self._config['backup-timestamp']
+        return self._get_config_property('backup-timestamp')
 
     def max_backups(self):
         """
         The maximum number of backups.
         """
-        return self._config['max-backups']
+        return self._get_config_property('max-backups')
 
     def set_max_backups(self, value):
         """
@@ -93,7 +92,7 @@ class ScheduledDatabaseBackup:
         """
         Backup the security database?
         """
-        return self._config['backup-security-database']
+        return self._get_config_property('backup-security-database')
 
     def set_backup_security_database(self, value):
         """
@@ -106,7 +105,7 @@ class ScheduledDatabaseBackup:
         """
         Backup the schema database?
         """
-        return self._config['backup-schemas-database']
+        return self._get_config_property('backup-schemas-database')
 
     def set_backup_schemas_database(self, value):
         """
@@ -119,7 +118,7 @@ class ScheduledDatabaseBackup:
         """
         Backup the triggers database?
         """
-        return self._config['backup-triggers-database']
+        return self._get_config_property('backup-triggers-database')
 
     def set_backup_triggers_database(self, value):
         """
@@ -132,7 +131,7 @@ class ScheduledDatabaseBackup:
         """
         Include replicas?
         """
-        return self._config['include-replicas']
+        return self._get_config_property('include-replicas')
 
     def set_include_replicas(self, value):
         """
@@ -145,7 +144,7 @@ class ScheduledDatabaseBackup:
         """
         Incremental backup?
         """
-        return self._config['incremental-backup']
+        return self._get_config_property('incremental-backup')
 
     def set_incremental_backup(self, value):
         """
@@ -158,7 +157,7 @@ class ScheduledDatabaseBackup:
         """
         Journal archiving?
         """
-        return self._config['journal-archiving']
+        return self._get_config_property('journal-archiving')
 
     def set_journal_archiving(self, value):
         """
@@ -171,7 +170,7 @@ class ScheduledDatabaseBackup:
         """
         The journal archive path.
         """
-        return self._config['journal-archive-path']
+        return self._get_config_property('journal-archive-path')
 
     def set_journal_archive_path(self, value):
         """
@@ -184,7 +183,7 @@ class ScheduledDatabaseBackup:
         """
         The journal archive lag limit.
         """
-        return self._config['journal-archive-lag_limit']
+        return self._get_config_property('journal-archive-lag_limit')
 
     def set_journal_archive_lag_limit(self, value):
         """
@@ -312,7 +311,7 @@ class ScheduledDatabaseBackupMinutely(ScheduledDatabaseBackup):
         """
         The period.
         """
-        return self._config['backup-period']
+        return self._get_config_property('backup-period')
 
 class ScheduledDatabaseBackupHourly(ScheduledDatabaseBackup):
     def __init__(self, backup_dir, period, start_time,
@@ -343,14 +342,14 @@ class ScheduledDatabaseBackupHourly(ScheduledDatabaseBackup):
         """
         The period.
         """
-        return self._config['backup-period']
+        return self._get_config_property('backup-period')
 
     def start_time(self):
         """
         The start time.
         """
         # FIXME: Check start-date!?
-        return self._config['backup-start-date']
+        return self._get_config_property('backup-start-date')
 
 class ScheduledDatabaseBackupDaily(ScheduledDatabaseBackup):
     def __init__(self, backup_dir, period, start_time,
@@ -381,13 +380,13 @@ class ScheduledDatabaseBackupDaily(ScheduledDatabaseBackup):
         """
         The period.
         """
-        return self._config['backup-period']
+        return self._get_config_property('backup-period')
 
     def start_time(self):
         """
         The start time.
         """
-        return self._config['backup-start-date']
+        return self._get_config_property('backup-start-date')
 
 class ScheduledDatabaseBackupWeekly(ScheduledDatabaseBackup):
     def __init__(self, backup_dir, period, days, start_time,
@@ -421,19 +420,19 @@ class ScheduledDatabaseBackupWeekly(ScheduledDatabaseBackup):
         """
         The period.
         """
-        return self._config['backup-period']
+        return self._get_config_property('backup-period')
 
     def days(self):
         """
         The days.
         """
-        return self._config['backup-day']
+        return self._get_config_property('backup-day')
 
     def start_time(self):
         """
         The start time.
         """
-        return self._config['backup-start-time']
+        return self._get_config_property('backup-start-time')
 
 class ScheduledDatabaseBackupMonthly(ScheduledDatabaseBackup):
     def __init__(self, backup_dir, period, month_day, start_time,
@@ -465,19 +464,19 @@ class ScheduledDatabaseBackupMonthly(ScheduledDatabaseBackup):
         """
         The period.
         """
-        return self._config['backup-period']
+        return self._get_config_property('backup-period')
 
     def month_day(self):
         """
         The day of the month.
         """
-        return self._config['backup-month-day']
+        return self._get_config_property('backup-month-day')
 
     def start_time(self):
         """
         The start time.
         """
-        return self._config['backup-start-time']
+        return self._get_config_property('backup-start-time')
 
 class ScheduledDatabaseBackupOnce(ScheduledDatabaseBackup):
     def __init__(self, backup_dir, start_date, start_time,
@@ -510,11 +509,11 @@ class ScheduledDatabaseBackupOnce(ScheduledDatabaseBackup):
         """
         The start date.
         """
-        return self._config['backup-start-date']
+        return self._get_config_property('backup-start-date')
 
     def start_time(self):
         """
         The start time.
         """
-        return self._config['backup-start-date']
+        return self._get_config_property('backup-start-date')
 

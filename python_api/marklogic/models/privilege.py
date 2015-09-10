@@ -28,11 +28,12 @@ Classes for manipulating MarkLogic privileges.
 from __future__ import unicode_literals, print_function, absolute_import
 import json, logging
 import marklogic.exceptions
+from marklogic.models.model import Model
 from marklogic.utilities.validators import validate_custom
 from marklogic.utilities.validators import validate_privilege_kind
 from marklogic.utilities import PropertyLists
 
-class Privilege(PropertyLists):
+class Privilege(Model,PropertyLists):
     """
     The Privilege class encapsulates a MarkLogic privilege.
     """
@@ -60,7 +61,7 @@ class Privilege(PropertyLists):
 
         :return: The privilege name
         """
-        return self._config['privilege-name']
+        return self._get_config_property('privilege-name')
 
     def set_privilege_name(self, name):
         """
@@ -77,7 +78,7 @@ class Privilege(PropertyLists):
 
         :return: The privilege action
         """
-        return self._config['action']
+        return self._get_config_property('action')
 
     def set_action(self, action):
         """
@@ -112,9 +113,7 @@ class Privilege(PropertyLists):
 
         :return: The list of role names
         """
-        if u'role' not in self._config:
-            return []
-        return self._config[u'role']
+        return self._get_config_property('role')
 
     def set_role_names(self, roles):
         """

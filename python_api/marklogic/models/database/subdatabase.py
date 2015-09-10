@@ -22,6 +22,7 @@
 """
 Classes for dealing with subdatabases
 """
+from marklogic.models.model import Model
 
 class Subdatabase:
     """
@@ -44,7 +45,7 @@ class Subdatabase:
         """
         The database.
         """
-        return self._config['database-name']
+        return self._get_config_property('database-name')
 
     def set_database(self, database):
         """
@@ -55,12 +56,9 @@ class Subdatabase:
 
     def cluster(self):
         """
-        The cluster, or None.
+        The cluster name, or None.
         """
-        if 'cluster-name' in self._config:
-            return self._config['cluster-name']
-        else:
-            return None
+        return self._get_config_property('cluster-name')
 
     def set_database(self, cluster):
         """

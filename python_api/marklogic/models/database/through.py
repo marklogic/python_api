@@ -25,8 +25,9 @@ Classes for dealing with phrase arounds, phrase throughs, and query throughs.
 
 from marklogic.utilities.validators import assert_list_of_type
 from marklogic.utilities import PropertyLists
+from marklogic.models.model import Model
 
-class _Through(PropertyLists):
+class _Through(Model,PropertyLists):
     """
     A phrase through or around.
     """
@@ -37,7 +38,7 @@ class _Through(PropertyLists):
         """
         The namespace URI.
         """
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         """
@@ -50,10 +51,7 @@ class _Through(PropertyLists):
         """
         The localnames.
         """
-        if 'localname' in self._config['localname']:
-            return self._config['localname']
-        else:
-            return None
+        return self._get_config_property('localname')
 
     def add_localname(self, name):
         """

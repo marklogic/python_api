@@ -23,7 +23,9 @@
 Classes for dealing with schemas
 """
 
-class Schema:
+from marklogic.models.model import Model
+
+class Schema(Model):
     """
     A server schema mapping.
     """
@@ -45,7 +47,7 @@ class Schema:
         """
         if self._config['namespace-uri'] == '':
             return None
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         """
@@ -58,7 +60,7 @@ class Schema:
         """
         The schema location.
         """
-        return self._config['schema-location']
+        return self._get_config_property('schema-location')
 
     def set_schema_location(self, location):
         """

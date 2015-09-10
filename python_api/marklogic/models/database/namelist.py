@@ -23,9 +23,10 @@
 Classes for dealing with lists of names, a namespace plus a list of localnames.
 """
 
+from marklogic.models.model import Model
 from marklogic.utilities import PropertyLists
 
-class NameList(PropertyLists):
+class NameList(Model,PropertyLists):
     """
     A database name list.
     """
@@ -56,7 +57,7 @@ class NameList(PropertyLists):
         """
         The namespace URI.
         """
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         """
@@ -69,10 +70,7 @@ class NameList(PropertyLists):
         """
         The localnames.
         """
-        if 'localname' in self._config['localname']:
-            return self._config['localname']
-        else:
-            return None
+        return self._get_config_property('localname')
 
     def add_localname(self, name):
         """

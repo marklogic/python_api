@@ -57,9 +57,7 @@ class User(Model,PropertyLists):
 
         :return: The list of roles
         """
-        if u'role' not in self._config:
-            return None
-        return self._config[u'role']
+        return self.get_property_list('role')
 
     def set_role_names(self, roles):
         """
@@ -133,9 +131,7 @@ class User(Model,PropertyLists):
 
         :return: The list of collections
         """
-        if 'collection' not in self._config:
-            return None
-        return self._config['collection']
+        return self._get_config_property('collection')
 
     def set_collections(self, collections):
         """
@@ -169,9 +165,7 @@ class User(Model,PropertyLists):
 
         :return: The list of external_names
         """
-        if 'external-name' not in self._config:
-            return None
-        return self._config['external-name']
+        return self._get_config_property('external-name')
 
     def set_external_names(self, names):
         """

@@ -32,6 +32,7 @@ from marklogic.utilities import files
 from marklogic.utilities import PropertyLists
 from marklogic.utilities.validators import *
 from marklogic.exceptions import *
+from marklogic.models.model import Model
 from marklogic.models.database.fragment import FragmentRoot, FragmentParent
 from marklogic.models.database.index import ElementRangeIndex, AttributeRangeIndex
 from marklogic.models.database.index import PathRangeIndex, FieldRangeIndex
@@ -62,7 +63,7 @@ from marklogic.models.database.field import Field, RootField, PathField, FieldPa
 from marklogic.models.database.assignpol import AssignmentPolicy, BucketAssignmentPolicy, LegacyAssignmentPolicy, StatisticalAssignmentPolicy, RangeAssignmentPolicy
 from marklogic.models.database.ctsref import ElementReference
 
-class Database(PropertyLists):
+class Database(Model,PropertyLists):
     """
     The Database class encapsulates a MarkLogic database.  It provides
     methods to set/get database attributes.  The use of methods will
@@ -116,9 +117,7 @@ class Database(PropertyLists):
 
         :return: The name
         """
-        if 'database-name' in self._config:
-            return self._config['database-name']
-        return None
+        return self._get_config_property('database-name')
 
     def set_enabled(self, enabled=True):
         """
@@ -138,9 +137,7 @@ class Database(PropertyLists):
 
         :return: The database enable status
         """
-        if 'enabled' in self._config:
-            return self._config['enabled']
-        return None
+        return self._get_config_property('enabled')
 
     def set_security_database_name(self, db='Security'):
         """
@@ -165,9 +162,7 @@ class Database(PropertyLists):
 
         :return: The security database name
         """
-        if 'security-database' in self._config:
-            return self._config['security-database']
-        return None
+        return self._get_config_property('security-database')
 
     def set_triggers_database_name(self, db='Triggers'):
         """
@@ -192,9 +187,7 @@ class Database(PropertyLists):
 
         :return: The name of the triggers database
         """
-        if 'triggers-database' in self._config:
-            return self._config['triggers-database']
-        return None
+        return self._get_config_property('triggers-database')
 
     def set_schema_database_name(self, db='Schemas'):
         """
@@ -219,9 +212,7 @@ class Database(PropertyLists):
 
         :return: The name of the schema database
         """
-        if 'schema-database' in self._config:
-            return self._config['schema-database']
-        return None
+        return self._get_config_property('schema-database')
 
     def add_forest_name(self, forest):
         """
@@ -257,9 +248,7 @@ class Database(PropertyLists):
 
         :return: The attached forests
         """
-        if 'forest' in self._config:
-            return self._config['forest']
-        return None
+        return self._get_config_property('forest')
 
     def set_language(self, language):
         """
@@ -291,9 +280,7 @@ class Database(PropertyLists):
 
         :return: The default language for the database.
         """
-        if 'language' in self._config:
-            return self._config['language']
-        return None
+        return self._get_config_property('language')
 
     def set_stemmed_searches(self, which='basic'):
         """
@@ -328,9 +315,7 @@ class Database(PropertyLists):
 
         :return: The type of stemmed search
         """
-        if 'stemmed-searches' in self._config:
-            return self._config['stemmed-searches']
-        return None
+        return self._get_config_property('stemmed-searches')
 
     def set_word_searches(self, enabled=False):
         """
@@ -364,9 +349,7 @@ class Database(PropertyLists):
 
         :return: Stemmed word searches enabled
         """
-        if 'word-searches' in self._config:
-            return self._config['word-searches']
-        return None
+        return self._get_config_property('word-searches')
 
     def set_word_positions(self, enabled=False):
         """
@@ -400,9 +383,7 @@ class Database(PropertyLists):
 
         :return: Word positions are enabled
         """
-        if 'word-positions' in self._config:
-            return self._config['word-positions']
-        return None
+        return self._get_config_property('word-positions')
 
     def set_fast_phrase_searches(self, enabled=True):
         """
@@ -436,9 +417,7 @@ class Database(PropertyLists):
 
         :return: Fast phrase searches enabled
         """
-        if 'fast-phrase-searches' in self._config:
-            return self._config['fast-phrase-searches']
-        return None
+        return self._get_config_property('fast-phrase-searches')
 
     def set_fast_reverse_searches(self, enabled=True):
         """
@@ -474,9 +453,7 @@ class Database(PropertyLists):
 
         :return: Fast reverse searches enabled
         """
-        if 'fast-reverse-searches' in self._config:
-            return self._config['fast-reverse-searches']
-        return None
+        return self._get_config_property('fast-reverse-searches')
 
     def set_triple_index(self, enabled=False):
         """
@@ -512,9 +489,7 @@ class Database(PropertyLists):
 
         :return: The triple index enabled
         """
-        if 'triple-index' in self._config:
-            return self._config['triple-index']
-        return None
+        return self._get_config_property('triple-index')
 
     def set_triple_positions(self, enabled=False):
         """
@@ -550,9 +525,7 @@ class Database(PropertyLists):
 
         :return: Triple positions enabled
         """
-        if 'triple-positions' in self._config:
-            return self._config['triple-positions']
-        return None
+        return self._get_config_property('triple-positions')
 
     def set_fast_case_sensitive_searches(self, enabled=True):
         """
@@ -586,9 +559,7 @@ class Database(PropertyLists):
 
         :return: Fast case sensitive searches enabled
         """
-        if 'fast-case-sensitive-searches' in self._config:
-            return self._config['fast-case-sensitive-searches']
-        return None
+        return self._get_config_property('fast-case-sensitive-searches')
 
     def set_fast_diacritic_sensitive_searches(self, enabled=True):
         """
@@ -624,9 +595,7 @@ class Database(PropertyLists):
 
         :return: Fast diacritic sensitive searches enabled
         """
-        if 'fast-diacritic-sensitive-searches' in self._config:
-            return self._config['fast-diacritic-sensitive-searches']
-        return None
+        return self._get_config_property('fast-diacritic-sensitive-searches')
 
     def set_fast_element_word_searches(self, enabled=True):
         """
@@ -660,9 +629,7 @@ class Database(PropertyLists):
 
         :return: Fast element word searches enabled
         """
-        if 'fast-element-word-searches' in self._config:
-            return self._config['fast-element-word-searches']
-        return None
+        return self._get_config_property('fast-element-word-searches')
 
     def set_element_word_positions(self, enabled=False):
         """
@@ -706,9 +673,7 @@ class Database(PropertyLists):
 
         :return: Fast element word searches enabled
         """
-        if 'element-word-positions' in self._config:
-            return self._config['element-word-positions']
-        return None
+        return self._get_config_property('element-word-positions')
 
     def set_fast_element_phrase_searches(self, enabled=True):
         """
@@ -742,9 +707,7 @@ class Database(PropertyLists):
 
         :return: Fast element phrase searches enabled
         """
-        if 'fast-element-phrase-searches' in self._config:
-            return self._config['fast-element-phrase-searches']
-        return None
+        return self._get_config_property('fast-element-phrase-searches')
 
     def set_element_value_positions(self, enabled=False):
         """
@@ -782,9 +745,7 @@ class Database(PropertyLists):
 
         :return: Element value positions enabled
         """
-        if 'element-value-positions' in self._config:
-            return self._config['element-value-positions']
-        return None
+        return self._get_config_property('element-value-positions')
 
     def set_attribute_value_positions(self, enabled=False):
         """
@@ -822,9 +783,7 @@ class Database(PropertyLists):
 
         :return: Attribute value positions enabled
         """
-        if 'attribute-value-positions' in self._config:
-            return self._config['attribute-value-positions']
-        return None
+        return self._get_config_property('attribute-value-positions')
 
     def set_field_value_searches(self, enabled=False):
         """
@@ -860,9 +819,7 @@ class Database(PropertyLists):
 
         :return: Field value searches enabled
         """
-        if 'field-value-searches' in self._config:
-            return self._config['field-value-searches']
-        return None
+        return self._get_config_property('field-value-searches')
 
     def set_field_value_positions(self, enabled=False):
         """
@@ -900,9 +857,7 @@ class Database(PropertyLists):
 
         :return: Field value positions enabled
         """
-        if 'field-value-positions' in self._config:
-            return self._config['field-value-positions']
-        return None
+        return self._get_config_property('field-value-positions')
 
     def set_three_character_searches(self, enabled=False):
         """
@@ -952,9 +907,7 @@ class Database(PropertyLists):
 
         :return: Three character searches enabled
         """
-        if 'three-character-searches' in self._config:
-            return self._config['three-character-searches']
-        return None
+        return self._get_config_property('three-character-searches')
 
     def set_three_character_word_positions(self, enabled=False):
         """
@@ -996,9 +949,7 @@ class Database(PropertyLists):
 
         :return: Three character word positions enabled
         """
-        if 'three-character-word-positions' in self._config:
-            return self._config['three-character-word-positions']
-        return None
+        return self._get_config_property('three-character-word-positions')
 
     def set_fast_element_character_searches(self, enabled=False):
         """
@@ -1036,9 +987,7 @@ class Database(PropertyLists):
 
         :return: Fast element character searches
         """
-        if 'fast-element-character-searches' in self._config:
-            return self._config['fast-element-character-searches']
-        return None
+        return self._get_config_property('fast-element-character-searches')
 
     def set_trailing_wildcard_searches(self, enabled=False):
         """
@@ -1078,9 +1027,7 @@ class Database(PropertyLists):
 
         :return: Trailing wild card searches enabled
         """
-        if 'trailing-wildcard-searches' in self._config:
-            return self._config['trailing-wildcard-searches']
-        return None
+        return self._get_config_property('trailing-wildcard-searches')
 
     def set_trailing_wildcard_word_positions(self, enabled=False):
         """
@@ -1124,9 +1071,7 @@ class Database(PropertyLists):
 
         :return: Index word positions enabled
         """
-        if 'trailing-wildcard-word-positions' in self._config:
-            return self._config['trailing-wildcard-word-positions']
-        return None
+        return self._get_config_property('trailing-wildcard-word-positions')
 
     def set_fast_element_trailing_wildcard_searches(self, enabled=False):
         """
@@ -1164,9 +1109,7 @@ class Database(PropertyLists):
 
         :return: Fast element trailing wildcard searches enabled
         """
-        if 'fast-element-trailing-wildcard-searches' in self._config:
-            return self._config['fast-element-trailing-wildcard-searches']
-        return None
+        return self._get_config_property('fast-element-trailing-wildcard-searches')
 
     def set_two_character_searches(self, enabled=False):
         """
@@ -1204,9 +1147,7 @@ class Database(PropertyLists):
 
         :return: Two character wildcard searches enabled
         """
-        if 'two-character-searches' in self._config:
-            return self._config['two-character-searches']
-        return None
+        return self._get_config_property('two-character-searches')
 
     def set_one_character_searches(self, enabled=False):
         """
@@ -1242,9 +1183,7 @@ class Database(PropertyLists):
 
         :return: One character wildcard searches enabled
         """
-        if 'one-character-searches' in self._config:
-            return self._config['one-character-searches']
-        return None
+        return self._get_config_property('one-character-searches')
 
     def set_uri_lexicon(self, enabled=True):
         """
@@ -1276,9 +1215,7 @@ class Database(PropertyLists):
 
         :return: URI lexicon enabled
         """
-        if 'uri-lexicon' in self._config:
-            return self._config['uri-lexicon']
-        return None
+        return self._get_config_property('uri-lexicon')
 
     def set_collection_lexicon(self, enabled=False):
         """
@@ -1312,9 +1249,7 @@ class Database(PropertyLists):
 
         :return: Collection lexicon enabled
         """
-        if 'collection-lexicon' in self._config:
-            return self._config['collection-lexicon']
-        return None
+        return self._get_config_property('collection-lexicon')
 
     def set_reindexer_enable(self, enabled=True):
         """
@@ -1354,9 +1289,7 @@ class Database(PropertyLists):
 
         :return: Automatic reindexing enabled
         """
-        if 'reindexer-enable' in self._config:
-            return self._config['reindexer-enable']
-        return None
+        return self._get_config_property('reindexer-enable')
 
     def set_reindexer_throttle(self, limit=5):
         """
@@ -1398,9 +1331,7 @@ class Database(PropertyLists):
 
         :return: The level of system resources
         """
-        if 'reindexer-throttle' in self._config:
-            return self._config['reindexer-throttle']
-        return None
+        return self._get_config_property('reindexer-throttle')
 
     def set_reindexer_timestamp(self, limit=0):
         """
@@ -1449,9 +1380,7 @@ class Database(PropertyLists):
 
         :return: Reindexer timestamp in milliseconds
         """
-        if 'reindexer-timestamp' in self._config:
-            return self._config['reindexer-timestamp']
-        return None
+        return self._get_config_property('reindexer-timestamp')
 
     def set_directory_creation(self, which='manual'):
         """
@@ -1507,9 +1436,7 @@ class Database(PropertyLists):
 
         :return: Directory creation method
         """
-        if 'directory-creation' in self._config:
-            return self._config['directory-creation']
-        return None
+        return self._get_config_property('directory-creation')
 
     def set_maintain_last_modified(self, enabled=False):
         """
@@ -1537,9 +1464,7 @@ class Database(PropertyLists):
 
         :return: Maintain last modified
         """
-        if 'maintain-last-modified' in self._config:
-            return self._config['maintain-last-modified']
-        return None
+        return self._get_config_property('maintain-last-modified')
 
     def set_maintain_directory_last_modified(self, enabled=False):
         """
@@ -1567,9 +1492,7 @@ class Database(PropertyLists):
 
         :return: Maintain directory last modified property enabled
         """
-        if 'maintain-directory-last-modified' in self._config:
-            return self._config['maintain-directory-last-modified']
-        return None
+        return self._get_config_property('maintain-directory-last-modified')
 
     def set_inherit_permissions(self, enabled=False):
         """
@@ -1599,9 +1522,7 @@ class Database(PropertyLists):
 
         :return: Inherit document permissions from parent enabled
         """
-        if 'inherit-permissions' in self._config:
-            return self._config['inherit-permissions']
-        return None
+        return self._get_config_property('inherit-permissions')
 
     def set_inherit_collections(self, enabled=False):
         """
@@ -1631,9 +1552,7 @@ class Database(PropertyLists):
 
         :return: Inherit default collections enabled
         """
-        if 'inherit-collections' in self._config:
-            return self._config['inherit-collections']
-        return None
+        return self._get_config_property('inherit-collections')
 
     def set_inherit_quality(self, enabled=False):
         """
@@ -1663,9 +1582,7 @@ class Database(PropertyLists):
 
         :return: Inherity document quality
         """
-        if 'inherit-quality' in self._config:
-            return self._config['inherit-quality']
-        return None
+        return self._get_config_property('inherit-quality')
 
     def set_in_memory_limit(self, limit=262144):
         """
@@ -1700,9 +1617,7 @@ class Database(PropertyLists):
 
         :return: In memory fragment limit
         """
-        if 'in-memory-limit' in self._config:
-            return self._config['in-memory-limit']
-        return None
+        return self._get_config_property('in-memory-limit')
 
     def set_in_memory_list_size(self, limit=512):
         """
@@ -1729,9 +1644,7 @@ class Database(PropertyLists):
 
         :return: The in memory list storage size in megabytes
         """
-        if 'in-memory-list-size' in self._config:
-            return self._config['in-memory-list-size']
-        return None
+        return self._get_config_property('in-memory-list-size')
 
     def set_in_memory_tree_size(self, limit=128):
         """
@@ -1758,9 +1671,7 @@ class Database(PropertyLists):
 
         :return: In memory tree storage size
         """
-        if 'in-memory-tree-size' in self._config:
-            return self._config['in-memory-tree-size']
-        return None
+        return self._get_config_property('in-memory-tree-size')
 
     def set_in_memory_range_index_size(self, limit=16):
         """
@@ -1787,9 +1698,7 @@ class Database(PropertyLists):
 
         :return: The in-memory range index size
         """
-        if 'in-memory-range-index-size' in self._config:
-            return self._config['in-memory-range-index-size']
-        return None
+        return self._get_config_property('in-memory-range-index-size')
 
     def set_in_memory_reverse_index_size(self, limit=16):
         """
@@ -1816,9 +1725,7 @@ class Database(PropertyLists):
 
         :return: In memory reverse index size
         """
-        if 'in-memory-reverse-index-size' in self._config:
-            return self._config['in-memory-reverse-index-size']
-        return None
+        return self._get_config_property('in-memory-reverse-index-size')
 
     def set_in_memory_triple_index_size(self, limit=64):
         """
@@ -1845,9 +1752,7 @@ class Database(PropertyLists):
 
         :return: In memory triple index size
         """
-        if 'in-memory-triple-index-size' in self._config:
-            return self._config['in-memory-triple-index-size']
-        return None
+        return self._get_config_property('in-memory-triple-index-size')
 
     def set_large_size_threshold(self, limit=1024):
         """
@@ -1874,9 +1779,7 @@ class Database(PropertyLists):
 
         :return: The large size threshold
         """
-        if 'large-size-threshold' in self._config:
-            return self._config['large-size-threshold']
-        return None
+        return self._get_config_property('large-size-threshold')
 
     def set_locking(self, which='fast'):
         """
@@ -1928,9 +1831,7 @@ class Database(PropertyLists):
 
         :return: The transaction locking
         """
-        if 'locking' in self._config:
-            return self._config['locking']
-        return None
+        return self._get_config_property('locking')
 
     def set_journaling(self, which='fast'):
         """
@@ -1974,9 +1875,7 @@ class Database(PropertyLists):
 
         :return: The journaling
         """
-        if 'journaling' in self._config:
-            return self._config['journaling']
-        return None
+        return self._get_config_property('journaling')
 
     def set_journal_size(self, limit=682):
         """
@@ -2001,9 +1900,7 @@ class Database(PropertyLists):
 
         :return: The journal size
         """
-        if 'journal-size' in self._config:
-            return self._config['journal-size']
-        return None
+        return self._get_config_property('journal-size')
 
     def set_journal_count(self, limit=2):
         """
@@ -2022,9 +1919,7 @@ class Database(PropertyLists):
 
         :return: The journal count
         """
-        if 'journal-count' in self._config:
-            return self._config['journal-count']
-        return None
+        return self._get_config_property('journal-count')
 
     def set_preallocate_journals(self, enabled=False):
         """
@@ -2056,9 +1951,7 @@ class Database(PropertyLists):
 
         :return: Pre-allocate journal files
         """
-        if 'preallocate-journals' in self._config:
-            return self._config['preallocate-journals']
-        return None
+        return self._get_config_property('preallocate-journals')
 
     def set_preload_mapped_data(self, enabled=False):
         """
@@ -2094,9 +1987,7 @@ class Database(PropertyLists):
 
         :return: Preload memory mapped forest information
         """
-        if 'preload-mapped-data' in self._config:
-            return self._config['preload-mapped-data']
-        return None
+        return self._get_config_property('preload-mapped-data')
 
     def set_preload_replica_mapped_data(self, enabled=False):
         """
@@ -2130,9 +2021,7 @@ class Database(PropertyLists):
 
         :return: Preload mapped replica forest information
         """
-        if 'preload-replica-mapped-data' in self._config:
-            return self._config['preload-replica-mapped-data']
-        return None
+        return self._get_config_property('preload-replica-mapped-data')
 
     def set_range_index_optimize(self, which='facet-time'):
         """
@@ -2164,9 +2053,7 @@ class Database(PropertyLists):
 
         :return: Range index optimization type
         """
-        if 'range-index-optimize' in self._config:
-            return self._config['range-index-optimize']
-        return None
+        return self._get_config_property('range-index-optimize')
 
     def set_positions_list_max_size(self, limit=256):
         """
@@ -2217,9 +2104,7 @@ class Database(PropertyLists):
 
         :return: The maximum position containing list size
         """
-        if 'positions-list-max-size' in self._config:
-            return self._config['positions-list-max-size']
-        return None
+        return self._get_config_property('positions-list-max-size')
 
     def set_format_compatibility(self, which='automatic'):
         """
@@ -2265,9 +2150,7 @@ class Database(PropertyLists):
 
         :return: The on-disk forest format
         """
-        if 'format-compatibility' in self._config:
-            return self._config['format-compatibility']
-        return None
+        return self._get_config_property('format-compatibility')
 
     def set_index_detection(self, which='automatic'):
         """
@@ -2311,9 +2194,7 @@ class Database(PropertyLists):
 
         :return: How to handle differences in configuration settings
         """
-        if 'index-detection' in self._config:
-            return self._config['index-detection']
-        return None
+        return self._get_config_property('index-detection')
 
     def set_expunge_locks(self, which='none'):
         """
@@ -2353,9 +2234,7 @@ class Database(PropertyLists):
 
         :return: How to garbage collect timed locks
         """
-        if 'expunge-locks' in self._config:
-            return self._config['expunge-locks']
-        return None
+        return self._get_config_property('expunge-locks')
 
     def set_tf_normalization(self, which='scaled-log'):
         """
@@ -2393,9 +2272,7 @@ class Database(PropertyLists):
 
         :return: The term frequency normalization option
         """
-        if 'tf-normalization' in self._config:
-            return self._config['tf-normalization']
-        return None
+        return self._get_config_property('tf-normalization')
 
     def set_merge_priority(self, which='lower'):
         """
@@ -2439,9 +2316,7 @@ class Database(PropertyLists):
 
         :return: CPU scheduling hint for merges
         """
-        if 'merge-priority' in self._config:
-            return self._config['merge-priority']
-        return None
+        return self._get_config_property('merge-priority')
 
     def set_merge_max_size(self, limit=32768):
         """
@@ -2504,9 +2379,7 @@ class Database(PropertyLists):
         merging out the deleted fragments (even if the resulting
         stand is larger than the merge-max-size value specified).
         """
-        if 'merge-max-size' in self._config:
-            return self._config['merge-max-size']
-        return None
+        return self._get_config_property('merge-max-size')
 
     def set_merge_min_size(self, limit=1024):
         """
@@ -2535,9 +2408,7 @@ class Database(PropertyLists):
 
         :return: Minimum stand count for merge
         """
-        if 'merge-min-size' in self._config:
-            return self._config['merge-min-size']
-        return None
+        return self._get_config_property('merge-min-size')
 
     def set_merge_min_ratio(self, limit=2):
         """
@@ -2568,9 +2439,7 @@ class Database(PropertyLists):
 
         :return: The marge min ratio
         """
-        if 'merge-min-ratio' in self._config:
-            return self._config['merge-min-ratio']
-        return None
+        return self._get_config_property('merge-min-ratio')
 
     def set_merge_timestamp(self, limit=0):
         """
@@ -2665,9 +2534,7 @@ class Database(PropertyLists):
 
         :return: Minimum value
         """
-        if 'merge-timestamp' in self._config:
-            return self._config['merge-timestamp']
-        return None
+        return self._get_config_property('merge-timestamp')
 
     def set_retain_until_backup(self, enabled=False):
         """
@@ -2710,9 +2577,7 @@ class Database(PropertyLists):
 
         :return: Enable automatic rebalancing
         """
-        if 'rebalancer-enable' in self._config:
-            return self._config['rebalancer-enable']
-        return None
+        return self._get_config_property('rebalancer-enable')
 
     def set_rebalancer_throttle(self, limit=5):
         """
@@ -2754,9 +2619,7 @@ class Database(PropertyLists):
 
         :return: The relative amount of resources to dedicate to rebalancing
         """
-        if 'rebalancer-throttle' in self._config:
-            return self._config['rebalancer-throttle']
-        return None
+        return self._get_config_property('rebalancer-throttle')
 
     def set_assignment_policy(self, policy):
         """
@@ -2794,9 +2657,7 @@ class Database(PropertyLists):
 
         :return: The policy for assignment and rebalancing
         """
-        if 'assignment-policy' in self._config:
-            return self._config['assignment-policy']
-        return None
+        return self._get_config_property('assignment-policy')
 
     def path_namespaces(self):
         """
@@ -2805,9 +2666,7 @@ class Database(PropertyLists):
 
         :return: The path namespaces or none
         """
-        if 'path-namespace' in self._config:
-            return self._config['path-namespace']
-        return None
+        return self._get_config_property('path-namespace')
 
     def add_path_namespace(self, path):
         """
@@ -2849,9 +2708,7 @@ class Database(PropertyLists):
 
         :return: The lexicons or None
         """
-        if 'element-word-lexicon' in self._config:
-            return self._config['element-word-lexicon']
-        return None
+        return self._get_config_property('element-word-lexicon')
 
     def add_element_word_lexicon(self, lexicon):
         """
@@ -2875,9 +2732,7 @@ class Database(PropertyLists):
 
         :return: The lexicons or None
         """
-        if 'element-attribute-word-lexicon' in self._config:
-            return self._config['element-attribute-word-lexicon']
-        return None
+        return self._get_config_property('element-attribute-word-lexicon')
 
     def add_attribute_word_lexicon(self, lexicon):
         """
@@ -2908,9 +2763,7 @@ class Database(PropertyLists):
 
         :return: The throughs or None
         """
-        if 'phrase-through' in self._config:
-            return self._config['phrase-through']
-        return None
+        return self._get_config_property('phrase-through')
 
     def add_phrase_through(self, through):
         """
@@ -2934,9 +2787,7 @@ class Database(PropertyLists):
 
         :return: The arounds or None
         """
-        if 'phrase-around' in self._config:
-            return self._config['phrase-around']
-        return None
+        return self._get_config_property('phrase-around')
 
     def add_phrase_around(self, around):
         """
@@ -2960,9 +2811,7 @@ class Database(PropertyLists):
 
         :return: The query throughs or None
         """
-        if 'element-word-query-through' in self._config:
-            return self._config['element-word-query_through']
-        return None
+        return self._get_config_property('element-word-query_through')
 
     def add_element_word_query_through(self, query_through):
         """
@@ -2993,9 +2842,7 @@ class Database(PropertyLists):
 
         :return: The default rule sets or None
         """
-        if 'default-ruleset' in self._config:
-            return self._config['default-ruleset']
-        return None
+        return self._get_config_property('default-ruleset')
 
     def add_default_ruleset(self, ruleset):
         """
@@ -3017,9 +2864,7 @@ class Database(PropertyLists):
         """
         The fragment roots.
         """
-        if 'fragment-root' in self._config:
-            return self._config['fragment-root']
-        return None
+        return self._get_config_property('fragment-root')
 
     def add_fragment_root(self, root):
         """
@@ -3043,9 +2888,7 @@ class Database(PropertyLists):
         """
         The fragment parents.
         """
-        if 'fragment-parent' in self._config:
-            return self._config['fragment-parent']
-        return None
+        return self._get_config_property('fragment-parent')
 
     def add_fragment_parent(self, parent):
         """
@@ -3070,9 +2913,7 @@ class Database(PropertyLists):
         """
         The merge blackouts
         """
-        if 'merge-blackout' in self._config:
-            return self._config['merge-blackout']
-        return None
+        return self._get_config_property('merge-blackout')
 
     def set_merge_blackouts(self, blackouts):
         """
@@ -3098,9 +2939,7 @@ class Database(PropertyLists):
         """
         The scheduled backups.
         """
-        if 'database-backup' in self._config:
-            return self._config['database-backup']
-        return None
+        return self._get_config_property('database-backup')
 
     def set_scheduled_backups(self, backups):
         """
@@ -3954,73 +3793,55 @@ class Database(PropertyLists):
         """
         The element range indexes.
         """
-        if 'range-element-index' in self._config:
-            return self._config['range-element-index']
-        return None
+        return self._get_config_property('range-element-index')
 
     def field_range_indexes(self):
         """
         The field range indexes.
         """
-        if 'range-field-index' in self._config:
-            return self._config['range-field-index']
-        return None
+        return self._get_config_property('range-field-index')
 
     def attribute_range_indexes(self):
         """
         The attribute range indexes.
         """
-        if 'range-element-attribute-index' in self._config:
-            return self._config['range-element-attribute-index']
-        return None
+        return self._get_config_property('range-element-attribute-index')
 
     def path_range_indexes(self):
         """
         The path range indexes.
         """
-        if 'range-path-index' in self._config:
-            return self._config['range-path-index']
-        return None
+        return self._get_config_property('range-path-index')
 
     def geospatial_element_indexes(self):
         """
         The geospatial element indexes.
         """
-        if 'geospatial-element-index' in self._config:
-            return self._config['geospatial-element-index']
-        return None
+        return self._get_config_property('geospatial-element-index')
 
     def geospatial_path_indexes(self):
         """
         The geospatial path indexes.
         """
-        if 'geospatial-path-index' in self._config:
-            return self._config['geospatial-path-index']
-        return None
+        return self._get_config_property('geospatial-path-index')
 
     def geospatial_element_child_indexes(self):
         """
         The geospatial element child indexes.
         """
-        if 'geospatial-element-child-index' in self._config:
-            return self._config['geospatial-element-child-index']
-        return None
+        return self._get_config_property('geospatial-element-child-index')
 
     def geospatial_element_pair_indexes(self):
         """
         The geospatial element pair indexes.
         """
-        if 'geospatial-element-pair-index' in self._config:
-            return self._config['geospatial-element-pair-index']
-        return None
+        return self._get_config_property('geospatial-element-pair-index')
 
     def geospatial_element_attribute_pair_indexes(self):
         """
         The geospatial element attribute pair indexes.
         """
-        if 'geospatial-element-attribute-pair-index' in self._config:
-            return self._config['geospatial-element-attribute-pair-index']
-        return None
+        return self._get_config_property('geospatial-element-attribute-pair-index')
 
     def fields(self):
         """
