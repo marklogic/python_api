@@ -65,13 +65,16 @@ class MarkLogicManager(Manager):
     def init(self, args, config, connection):
         status = self.status(args,config,connection,internal=True)
         if status != 'up':
-            try:
-                data = config[args['config']]['datadir']
-                print("Clearing {0}...".format(data))
-                shutil.rmtree(data)
-                os.mkdir(data)
-            except KeyError:
-                pass
+            if connection.host == 'localhost':
+                try:
+                    data = config[args['config']]['datadir']
+                    print("Clearing {0}...".format(data))
+                    shutil.rmtree(data)
+                    os.mkdir(data)
+                except KeyError:
+                    pass
+            else:
+                self.logger.info("Skipping clear data directory; not localhost")
             self.start(args,config,connection)
 
         print("Initializing {0}...".format(connection.host))
@@ -158,7 +161,16 @@ class MarkLogicManager(Manager):
                 if hostname == 'localhost':
                     hostname = socket.gethostname()
                 host = Host(hostname,connection=connection).read()
-                print("Shutting down host...")
+
+                if host.group_name() is None:
+                    ml = MarkLogic(connection)
+                    if len(ml.hosts()) == 1:
+                        host = Host(ml.hosts()[0], connection=connection).read()
+                    else:
+                        println("Failed to identify host.")
+                        sys.exit(1)
+
+                print("Shutting down host: " + host.host_name())
                 host.shutdown()
 
             status = self.status(args,config,connection,internal=True)
