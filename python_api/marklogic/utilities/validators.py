@@ -44,6 +44,8 @@ def validate_boolean(raw_val):
     """
     Validate a boolean.
     """
+    if type(raw_val) == str and (raw_val == 'true' or raw_val == 'false'):
+        return
     if type(raw_val) != bool:
         raise ValidationError('Value passed is not a boolean', repr(raw_val))
 
