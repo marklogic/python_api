@@ -31,8 +31,9 @@ from marklogic.models.server.schema import Schema
 from marklogic.models.server.namespace import UsingNamespace, Namespace
 from marklogic.models.server.requestblackout import RequestBlackout
 from marklogic.models.server.module import ModuleLocation
+from marklogic.models.model import Model
 
-class Server(PropertyLists):
+class Server(Model,PropertyLists):
     """
     The Server class encapsulates a MarkLogic application server. It provides
     methods to set/get common attributes.  The use of methods will
@@ -49,9 +50,7 @@ class Server(PropertyLists):
 
         *address* specifies the IP address for the App Server.
         """
-        if 'address' in self._config:
-            return self._config['address']
-        return None
+        return self._get_config_property('address')
 
     def set_address(self, address):
         """
@@ -69,9 +68,7 @@ class Server(PropertyLists):
         *authentication* specifies the authentication scheme
         to use for the server.
         """
-        if 'authentication' in self._config:
-            return self._config['authentication']
-        return None
+        return self._get_config_property('authentication')
 
     def set_authentication(self, authentication):
         """
@@ -90,9 +87,7 @@ class Server(PropertyLists):
         *backlog* specifies the maximum number of pending connections
         allowed on the HTTP server socket.
         """
-        if 'backlog' in self._config:
-            return self._config['backlog']
-        return None
+        return self._get_config_property('backlog')
 
     def set_backlog(self, backlog):
         """
@@ -113,9 +108,7 @@ class Server(PropertyLists):
         for string comparison and sorting if none is specified
         in the query.
         """
-        if 'collation' in self._config:
-            return self._config['collation']
-        return None
+        return self._get_config_property('collation')
 
     def set_collation(self, collation):
         """
@@ -137,9 +130,7 @@ class Server(PropertyLists):
         of requests any user may have running at a specific
         time. 0 indicates no maximum.
         """
-        if 'concurrent-request-limit' in self._config:
-            return self._config['concurrent-request-limit']
-        return None
+        return self._get_config_property('concurrent-request-limit')
 
     def set_concurrent_request_limit(self, concurrent_request_limit):
         """
@@ -160,9 +151,7 @@ class Server(PropertyLists):
         this App Server to be stopped for debugging, using
         the MarkLogic Server debugging APIs.
         """
-        if 'debug-allow' in self._config:
-            return self._config['debug-allow']
-        return None
+        return self._get_config_property('debug-allow')
 
     def set_debug_allow(self, debug_allow):
         """
@@ -183,9 +172,7 @@ class Server(PropertyLists):
         language for this App Server if an XQuery module does
         explicitly declare its language version.
         """
-        if 'default-xquery-version' in self._config:
-            return self._config['default-xquery-version']
-        return None
+        return self._get_config_property('default-xquery-version')
 
     def set_default_xquery_version(self, default_xquery_version):
         """
@@ -205,9 +192,7 @@ class Server(PropertyLists):
         *last login* specifies the name of the database in
         which this HTTP server stores users' last login information.
         """
-        if 'last-login-database' in self._config:
-            return self._config['last-login-database']
-        return None
+        return self._get_config_property('last-login-database')
 
     def set_last_login_database_name(self, database):
         """
@@ -228,9 +213,7 @@ class Server(PropertyLists):
         API should return true or false in the ``display-last-login``
         element.
         """
-        if 'display-last-login' in self._config:
-            return self._config['display-last-login']
-        return None
+        return self._get_config_property('display-last-login')
 
     def set_display_last_login(self, display_last_login):
         """
@@ -268,9 +251,7 @@ class Server(PropertyLists):
         has been distributed. This ensures timeliness of read-after-write
         query results from other hosts in the group.
         """
-        if 'distribute-timestamps' in self._config:
-            return self._config['distribute-timestamps']
-        return None
+        return self._get_config_property('distribute-timestamps')
 
     def set_distribute_timestamps(self, distribute_timestamps):
         """
@@ -305,9 +286,7 @@ class Server(PropertyLists):
 
         :return: The enabled status or None if it is unknown
         """
-        if 'enabled' in self._config:
-            return self._config['enabled']
-        return None
+        return self._get_config_property('enabled')
 
     def set_enabled(self, enabled):
         """
@@ -327,9 +306,7 @@ class Server(PropertyLists):
 
         :return: The group name or None if it is unknown
         """
-        if 'group-name' in self._config:
-            return self._config['group-name']
-        return None
+        return self._get_config_property('group-name')
 
     def internal_security(self):
         """
@@ -340,9 +317,7 @@ class Server(PropertyLists):
         is used for authentication and authorization if the
         user is found in the security database.
         """
-        if 'internal-security' in self._config:
-            return self._config['internal-security']
-        return None
+        return self._get_config_property('internal-security')
 
     def set_internal_security(self, internal_security):
         """
@@ -365,9 +340,7 @@ class Server(PropertyLists):
         is useful to log exceptions that might occur on an
         App Server for later debugging.
         """
-        if 'log-errors' in self._config:
-            return self._config['log-errors']
-        return None
+        return self._get_config_property('log-errors')
 
     def set_log_errors(self, log_errors):
         """
@@ -400,9 +373,7 @@ class Server(PropertyLists):
         has committed. Queries won't block waiting for transactions,
         but they may see less timely results.
         """
-        if 'multi-version-concurrency-control' in self._config:
-            return self._config['multi-version-concurrency-control']
-        return None
+        return self._get_config_property('multi-version-concurrency-control')
 
     def set_multi_version_concurrency_control(self, mvcc):
         """
@@ -436,9 +407,7 @@ class Server(PropertyLists):
         both the XSLT ``xsl:output`` instruction and the MarkLogic
         XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-byte-order-mark' in self._config:
-            return self._config['output-byte-order-mark']
-        return None
+        return self._get_config_property('output-byte-order-mark')
 
     def set_output_byte_order_mark(self, output_byte_order_mark):
         """
@@ -468,9 +437,7 @@ class Server(PropertyLists):
         You can only configure CDATA sections in one namespace
         at the level of server defaults.
         """
-        if 'output-cdata-section-localname' in self._config:
-            return self._config['output-cdata-section-localname']
-        return None
+        return self._get_config_property('output-cdata-section-localname')
 
     def set_output_cdata_section_localname(self, output_cdata_section_localname):
         """
@@ -502,9 +469,7 @@ class Server(PropertyLists):
         only configure CDATA sections in one namespace at the
         level of server defaults.
         """
-        if 'output-cdata-section-namespace-uri' in self._config:
-            return self._config['output-cdata-section-namespace-uri']
-        return None
+        return self._get_config_property('output-cdata-section-namespace-uri')
 
     def set_output_cdata_section_namespace_uri(self, output_cdata_section_namespace_uri):
         """
@@ -531,9 +496,7 @@ class Server(PropertyLists):
         XSLT ``xsl:output`` instruction and the MarkLogic XQuery
         ``xdmp:output`` prolog statement.
         """
-        if 'output-doctype-public' in self._config:
-            return self._config['output-doctype-public']
-        return None
+        return self._get_config_property('output-doctype-public')
 
     def set_output_doctype_public(self, output_doctype_public):
         """
@@ -558,9 +521,7 @@ class Server(PropertyLists):
         XSLT ``xsl:output`` instruction and the MarkLogic XQuery
         ``xdmp:output`` prolog statement.
         """
-        if 'output-doctype-system' in self._config:
-            return self._config['output-doctype-system']
-        return None
+        return self._get_config_property('output-doctype-system')
 
     def set_output_doctype_system(self, output_doctype_system):
         """
@@ -584,9 +545,7 @@ class Server(PropertyLists):
         of both the XSLT ``xsl:output`` instruction and the
         MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-encoding' in self._config:
-            return self._config['output-encoding']
-        return None
+        return self._get_config_property('output-encoding')
 
     def set_output_encoding(self, output_encoding):
         """
@@ -610,9 +569,7 @@ class Server(PropertyLists):
         option of both the XSLT ``xsl:output`` instruction
         and the MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-escape-uri-attributes' in self._config:
-            return self._config['output-escape-uri-attributes']
-        return None
+        return self._get_config_property('output-escape-uri-attributes')
 
     def set_output_escape_uri_attributes(self, output_escape_uri_attributes):
         """
@@ -638,9 +595,7 @@ class Server(PropertyLists):
         option of both the XSLT ``xsl:output`` instruction
         and the MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-include-content-type' in self._config:
-            return self._config['output-include-content-type']
-        return None
+        return self._get_config_property('output-include-content-type')
 
     def set_output_include_content_type(self, output_include_content_type):
         """
@@ -666,9 +621,7 @@ class Server(PropertyLists):
         option of the MarkLogic XQuery ``xdmp:output`` prolog
         statement.
         """
-        if 'output-include-default-attributes' in self._config:
-            return self._config['output-include-default-attributes']
-        return None
+        return self._get_config_property('output-include-default-attributes')
 
     def set_output_include_default_attributes(self, output_include_default_attributes):
         """
@@ -695,9 +648,7 @@ class Server(PropertyLists):
         instruction and the MarkLogic XQuery ``xdmp:output``
         prolog statement.
         """
-        if 'output-indent' in self._config:
-            return self._config['output-indent']
-        return None
+        return self._get_config_property('output-indent')
 
     def set_output_indent(self, output_indent):
         """
@@ -725,9 +676,7 @@ class Server(PropertyLists):
         or ``no``. This is like the "indent-untyped" option
         of the MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-indent-untyped' in self._config:
-            return self._config['output-indent-untyped']
-        return None
+        return self._get_config_property('output-indent-untyped')
 
     def set_output_indent_untyped(self, output_indent_untyped):
         """
@@ -753,9 +702,7 @@ class Server(PropertyLists):
         option of both the XSLT ``xsl:output`` instruction
         and the MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-media-type' in self._config:
-            return self._config['output-media-type']
-        return None
+        return self._get_config_property('output-media-type')
 
     def set_output_media_type(self, output_media_type):
         """
@@ -779,9 +726,7 @@ class Server(PropertyLists):
         option of both the XSLT ``xsl:output`` instruction
         and the MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-method' in self._config:
-            return self._config['output-method']
-        return None
+        return self._get_config_property('output-method')
 
     def set_output_method(self, output_method):
         """
@@ -805,9 +750,7 @@ class Server(PropertyLists):
         option of both the XSLT ``xsl:output`` instruction
         and the MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-normalization-form' in self._config:
-            return self._config['output-normalization-form']
-        return None
+        return self._get_config_property('output-normalization-form')
 
     def set_output_normalization_form(self, output_normalization_form):
         """
@@ -831,9 +774,7 @@ class Server(PropertyLists):
         option of both the XSLT ``xsl:output`` instruction
         and the MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-omit-xml-declaration' in self._config:
-            return self._config['output-omit-xml-declaration']
-        return None
+        return self._get_config_property('output-omit-xml-declaration')
 
     def set_output_omit_xml_declaration(self, output_omit_xml_declaration):
         """
@@ -859,9 +800,7 @@ class Server(PropertyLists):
         entities are serialized on output, unless the App Server
         is configured to output SGML character entities.
         """
-        if 'output-sgml-character-entities' in self._config:
-            return self._config['output-sgml-character-entities']
-        return None
+        return self._get_config_property('output-sgml-character-entities')
 
     def set_output_sgml_character_entities(self, output_sgml_character_entities):
         """
@@ -889,9 +828,7 @@ class Server(PropertyLists):
         both the XSLT ``xsl:output`` instruction and the MarkLogic
         XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-standalone' in self._config:
-            return self._config['output-standalone']
-        return None
+        return self._get_config_property('output-standalone')
 
     def set_output_standalone(self, output_standalone):
         """
@@ -917,9 +854,7 @@ class Server(PropertyLists):
         of both the XSLT ``xsl:output`` instruction and the
         MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-undeclare-prefixes' in self._config:
-            return self._config['output-undeclare-prefixes']
-        return None
+        return self._get_config_property('output-undeclare-prefixes')
 
     def set_output_undeclare_prefixes(self, output_undeclare_prefixes):
         """
@@ -944,9 +879,7 @@ class Server(PropertyLists):
         option of both the XSLT ``xsl:output`` instruction
         and the MarkLogic XQuery ``xdmp:output`` prolog statement.
         """
-        if 'output-version' in self._config:
-            return self._config['output-version']
-        return None
+        return self._get_config_property('output-version')
 
     def set_output_version(self, output_version):
         """
@@ -967,9 +900,7 @@ class Server(PropertyLists):
 
         *port* specifes the socket port for the HTTP server.
         """
-        if 'port' in self._config:
-            return self._config['port']
-        return None
+        return self._get_config_property('port')
 
     def set_port(self, port):
         """
@@ -988,9 +919,7 @@ class Server(PropertyLists):
         of pre-commit triggers a single statement against this
         App Server can invoke.
         """
-        if 'pre-commit-trigger-depth' in self._config:
-            return self._config['pre-commit-trigger-depth']
-        return None
+        return self._get_config_property('pre-commit-trigger-depth')
 
     def set_pre_commit_trigger_depth(self, pre_commit_trigger_depth):
         """
@@ -1014,9 +943,7 @@ class Server(PropertyLists):
         pre-commit triggers that are executed against this
         App Server.
         """
-        if 'pre-commit-trigger-limit' in self._config:
-            return self._config['pre-commit-trigger-limit']
-        return None
+        return self._get_config_property('pre-commit-trigger-limit')
 
     def set_pre_commit_trigger_limit(self, pre_commit_trigger_limit):
         """
@@ -1040,9 +967,7 @@ class Server(PropertyLists):
         against this App Server to be profiled, using the MarkLogic
         Server profiling APIs.
         """
-        if 'profile-allow' in self._config:
-            return self._config['profile-allow']
-        return None
+        return self._get_config_property('profile-allow')
 
     def set_profile_allow(self, profile_allow):
         """
@@ -1064,9 +989,7 @@ class Server(PropertyLists):
 
         *root* specifies the modules root directory.
         """
-        if 'root' in self._config:
-            return self._config['root']
-        return None
+        return self._get_config_property('root')
 
     def set_root(self, root):
         """
@@ -1086,10 +1009,8 @@ class Server(PropertyLists):
 
         :return: The server name
         """
-        # Can't be unknown, right?
-        return self._config['server-name']
+        return self._get_config_property('server-name')
 
-    def set_server_name(self, server_name):
         """
         Set the server name.
 
@@ -1107,19 +1028,15 @@ class Server(PropertyLists):
 
         :return: The server type
         """
-        # Can't be unknown, right?
-        return self._config['server-type']
+        return self._get_config_property('server-type')
 
-    def ssl_allow_sslv3(self):
         """
         Whether or not SSLv3 is allowed.
 
         *SSL enabled* specifies whether SSLv3 is allowed for
         this XDQP.
         """
-        if 'ssl-allow-sslv3' in self._config:
-            return self._config['ssl-allow-sslv3']
-        return None
+        return self._get_config_property('ssl-allow-sslv3')
 
     def set_ssl_allow_sslv3(self, ssl_allow_sslv3):
         """
@@ -1138,9 +1055,7 @@ class Server(PropertyLists):
         *SSL enabled* specifies whether TLS is allowed for
         XDQP.
         """
-        if 'ssl-allow-tls' in self._config:
-            return self._config['ssl-allow-tls']
-        return None
+        return self._get_config_property('ssl-allow-tls')
 
     def set_ssl_allow_tls(self, ssl_allow_tls):
         """
@@ -1169,9 +1084,7 @@ class Server(PropertyLists):
         template specifies the common information for the individual
         SSL certificates needed for each host in the group.
         """
-        if 'ssl-certificate-template' in self._config:
-            return self._config['ssl-certificate-template']
-        return None
+        return self._get_config_property('ssl-certificate-template')
 
     def set_ssl_certificate_template(self, ssl_certificate_template):
         """
@@ -1200,9 +1113,7 @@ class Server(PropertyLists):
         *ssl ciphers* specifies the SSL ciphers that may be
         used.
         """
-        if 'ssl-ciphers' in self._config:
-            return self._config['ssl-ciphers']
-        return None
+        return self._get_config_property('ssl-ciphers')
 
     def set_ssl_ciphers(self, ssl_ciphers):
         """
@@ -1227,9 +1138,7 @@ class Server(PropertyLists):
         running behind a load balancer. If not specified, each
         host will use a certificate for its own hostname.
         """
-        if 'ssl-hostname' in self._config:
-            return self._config['ssl-hostname']
-        return None
+        return self._get_config_property('ssl-hostname')
 
     def set_ssl_hostname(self, ssl_hostname):
         """
@@ -1259,9 +1168,7 @@ class Server(PropertyLists):
         a client certificate is required when connecting to
         this application server.
         """
-        if 'ssl-require-client-certificate' in self._config:
-            return self._config['ssl-require-client-certificate']
-        return None
+        return self._get_config_property('ssl-require-client-certificate')
 
     def set_ssl_require_client_certificate(self, ssl_require_client_certificate):
         """
@@ -1285,9 +1192,7 @@ class Server(PropertyLists):
         *threads* specifies the maximum number of App Server
         threads.
         """
-        if 'threads' in self._config:
-            return self._config['threads']
-        return None
+        return self._get_config_property('threads')
 
     def set_threads(self, threads):
         """
@@ -1305,9 +1210,7 @@ class Server(PropertyLists):
 
         :return: The schema bindings or None if there aren't any.
         """
-        if 'schema' in self._config:
-            return self._config['schema']
-        return None
+        return self._get_config_property('schema')
 
     def add_schema(self, schema):
         """
@@ -1331,9 +1234,7 @@ class Server(PropertyLists):
         """
         The namespace bindings.
         """
-        if 'namespace' in self._config:
-            return self._config['namespace']
-        return None
+        return self._get_config_property('namespace')
 
     def add_namespace(self, namespace):
         """
@@ -1357,9 +1258,7 @@ class Server(PropertyLists):
         """
         The namespace path URIs.
         """
-        if 'using-namespaces' in self._config:
-            return self._config['using-namespace']
-        return None
+        return self._get_config_property('using-namespace')
 
     def add_using_namespace(self, namespace):
         """
@@ -1384,9 +1283,7 @@ class Server(PropertyLists):
         """
         The module locations.
         """
-        if 'module-location' in self._config:
-            return self._config['module-location']
-        return None
+        return self._get_config_property('module-location')
 
     def add_module_location(self, location):
         """
@@ -1405,10 +1302,7 @@ class Server(PropertyLists):
         """
         The request blackout periods.
         """
-        if 'request-blackout' in self._config:
-            return self._config['request-blackout']
-        else:
-            return None
+        return self._get_config_property('request-blackout')
 
     def add_request_blackout(self, blackout):
         """
@@ -1746,9 +1640,7 @@ class HttpServer(Server):
         *compute-content-length* specifes whether to compute
         content length when using a webDAV server.
         """
-        if 'compute-content-length' in self._config:
-            return self._config['compute-content-length']
-        return None
+        return self._get_config_property('compute-content-length')
 
     def set_compute_content_length(self, compute_content_length):
         """
@@ -1767,9 +1659,7 @@ class HttpServer(Server):
         *database* specifies the database to which this App
         Server connects for query execution.
         """
-        if 'content-database' in self._config:
-            return self._config['content-database']
-        return None
+        return self._get_config_property('content-database')
 
     def set_content_database_name(self, content_database):
         """
@@ -1789,9 +1679,7 @@ class HttpServer(Server):
         *default error handler* specifies the default format
         for protocol errors for this server.
         """
-        if 'default-error-format' in self._config:
-            return self._config['default-error-format']
-        return None
+        return self._get_config_property('default-error-format')
 
     def set_default_error_format(self, default_error_format):
         """
@@ -1811,9 +1699,7 @@ class HttpServer(Server):
         *default inference size* specifies the default value
         for any request's inference size.
         """
-        if 'default-inference-size' in self._config:
-            return self._config['default-inference-size']
-        return None
+        return self._get_config_property('default-inference-size')
 
     def set_default_inference_size(self, default_inference_size):
         """
@@ -1835,9 +1721,7 @@ class HttpServer(Server):
         The time limit is the default number of seconds allowed
         for servicing a query request.
         """
-        if 'default-time-limit' in self._config:
-            return self._config['default-time-limit']
-        return None
+        return self._get_config_property('default-time-limit')
 
     def set_default_time_limit(self, default_time_limit):
         """
@@ -1865,9 +1749,7 @@ class HttpServer(Server):
         effectively disables security, because everyone who
         accesses the server then has the admin role.
         """
-        if 'default-user' in self._config:
-            return self._config['default-user']
-        return None
+        return self._get_config_property('default-user')
 
     def set_default_user(self, default_user):
         """
@@ -1893,9 +1775,7 @@ class HttpServer(Server):
         *error handler* specifies the page to internally redirect
         to in case of any 400 or 500 errors.
         """
-        if 'error-handler' in self._config:
-            return self._config['error-handler']
-        return None
+        return self._get_config_property('error-handler')
 
     def set_error_handler(self, error_handler):
         """
@@ -1912,9 +1792,7 @@ class HttpServer(Server):
         """
         The execute flag
         """
-        if 'execute' in self._config:
-            return self._config['execute']
-        return None
+        return self._get_config_property('execute')
 
     def set_execute(self, execute):
         """
@@ -1931,9 +1809,7 @@ class HttpServer(Server):
         seconds before a socket receives a timeout for subsequent
         requests over the same connection.
         """
-        if 'keep-alive-timeout' in self._config:
-            return self._config['keep-alive-timeout']
-        return None
+        return self._get_config_property('keep-alive-timeout')
 
     def set_keep_alive_timeout(self, keep_alive_timeout):
         """
@@ -1959,9 +1835,7 @@ class HttpServer(Server):
         Server gives up on queries which exceed the memory
         limit, and returns an error.
         """
-        if 'max-inference-size' in self._config:
-            return self._config['max-inference-size']
-        return None
+        return self._get_config_property('max-inference-size')
 
     def set_max_inference_size(self, max_inference_size):
         """
@@ -1991,9 +1865,7 @@ class HttpServer(Server):
         a query request. The App Server gives up on queries
         which take longer, and returns an error.
         """
-        if 'max-time-limit' in self._config:
-            return self._config['max-time-limit']
-        return None
+        return self._get_config_property('max-time-limit')
 
     def set_max_time_limit(self, max_time_limit):
         """
@@ -2022,9 +1894,7 @@ class HttpServer(Server):
         whose URI begins with the specified *root* directory
         are executable.
         """
-        if 'modules-database' in self._config:
-            return self._config['modules-database']
-        return None
+        return self._get_config_property('modules-database')
 
     def set_modules_database_name(self, modules_database):
         """
@@ -2048,9 +1918,7 @@ class HttpServer(Server):
         *privilege* specifies the execute privilege required
         to access the server.
         """
-        if 'privilege' in self._config:
-            return self._config['privilege']
-        return None
+        return self._get_config_property('privilege')
 
     def set_privilege_name(self, privilege):
         """
@@ -2069,9 +1937,7 @@ class HttpServer(Server):
         *request timeout* specifies the maximum number of seconds
         before a socket receives a timeout for the first request.
         """
-        if 'request-timeout' in self._config:
-            return self._config['request-timeout']
-        return None
+        return self._get_config_property('request-timeout')
 
     def set_request_timeout(self, request_timeout):
         """
@@ -2092,9 +1958,7 @@ class HttpServer(Server):
         rewritten URLs to be resolved from the global MarkLogic
         Modules/ directory.
         """
-        if 'rewrite-resolves-globally' in self._config:
-            return self._config['rewrite-resolves-globally']
-        return None
+        return self._get_config_property('rewrite-resolves-globally')
 
     def set_rewrite_resolves_globally(self, rewrite_resolves_globally):
         """
@@ -2115,9 +1979,7 @@ class HttpServer(Server):
         *session timeout* specifies the maximum number of seconds
         before a session times out.
         """
-        if 'session-timeout' in self._config:
-            return self._config['session-timeout']
-        return None
+        return self._get_config_property('session-timeout')
 
     def set_session_timeout(self, session_timeout):
         """
@@ -2137,9 +1999,7 @@ class HttpServer(Server):
         *static expires* adds an "expires" HTTP header for
         static content to expire after this many seconds.
         """
-        if 'static-expires' in self._config:
-            return self._config['static-expires']
-        return None
+        return self._get_config_property('static-expires')
 
     def set_static_expires(self, static_expires):
         """
@@ -2159,9 +2019,7 @@ class HttpServer(Server):
         *url rewriter* specifies the script to run to rewrite
         URLs.
         """
-        if 'url-rewriter' in self._config:
-            return self._config['url-rewriter']
-        return None
+        return self._get_config_property('url-rewriter')
 
     def set_url_rewriter(self, url_rewriter):
         """
@@ -2177,9 +2035,7 @@ class HttpServer(Server):
         """
         The webDAV setting.
         """
-        if 'webDAV' in self._config:
-            return self._config['webDAV']
-        return None
+        return self._get_config_property('webDAV')
 
     @classmethod
     def list(cls, connection):
@@ -2233,9 +2089,7 @@ class OdbcServer(Server):
         out. A value of 0 means the connection will never time
         out.
         """
-        if 'connection-timeout' in self._config:
-            return self._config['connection-timeout']
-        return None
+        return self._get_config_property('connection-timeout')
 
     def set_connection_timeout(self, connection_timeout):
         """
@@ -2262,9 +2116,7 @@ class OdbcServer(Server):
         servicing a query request. The App Server gives up
         on queries which take longer, and returns an error.
         """
-        if 'default-query-time-limit' in self._config:
-            return self._config['default-query-time-limit']
-        return None
+        return self._get_config_property('default-query-time-limit')
 
     def set_default_query_time_limit(self, default_query_time_limit):
         """
@@ -2293,9 +2145,7 @@ class OdbcServer(Server):
         a query request. The App Server gives up on queries
         which take longer, and returns an error.
         """
-        if 'max-query-time-limit' in self._config:
-            return self._config['max-query-time-limit']
-        return None
+        return self._get_config_property('max-query-time-limit')
 
     def set_max_query_time_limit(self, max_query_time_limit):
         """
@@ -2361,9 +2211,7 @@ class XdbcServer(Server):
         *default inference size* specifies the default value
         for any request's inference size.
         """
-        if 'default-inference-size' in self._config:
-            return self._config['default-inference-size']
-        return None
+        return self._get_config_property('default-inference-size')
 
     def set_default_inference_size(self, default_inference_size):
         """
@@ -2385,9 +2233,7 @@ class XdbcServer(Server):
         The time limit is the default number of seconds allowed
         for servicing a query request.
         """
-        if 'default-time-limit' in self._config:
-            return self._config['default-time-limit']
-        return None
+        return self._get_config_property('default-time-limit')
 
     def set_default_time_limit(self, default_time_limit):
         """
@@ -2410,9 +2256,7 @@ class XdbcServer(Server):
         seconds before a socket receives a timeout for subsequent
         requests over the same connection.
         """
-        if 'keep-alive-timeout' in self._config:
-            return self._config['keep-alive-timeout']
-        return None
+        return self._get_config_property('keep-alive-timeout')
 
     def set_keep_alive_timeout(self, keep_alive_timeout):
         """
@@ -2438,9 +2282,7 @@ class XdbcServer(Server):
         Server gives up on queries which exceed the memory
         limit, and returns an error.
         """
-        if 'max-inference-size' in self._config:
-            return self._config['max-inference-size']
-        return None
+        return self._get_config_property('max-inference-size')
 
     def set_max_inference_size(self, max_inference_size):
         """
@@ -2470,9 +2312,7 @@ class XdbcServer(Server):
         a query request. The App Server gives up on queries
         which take longer, and returns an error.
         """
-        if 'max-time-limit' in self._config:
-            return self._config['max-time-limit']
-        return None
+        return self._get_config_property('max-time-limit')
 
     def set_max_time_limit(self, max_time_limit):
         """
@@ -2496,9 +2336,7 @@ class XdbcServer(Server):
         *request timeout* specifies the maximum number of seconds
         before a socket receives a timeout for the first request.
         """
-        if 'request-timeout' in self._config:
-            return self._config['request-timeout']
-        return None
+        return self._get_config_property('request-timeout')
 
     def set_request_timeout(self, request_timeout):
         """
@@ -2517,9 +2355,7 @@ class XdbcServer(Server):
         *session timeout* specifies the maximum number of seconds
         before a session times out.
         """
-        if 'session-timeout' in self._config:
-            return self._config['session-timeout']
-        return None
+        return self._get_config_property('session-timeout')
 
     def set_session_timeout(self, session_timeout):
         """
@@ -2579,9 +2415,7 @@ class WebDAVServer(Server):
         *compute-content-length* specifes whether to compute
         content length when using a webDAV server.
         """
-        if 'compute-content-length' in self._config:
-            return self._config['compute-content-length']
-        return None
+        return self._get_config_property('compute-content-length')
 
     def set_compute_content_length(self, compute_content_length):
         """
@@ -2601,9 +2435,7 @@ class WebDAVServer(Server):
         *default error handler* specifies the default format
         for protocol errors for this server.
         """
-        if 'default-error-format' in self._config:
-            return self._config['default-error-format']
-        return None
+        return self._get_config_property('default-error-format')
 
     def set_default_error_format(self, default_error_format):
         """
@@ -2623,9 +2455,7 @@ class WebDAVServer(Server):
         *default inference size* specifies the default value
         for any request's inference size.
         """
-        if 'default-inference-size' in self._config:
-            return self._config['default-inference-size']
-        return None
+        return self._get_config_property('default-inference-size')
 
     def set_default_inference_size(self, default_inference_size):
         """
@@ -2647,9 +2477,7 @@ class WebDAVServer(Server):
         The time limit is the default number of seconds allowed
         for servicing a query request.
         """
-        if 'default-time-limit' in self._config:
-            return self._config['default-time-limit']
-        return None
+        return self._get_config_property('default-time-limit')
 
     def set_default_time_limit(self, default_time_limit):
         """
@@ -2677,9 +2505,7 @@ class WebDAVServer(Server):
         effectively disables security, because everyone who
         accesses the server then has the admin role.
         """
-        if 'default-user' in self._config:
-            return self._config['default-user']
-        return None
+        return self._get_config_property('default-user')
 
     def set_default_user(self, default_user):
         """
@@ -2705,9 +2531,7 @@ class WebDAVServer(Server):
         *error handler* specifies the page to internally redirect
         to in case of any 400 or 500 errors.
         """
-        if 'error-handler' in self._config:
-            return self._config['error-handler']
-        return None
+        return self._get_config_property('error-handler')
 
     def set_error_handler(self, error_handler):
         """
@@ -2721,9 +2545,7 @@ class WebDAVServer(Server):
         return self
 
     def execute(self):
-        if 'execute' in self._config:
-            return self._config['execute']
-        return None
+        return self._get_config_property('execute')
 
     def set_execute(self, execute):
         self._config['execute'] = execute
@@ -2737,9 +2559,7 @@ class WebDAVServer(Server):
         seconds before a socket receives a timeout for subsequent
         requests over the same connection.
         """
-        if 'keep-alive-timeout' in self._config:
-            return self._config['keep-alive-timeout']
-        return None
+        return self._get_config_property('keep-alive-timeout')
 
     def set_keep_alive_timeout(self, keep_alive_timeout):
         """
@@ -2765,9 +2585,7 @@ class WebDAVServer(Server):
         Server gives up on queries which exceed the memory
         limit, and returns an error.
         """
-        if 'max-inference-size' in self._config:
-            return self._config['max-inference-size']
-        return None
+        return self._get_config_property('max-inference-size')
 
     def set_max_inference_size(self, max_inference_size):
         """
@@ -2797,9 +2615,7 @@ class WebDAVServer(Server):
         a query request. The App Server gives up on queries
         which take longer, and returns an error.
         """
-        if 'max-time-limit' in self._config:
-            return self._config['max-time-limit']
-        return None
+        return self._get_config_property('max-time-limit')
 
     def set_max_time_limit(self, max_time_limit):
         """
@@ -2823,9 +2639,7 @@ class WebDAVServer(Server):
         *request timeout* specifies the maximum number of seconds
         before a socket receives a timeout for the first request.
         """
-        if 'request-timeout' in self._config:
-            return self._config['request-timeout']
-        return None
+        return self._get_config_property('request-timeout')
 
     def set_request_timeout(self, request_timeout):
         """
@@ -2846,9 +2660,7 @@ class WebDAVServer(Server):
         rewritten URLs to be resolved from the global MarkLogic
         Modules/ directory.
         """
-        if 'rewrite-resolves-globally' in self._config:
-            return self._config['rewrite-resolves-globally']
-        return None
+        return self._get_config_property('rewrite-resolves-globally')
 
     def set_rewrite_resolves_globally(self, rewrite_resolves_globally):
         """
@@ -2869,9 +2681,7 @@ class WebDAVServer(Server):
         *session timeout* specifies the maximum number of seconds
         before a session times out.
         """
-        if 'session-timeout' in self._config:
-            return self._config['session-timeout']
-        return None
+        return self._get_config_property('session-timeout')
 
     def set_session_timeout(self, session_timeout):
         """
@@ -2891,9 +2701,7 @@ class WebDAVServer(Server):
         *static expires* adds an "expires" HTTP header for
         static content to expire after this many seconds.
         """
-        if 'static-expires' in self._config:
-            return self._config['static-expires']
-        return None
+        return self._get_config_property('static-expires')
 
     def set_static_expires(self, static_expires):
         """
@@ -2913,9 +2721,7 @@ class WebDAVServer(Server):
         *url rewriter* specifies the script to run to rewrite
         URLs.
         """
-        if 'url-rewriter' in self._config:
-            return self._config['url-rewriter']
-        return None
+        return self._get_config_property('url-rewriter')
 
     def set_url_rewriter(self, url_rewriter):
         """
@@ -2928,9 +2734,7 @@ class WebDAVServer(Server):
         return self
 
     def webDAV(self):
-        if 'webDAV' in self._config:
-            return self._config['webDAV']
-        return None
+        return self._get_config_property('webDAV')
 
     @classmethod
     def list(cls, connection):

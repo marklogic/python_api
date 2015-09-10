@@ -21,13 +21,14 @@
 #
 
 from abc import ABCMeta, abstractmethod
+from marklogic.models.model import Model
 from marklogic.utilities.validators import validate_index_type
 from marklogic.utilities.validators import validate_index_invalid_value_actions
 from marklogic.utilities.validators import validate_boolean
 from marklogic.utilities.validators import validate_collation
 from marklogic.utilities.validators import validate_coordinate_system
 
-class _Index:
+class _Index(Model):
     """
     Defines a MarkLogic index.
 
@@ -41,9 +42,7 @@ class _Index:
 
         :return: The range value positions setting
         """
-        if 'range-value-positions' in self._config:
-            return self._config['range-value-positions']
-        return None
+        return self._get_config_property('range-value-positions')
 
     def set_range_value_positions(self, pos=False):
         """
@@ -63,9 +62,7 @@ class _Index:
 
         :return: The invalid values setting
         """
-        if 'invalid-values' in self._config:
-            return self._config['invalid-values']
-        return None
+        return self._get_config_property('invalid-values')
 
     def set_invalid_values(self, invalid='reject'):
         """
@@ -93,9 +90,7 @@ class _RangeIndex(_Index):
 
         :return: The scalar type of the index.
         """
-        if 'scalar-type' in self._config:
-            return self._config['scalar-type']
-        return None
+        return self._get_config_property('scalar-type')
 
     def set_scalar_type(self, scalar='string'):
         """
@@ -119,10 +114,8 @@ class _RangeIndex(_Index):
         if self.scalar_type() != 'string':
             return None
 
-        if 'collation' in self._config:
-            return self._config['collation']
+        return self._get_config_property('collation')
 
-        return None
 
     def set_collation(self, collation):
         """
@@ -136,7 +129,7 @@ class _RangeIndex(_Index):
         self._config['collation'] = collation
         return self
 
-class _LocalNameIndex():
+class _LocalNameIndex(Model):
     """
     A mixin for indexes that have local names.
 
@@ -150,9 +143,7 @@ class _LocalNameIndex():
 
         :return: The namespace-uri URI.
         """
-        if 'namespace-uri' in self._config:
-            return self._config['namespace-uri']
-        return None
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         """
@@ -172,9 +163,7 @@ class _LocalNameIndex():
 
         :return: The localname URI.
         """
-        if 'localname' in self._config:
-            return self._config['localname']
-        return None
+        return self._get_config_property('localname')
 
     def set_localname(self, localname):
         """
@@ -188,7 +177,7 @@ class _LocalNameIndex():
         self._config['localname'] = localname
         return self
 
-class _ParentNameIndex():
+class _ParentNameIndex(Model):
     """
     A mixin for indexes that have parent names.
 
@@ -202,9 +191,7 @@ class _ParentNameIndex():
 
         :return: The parent namespace URI.
         """
-        if 'parent-namespace-uri' in self._config:
-            return self._config['parent-namespace-uri']
-        return None
+        return self._get_config_property('parent-namespace-uri')
 
     def set_parent_namespace_uri(self, parent_namespace_uri):
         """
@@ -224,9 +211,7 @@ class _ParentNameIndex():
 
         :return: The parent localname URI.
         """
-        if 'parent-localname' in self._config:
-            return self._config['parent-localname']
-        return None
+        return self._get_config_property('parent-localname')
 
     def set_parent_localname(self, parent_localname):
         """
@@ -304,7 +289,7 @@ class AttributeRangeIndex(_RangeIndex, _LocalNameIndex, _ParentNameIndex):
         if collation is not None:
             self._config['collation'] = collation
 
-class _PathExpressionIndex():
+class _PathExpressionIndex(Model):
     """
     A mixin for indexes that have path expressions.
 
@@ -319,9 +304,7 @@ class _PathExpressionIndex():
 
         :return: The path expression.
         """
-        if 'path-expression' in self._config:
-            return self._config['path-expression']
-        return None
+        return self._get_config_property('path-expression')
 
     def set_path_expression(self, path_expression):
         """
@@ -399,9 +382,7 @@ class FieldRangeIndex(_RangeIndex):
 
         :return: The field name.
         """
-        if 'field-name' in self._config:
-            return self._config['field-name']
-        return None
+        return self._get_config_property('field-name')
 
     def set_field_name(self, field_name):
         """
@@ -429,9 +410,7 @@ class _GeospatialIndex(_Index):
 
         :return: The coordinate system.
         """
-        if 'coordinate-system' in self._config:
-            return self._config['coordinate-system']
-        return None
+        return self._get_config_property('coordinate-system')
 
     def set_coordinate_system(self, coordinate_system):
         """
@@ -451,9 +430,7 @@ class _GeospatialIndex(_Index):
 
         :return: The point format.
         """
-        if 'point-format' in self._config:
-            return self._config['point-format']
-        return None
+        return self._get_config_property('point-format')
 
     def set_point_format(self, point_format):
         """
@@ -574,9 +551,7 @@ class GeospatialElementPairIndex(_GeospatialIndex, _ParentNameIndex):
 
         :return: The longitude namespace URI.
         """
-        if 'longitude-namespace-uri' in self._config:
-            return self._config['longitude-namespace-uri']
-        return None
+        return self._get_config_property('longitude-namespace-uri')
 
     def set_longitude_namespace_uri(self, longitude_namespace_uri):
         """
@@ -596,9 +571,7 @@ class GeospatialElementPairIndex(_GeospatialIndex, _ParentNameIndex):
 
         :return: The longitude localname URI.
         """
-        if 'longitude-localname' in self._config:
-            return self._config['longitude-localname']
-        return None
+        return self._get_config_property('longitude-localname')
 
     def set_longitude_localname(self, longitude_localname):
         """
@@ -618,9 +591,7 @@ class GeospatialElementPairIndex(_GeospatialIndex, _ParentNameIndex):
 
         :return: The latitude namespace URI.
         """
-        if 'latitude-namespace-uri' in self._config:
-            return self._config['latitude-namespace-uri']
-        return None
+        return self._get_config_property('latitude-namespace-uri')
 
     def set_latitude_namespace_uri(self, latitude_namespace_uri):
         """
@@ -640,9 +611,7 @@ class GeospatialElementPairIndex(_GeospatialIndex, _ParentNameIndex):
 
         :return: The latitude localname URI.
         """
-        if 'latitude-localname' in self._config:
-            return self._config['latitude-localname']
-        return None
+        return self._get_config_property('latitude-localname')
 
     def set_latitude_localname(self, latitude_localname):
         """

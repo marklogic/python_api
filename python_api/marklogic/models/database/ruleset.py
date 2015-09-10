@@ -22,8 +22,9 @@
 """
 Classes for dealing with rulesets.
 """
+from marklogic.models.model import Model
 
-class RuleSet:
+class RuleSet(Model):
     """
     A database rule set.
     """
@@ -41,7 +42,7 @@ class RuleSet:
         """
         The location.
         """
-        return self._config['location']
+        return self._get_config_property('location')
 
     def set_location(self, location):
         """

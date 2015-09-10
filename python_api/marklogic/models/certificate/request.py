@@ -27,9 +27,10 @@ Request related classes for manipulating Certificate Requests
 from __future__ import unicode_literals, print_function, absolute_import
 
 import json
+from marklogic.models.model import Model
 from marklogic.utilities.validators import validate_custom
 
-class Request:
+class Request(Model):
     """
     The Request class encapsulates a MarkLogic representation of
     a certificate request.
@@ -89,9 +90,7 @@ class Request:
 
         :return The current version.
         """
-        if 'version' in self._config:
-            return self._config['version']
-        return None
+        return self._get_config_property('version')
 
     def set_version(self, value):
         """
@@ -110,9 +109,7 @@ class Request:
 
         :return: The current country.
         """
-        if 'countryName' in self._config['subject']:
-            return self._config['subject']['countryName']
-        return None
+        return self._get_config_property('subject')['countryName']
 
     def set_countryName(self, value):
         """
@@ -131,9 +128,7 @@ class Request:
 
         :return: The current state or province
         """
-        if 'stateOrProvinceName' in self._config['subject']:
-            return self._config['subject']['stateOrProvinceName']
-        return None
+        return self._get_config_property('subject')['stateOrProvinceName']
 
     def set_stateOrProvinceName(self, value):
         """
@@ -152,9 +147,7 @@ class Request:
 
         :return: The current locality.
         """
-        if 'localityName' in self._config['subject']:
-            return self._config['subject']['localityName']
-        return None
+        return self._get_config_property('subject')['localityName']
 
     def set_localityName(self, value):
         """
@@ -173,9 +166,7 @@ class Request:
 
         :return: The current organization name.
         """
-        if 'organizationName' in self._config['subject']:
-            return self._config['subject']['organizationName']
-        return None
+        return self._get_config_property('subject')['organizationName']
 
     def set_organizationName(self, value):
         """
@@ -196,9 +187,7 @@ class Request:
 
         :return: the current organizational unit name.
         """
-        if 'organizationalUnitName' in self._config['subject']:
-            return self._config['subject']['organizationalUnitName']
-        return None
+        return self._get_config_property('subject')['organizationalUnitName']
 
     def set_organizationalUnitName(self, value):
         """
@@ -217,9 +206,7 @@ class Request:
 
         :return: The current contact email address.
         """
-        if 'emailAddress' in self._config['subject']:
-            return self._config['subject']['emailAddress']
-        return None
+        return self._get_config_property('subject')['emailAddress']
 
     def set_emailAddress(self, value):
         """
@@ -238,9 +225,7 @@ class Request:
 
         :return: The current X.509v3 extensions.
         """
-        if 'v3ext' in self._config:
-            return self._config['v3ext']
-        return None
+        return self._get_config_property('v3ext')
 
     def set_v3ext(self, value):
         """

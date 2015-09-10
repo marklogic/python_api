@@ -22,8 +22,9 @@
 """
 Classes for dealing with namespaces
 """
+from marklogic.models.model import Model
 
-class UsingNamespace:
+class UsingNamespace(Model):
     """
     A server namespace.
     """
@@ -43,7 +44,7 @@ class UsingNamespace:
         """
         if self._config['namespace-uri'] == '':
             return None
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         """
@@ -72,7 +73,7 @@ class Namespace(UsingNamespace):
         """
         The server namespace prefix.
         """
-        return self._config['prefix']
+        return self._get_config_property('prefix')
 
     def set_prefix(self, location):
         """

@@ -26,10 +26,11 @@ Classes for dealing with database fragment parents and roots.
 from __future__ import unicode_literals, print_function, absolute_import
 
 import json, requests, sys
+from marklogic.models.model import Model
 from marklogic.utilities.validators import *
 from marklogic.exceptions import *
 
-class FragmentRoot:
+class FragmentRoot(Model):
     """
     Fragment root.
     """
@@ -54,14 +55,14 @@ class FragmentRoot:
     def namespace_uri(self):
         if self._config['namespace-uri'] == '':
             return None
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         self._config['namespace-uri'] = namespace_uri
         return self
 
     def localname(self):
-        return self._config['localname']
+        return self._get_config_property('localname')
 
     def set_localname(self, localname):
         self._config['localname'] = localname
@@ -92,14 +93,14 @@ class FragmentParent:
     def namespace_uri(self):
         if self._config['namespace-uri'] == '':
             return None
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         self._config['namespace-uri'] = namespace_uri
         return self
 
     def localname(self):
-        return self._config['localname']
+        return self._get_config_property('localname')
 
     def set_localname(self, localname):
         self._config['localname'] = localname

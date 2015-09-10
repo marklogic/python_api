@@ -22,8 +22,9 @@
 """
 Classes for dealing with database merge blackouts
 """
+from marklogic.models.model import Model
 
-class MergeBlackout:
+class MergeBlackout(Model):
     """
     A merge blackout period. This is an abstract class.
     """
@@ -34,19 +35,19 @@ class MergeBlackout:
         """
         The blackout type.
         """
-        return self._config['blackout_type']
+        return self._get_config_property('blackout_type')
 
     def limit(self):
         """
         The limit.
         """
-        return self._config['limit']
+        return self._get_config_property('limit')
 
     def merge_priority(self):
         """
         The merge priority.
         """
-        return self._config['merge-priority']
+        return self._get_config_property('merge-priority')
 
     @classmethod
     def recurringDuration(cls, priority, limit, days, start_time, duration):
@@ -118,19 +119,19 @@ class MergeBlackoutRecurringDuration(MergeBlackout):
         """
         The days.
         """
-        return self._config['days']
+        return self._get_config_property('days')
 
     def start_time():
         """
         The start time.
         """
-        return self._config['period']['start-time']
+        return self._get_config_property('period')['start-time']
 
     def duration():
         """
         The duration.
         """
-        return self._config['period']['duration']
+        return self._get_config_property('period')['duration']
 
 class MergeBlackoutRecurringStartEnd(MergeBlackout):
     """
@@ -155,19 +156,19 @@ class MergeBlackoutRecurringStartEnd(MergeBlackout):
         """
         The days.
         """
-        return self._config['days']
+        return self._get_config_property('days')
 
     def start_time():
         """
         The start time.
         """
-        return self._config['period']['start-time']
+        return self._get_config_property('period')['start-time']
 
     def end_time():
         """
         The end time.
         """
-        return self._config['period']['end-time']
+        return self._get_config_property('period')['end-time']
 
 class MergeBlackoutRecurringAllDay(MergeBlackout):
     """
@@ -189,7 +190,7 @@ class MergeBlackoutRecurringAllDay(MergeBlackout):
         """
         The days.
         """
-        return self._config['days']
+        return self._get_config_property('days')
 
 class MergeBlackoutOneTimeDuration(MergeBlackout):
     """
@@ -214,19 +215,19 @@ class MergeBlackoutOneTimeDuration(MergeBlackout):
         """
         The start date.
         """
-        return self._config['period']['start-date']
+        return self._get_config_property('period')['start-date']
 
     def start_time():
         """
         The start time.
         """
-        return self._config['period']['start-time']
+        return self._get_config_property('period')['start-time']
 
     def duration():
         """
         The duration.
         """
-        return self._config['period']['duration']
+        return self._get_config_property('period')['duration']
 
 
 class MergeBlackoutOneTimeStartEnd(MergeBlackout):
@@ -253,22 +254,22 @@ class MergeBlackoutOneTimeStartEnd(MergeBlackout):
         """
         The start date.
         """
-        return self._config['period']['start-date']
+        return self._get_config_property('period')['start-date']
 
     def start_time():
         """
         The start time.
         """
-        return self._config['period']['start-time']
+        return self._get_config_property('period')['start-time']
 
     def end_date():
         """
         The end date.
         """
-        return self._config['period']['end-date']
+        return self._get_config_property('period')['end-date']
 
     def end_time():
         """
         The end time.
         """
-        return self._config['period']['end-time']
+        return self._get_config_property('period')['end-time']

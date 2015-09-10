@@ -22,8 +22,9 @@
 """
 Classes for dealing with path namespaces
 """
+from marklogic.models.model import Model
 
-class PathNamespace:
+class PathNamespace(Model):
     """
     A database path namespace.
     """
@@ -43,7 +44,7 @@ class PathNamespace:
         """
         The prefix.
         """
-        return self._config['prefix']
+        return self._get_config_property('prefix')
 
     def set_prefix(self, prefix):
         """
@@ -56,7 +57,7 @@ class PathNamespace:
         """
         The namespace URI.
         """
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         """

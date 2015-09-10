@@ -27,10 +27,11 @@ Classes for manipulating MarkLogic permissions.
 from __future__ import unicode_literals, print_function, absolute_import
 
 import json
+from marklogic.models.model import Model
 from marklogic.utilities.validators import *
 from marklogic.exceptions import *
 
-class Permission(object):
+class Permission(Model,object):
     """
     The Permission class encapsulates a MarkLogic permission.
     A permission is the combination of a role and a capability.
@@ -49,7 +50,7 @@ class Permission(object):
 
         :return: The role name
         """
-        return self._config['role-name']
+        return self._get_config_property('role-name')
 
     def capability(self):
         """
@@ -57,4 +58,4 @@ class Permission(object):
 
         :return: The capability.
         """
-        return self._config['capability']
+        return self._get_config_property('capability')

@@ -25,8 +25,9 @@ Classes for dealing with server request blackouts
 
 from marklogic.utilities.validators import assert_list_of_type
 from marklogic.utilities import PropertyLists
+from marklogic.models.model import Model
 
-class RequestBlackout(PropertyLists):
+class RequestBlackout(Model,PropertyLists):
     """
     A request blackout period. This is an abstract class.
     """
@@ -37,14 +38,14 @@ class RequestBlackout(PropertyLists):
         """
         The blackout type.
         """
-        return self._config['blackout_type']
+        return self._get_config_property('blackout_type')
 
     def user_names(self):
         """
         The names of the users to whom this blackout applies.
         """
         if 'user' in self._config:
-            return self._config['user']
+            return self._get_config_property('user')
         return None
 
     def add_user_name(self, user):
@@ -70,7 +71,7 @@ class RequestBlackout(PropertyLists):
         The names of the roles to which this blackout applies.
         """
         if 'role' in self._config:
-            return self._config['role']
+            return self._get_config_property('role')
         return None
 
     def add_role_name(self, role):
@@ -170,19 +171,19 @@ class RequestBlackoutRecurringDuration(RequestBlackout):
         """
         The blackout days.
         """
-        return self._config['days']
+        return self._get_config_property('days')
 
     def start_time():
         """
         The blackout start time.
         """
-        return self._config['period']['start-time']
+        return self._get_config_property('period')['start-time']
 
     def duration():
         """
         The blackout duration.
         """
-        return self._config['period']['duration']
+        return self._get_config_property('period')['duration']
 
 class RequestBlackoutRecurringStartEnd(RequestBlackout):
     """
@@ -214,19 +215,19 @@ class RequestBlackoutRecurringStartEnd(RequestBlackout):
         """
         The blackout days.
         """
-        return self._config['days']
+        return self._get_config_property('days')
 
     def start_time():
         """
         The blackout start time.
         """
-        return self._config['period']['start-time']
+        return self._get_config_property('period')['start-time']
 
     def end_time():
         """
         The blackout end time.
         """
-        return self._config['period']['end-time']
+        return self._get_config_property('period')['end-time']
 
 class RequestBlackoutRecurringAllDay(RequestBlackout):
     """
@@ -254,7 +255,7 @@ class RequestBlackoutRecurringAllDay(RequestBlackout):
         """
         The blackout days.
         """
-        return self._config['days']
+        return self._get_config_property('days')
 
 class RequestBlackoutOneTimeDuration(RequestBlackout):
     """
@@ -287,19 +288,19 @@ class RequestBlackoutOneTimeDuration(RequestBlackout):
         """
         The blackout start date.
         """
-        return self._config['period']['start-date']
+        return self._get_config_property('period')['start-date']
 
     def start_time():
         """
         The blackout start time.
         """
-        return self._config['period']['start-time']
+        return self._get_config_property('period')['start-time']
 
     def duration():
         """
         The blackout duration.
         """
-        return self._config['period']['duration']
+        return self._get_config_property('period')['duration']
 
 
 class RequestBlackoutOneTimeStartEnd(RequestBlackout):
@@ -334,22 +335,22 @@ class RequestBlackoutOneTimeStartEnd(RequestBlackout):
         """
         The blackout start date.
         """
-        return self._config['period']['start-date']
+        return self._get_config_property('period')['start-date']
 
     def start_time():
         """
         The blackout start time.
         """
-        return self._config['period']['start-time']
+        return self._get_config_property('period')['start-time']
 
     def end_date():
         """
         The blackout end date.
         """
-        return self._config['period']['end-date']
+        return self._get_config_property('period')['end-date']
 
     def end_time():
         """
         The blackout end time.
         """
-        return self._config['period']['end-time']
+        return self._get_config_property('period')['end-time']

@@ -23,7 +23,9 @@
 Classes for dealing with modules
 """
 
-class ModuleLocation:
+from marklogic.models.model import Model
+
+class ModuleLocation(Model):
     """
     A server module location.
     """
@@ -45,7 +47,7 @@ class ModuleLocation:
         """
         if self._config['namespace-uri'] == '':
             return None
-        return self._config['namespace-uri']
+        return self._get_config_property('namespace-uri')
 
     def set_namespace_uri(self, namespace_uri):
         """
@@ -58,7 +60,7 @@ class ModuleLocation:
         """
         The module location.
         """
-        return self._config['location']
+        return self._get_config_property('location')
 
     def set_module_location(self, location):
         """

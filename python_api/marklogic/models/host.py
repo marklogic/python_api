@@ -26,10 +26,11 @@ Host related classes for manipulating MarkLogic hosts
 
 from __future__ import unicode_literals, print_function, absolute_import
 import json, logging, time
+from marklogic.models.model import Model
 from marklogic.connection import Connection
 from marklogic.exceptions import *
 
-class Host:
+class Host(Model):
     """
     The Host class encapsulates a MarkLogic host.
     """
@@ -56,7 +57,7 @@ class Host:
         Returns the host name of the cluster member
         :return: The member host name
         """
-        return self._config['host-name']
+        return self._get_config_property('host-name')
 
     def set_host_name(self, name):
         self._config['host-name'] = name
@@ -67,7 +68,7 @@ class Host:
 
         :return: Host's Group
         """
-        return self._config['group']
+        return self._get_config_property('group')
 
     def set_group_name(self, name):
         self._config['group'] = name
@@ -78,7 +79,7 @@ class Host:
 
         :return: The host's bind port
         """
-        return self._config['bind-port']
+        return self._get_config_property('bind-port')
 
     def set_bind_port(self, port):
         self._config['bind-port'] = port
@@ -89,7 +90,7 @@ class Host:
 
         :return: The Host's foreign bind port
         """
-        return self._config['foreign-bind-port']
+        return self._get_config_property('foreign-bind-port')
 
     def set_foreign_bind_port(self, port):
         self._config['foreign-bind-port'] = port
@@ -100,7 +101,7 @@ class Host:
 
         :return: The zone
         """
-        return self._config['zone']
+        return self._get_config_property('zone')
 
     def set_zone(self, zone):
         self._config['zone'] = zone
@@ -111,7 +112,7 @@ class Host:
 
         :return:Bootstrap host indicator
         """
-        return self._config['boostrap-host']
+        return self._get_config_property('boostrap-host')
 
     def just_initialized(self):
         """
