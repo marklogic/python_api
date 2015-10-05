@@ -41,13 +41,41 @@ class DatabaseBackup:
         self.job_id = job_id
         self.database_name = database_name
         self.host_name = host_name
+        self.connection = None
         self.settings = {}
 
+    def marshal(self):
+        struct = { }
+        struct['job-id'] = self.job_id
+        struct['database-name'] = self.database_name
+        if self.host_name != None:
+            struct['host-name'] = self.host_name
+        for key in self.settings:
+            struct[key] = self.settings[key]
+        return struct
+
+    def job_id(self):
+        return self.job_id
+
     @classmethod
-    def backup(cls, conn, database_name, backup_dir, forests=None,
+    def unmarshal(cls, settings):
+        result = DatabaseBackup(None, None)
+        for key in settings:
+            if key == 'job-id':
+                result.job_id = settings[key]
+            elif key == 'database-name':
+                result.database_name = settings[key]
+            elif key == 'host-name':
+                result.host_name = settings[key]
+            else:
+                result.settings[key] = settings[key]
+        return result
+
+    @classmethod
+    def backup(cls, connection, database_name, backup_dir, forests=None,
                journal_archiving=False, journal_archive_path=None,
-               lag_limit=30,
-               incremental=False, incremental_dir=None):
+               lag_limit=30, incremental=False, incremental_dir=None,
+               save_connection=True):
         """
         Start a backup on the server and return an object that represents
         that job.
@@ -79,6 +107,9 @@ class DatabaseBackup:
             host_name = result['host-name']
         backup = DatabaseBackup(result['job-id'], database_name, host_name)
 
+        if save_connection:
+            backup.connection = connection
+
         backup.settings = {
             'backup-dir': backup_dir,
             'journal-archiving': assert_type(journal_archiving, bool),
@@ -98,10 +129,13 @@ class DatabaseBackup:
 
         return backup
 
-    def status(self, conn):
+    def status(self, connection=None):
         """
         The status of the backup job.
         """
+        if connection is None:
+            connection = self.connection
+
         payload = {
             'operation': 'backup-status',
             'job-id': self.job_id
@@ -110,15 +144,18 @@ class DatabaseBackup:
         if self.host_name is not None:
             payload['host-name'] = self.host_name
 
-        uri = connection.uri("databases", database_name, properties=None)
+        uri = connection.uri("databases", self.database_name, properties=None)
         response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
 
-    def cancel(self, conn):
+    def cancel(self, connection=None):
         """
         Request to cancel the backup job.
         """
+        if connection is None:
+            connection = self.connection
+
         payload = {
             'operation': 'backup-cancel',
             'job-id': self.job_id
@@ -129,10 +166,13 @@ class DatabaseBackup:
 
         return json.loads(response.text)
 
-    def validate(self, conn):
+    def validate(self, connection=None):
         """
         Validate the (completed) backup job.
         """
+        if connection is None:
+            connection = self.connection
+
         payload = {
             'operation': 'backup-validate'
             }
@@ -144,12 +184,16 @@ class DatabaseBackup:
 
         return json.loads(response.text)
 
-    def purge(self, conn, keep_num=3, backup_dir=None):
+    def purge(self, connection=None, keep_num=3, backup_dir=None):
         """
         Purge old backups.
         """
+        if connection is None:
+            connection = self.connection
+
         if backup_dir is None:
             backup_dir = self.settings['backup-dir']
+
         payload = {
             'operation': 'backup-purge',
             'backup-dir': backup_dir,
@@ -175,12 +219,13 @@ class DatabaseRestore:
         self.job_id = job_id
         self.database_name = database_name
         self.host_name = host_name
+        self.connection = None
         self.settings = {}
 
     @classmethod
-    def restore(cls, conn, database_name, backup_dir, forests=None,
+    def restore(cls, connection, database_name, backup_dir, forests=None,
                 journal_archiving=False, journal_archive_path=None,
-                incremental=False, incremental_dir=None):
+                incremental=False, incremental_dir=None, save_connection=True):
         """
         Start a restore on the server and return an object that represents
         that job.
@@ -211,6 +256,9 @@ class DatabaseRestore:
             host_name = result['host-name']
         restore = DatabaseRestore(result['job-id'], database_name, host_name)
 
+        if save_connection:
+            restore.connection = connection
+
         restore.settings = {
             'backup-dir': backup_dir,
             'journal-archiving': assert_type(journal_archiving, bool),
@@ -229,10 +277,13 @@ class DatabaseRestore:
 
         return restore
 
-    def status(self, conn):
+    def status(self, connection=None):
         """
         The restore status.
         """
+        if connection is None:
+            connection = self.connection
+
         payload = {
             'operation': 'restore-status',
             'job-id': self.job_id
@@ -246,10 +297,13 @@ class DatabaseRestore:
 
         return json.loads(response.text)
 
-    def cancel(self, conn):
+    def cancel(self, connection=None):
         """
         Request to cancel the restore.
         """
+        if connection is None:
+            connection = self.connection
+
         payload = {
             'operation': 'restore-cancel',
             'job-id': self.job_id
@@ -260,10 +314,13 @@ class DatabaseRestore:
 
         return json.loads(response.text)
 
-    def validate(self, conn):
+    def validate(self, connection=None):
         """
         Validate a (completed) restore.
         """
+        if connection is None:
+            connection = self.connection
+
         payload = {
             'operation': 'restore-validate'
             }

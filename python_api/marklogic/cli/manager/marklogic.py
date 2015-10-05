@@ -167,7 +167,7 @@ class MarkLogicManager(Manager):
                     if len(ml.hosts()) == 1:
                         host = Host(ml.hosts()[0], connection=connection).read()
                     else:
-                        println("Failed to identify host.")
+                        print("Failed to identify host:",ml.hosts())
                         sys.exit(1)
 
                 print("Shutting down host: " + host.host_name())
