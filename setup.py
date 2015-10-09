@@ -6,7 +6,7 @@ import codecs
 import os
 import sys
 
-import python_api
+import marklogic
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,7 +19,7 @@ def read(*filenames, **kwargs):
             buf.append(f.read())
     return sep.join(buf)
 
-long_description = read('README.adoc')
+long_description = read('README.rst')
 
 class PyTest(TestCommand):
     def finalize_options(self):
@@ -33,8 +33,8 @@ class PyTest(TestCommand):
         sys.exit(errcode)
 
 setup(
-    name='python_api',
-    version=python_api.__version__,
+    name='marklogic_python_api',
+    version=marklogic.__version__,
     url='https://github.com/marklogic/python_api/',
     license='Apache Software License',
     author='Norman Walsh',
@@ -43,14 +43,13 @@ setup(
     author_email='norman.walsh@marklogic.com',
     description='MarkLogic Python API',
     long_description=long_description,
-    packages=find_packages("python_api"),
-    package_dir = {'':'python_api'},
+    packages=find_packages(exclude=['test']),
     install_requires=[
         'requests>=2.5.0'
     ],
     include_package_data=True,
     platforms='any',
-    test_suite='python_api.test.test_python_api',
+    test_suite='marklogic.test.test_marklogic',
     classifiers = [
         'Programming Language :: Python',
         'Development Status :: 3 - Alpha',

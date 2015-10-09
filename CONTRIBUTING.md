@@ -51,12 +51,12 @@ Before we can accept your pull request, we need you to sign the
 
 #### Fork the Python API
 
-Fork the project [on GitHub](https://github.com/marklogic/python_api/fork)
+Fork the project [on GitHub](https://github.com/marklogic/marklogic_python_api/fork)
 and clone your copy.
 
     $ git clone git@github.com:username/python_.git
-    $ cd python_api
-    $ git remote add upstream git://github.com/marklogic/python_api.git
+    $ cd marklogic_python_api
+    $ git remote add upstream git://github.com/marklogic/marklogic_python_api.git
 
 All bug fixes and new features go into the `develop` branch.
 
@@ -128,7 +128,7 @@ If you implement a new feature, please include unit tests for that feature.
 
 #### Submit the pull request
 
-Go to https://github.com/username/python_api and select your feature
+Go to https://github.com/username/marklogic_python_api and select your feature
 branch. Click the 'Pull Request' button and fill out the form.
 
 Pull requests are usually reviewed within a few days. If you get comments that

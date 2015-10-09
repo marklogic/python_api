@@ -35,6 +35,8 @@ from marklogic.models.server import Server, HttpServer, WebDAVServer
 from marklogic.models.server import OdbcServer, XdbcServer, WebDAVServer
 from marklogic.exceptions import *
 
+__version__ = "0.0.1.dev14"
+
 class MarkLogic:
     """
     The server class provides methods for manipulating a server cluster
