@@ -1,4 +1,6 @@
-= MarkLogic Python API
+====================
+MarkLogic Python API
+====================
 
 This is a (relatively low-level) Python(3) API to the MarkLogic REST
 Management API. It may grow to support the Client API as well, over time,
@@ -7,7 +9,8 @@ and it will certainly grow higher-level APIs.
 The API aims to provide complete coverage of what's in the MarkLogic
 REST API in idiomatic Python.
 
-== Churn warning
+Churn warning
+=============
 
 Several aspects of the API design are still in flux. Some
 inconsistencies are present. If you write scripts based on it, you'll
@@ -21,7 +24,8 @@ public releases of MarkLogic server.
 
 The installer has not been widely tested. Feedback welcome.
 
-== Features
+Features
+========
 
 * Creation and configuration of clusters, groups, databases, forests,
   servers, hosts, users, roles, permissions, and privileges.
@@ -29,28 +33,29 @@ The installer has not been widely tested. Feedback welcome.
 * Several example scripts
 * Some rather crude at the moment API docs.
 
-== Getting Started
+Getting Started
+===============
 
 1. Download and install MarkLogic (http://developer.marklogic.com/products)
-2. Checkout the MarkLogic python package from
-   http://github.com/marklogic/marklogic_python_api
-3. Install using ``easy_install`` (``easy_install /path/to/marklogic_python_api``)
+2. Install using ``pip`` (``pip3 install marklogic_python_api``)
+   Note that you must be using Python3!
+3. Checkout the MarkLogic python package from
+   http://github.com/marklogic/python_api
 
-At this point you should be able to script away. In the near future
-you’ll be able to directly install using `easy_install` without first
-checking out the project.
+At this point you should be able to script away.
 
 Pythonistas may find it useful to simply create a virtualenv for the
-project and run `make install`.
+project and run `python setup.py install`.
 
-== Running Tests
+Running Tests
+=============
 
 To run tests, edit the `test/resources.py` and `tests/settings.py`
 files to match your MarkLogic setup. The tests reference these values
 to connect with your MarkLogic server.
 
-== Credits
+Credits
+=======
 
 This library began as a project by Paul Hoehne, to whom we are
 indebted.
-
