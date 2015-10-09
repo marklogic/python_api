@@ -35,7 +35,7 @@ from marklogic.models.server import Server, HttpServer, WebDAVServer
 from marklogic.models.server import OdbcServer, XdbcServer, WebDAVServer
 from marklogic.exceptions import *
 
-__version__ = "0.0.1.dev14"
+__version__ = "0.0.2"
 
 class MarkLogic:
     """
