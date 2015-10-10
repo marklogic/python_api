@@ -40,7 +40,8 @@ class TestPrivilege(unittest.TestCase):
     def test_lookup(self):
         connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
 
-        privilege = Privilege.lookup(connection, "manage-admin", "execute")
+        privilege = Privilege.lookup(connection,
+                                     name="manage-admin", kind="execute")
 
         self.assertIsNotNone(privilege)
         self.assertEqual(privilege.privilege_name(), "manage-admin")
@@ -48,15 +49,16 @@ class TestPrivilege(unittest.TestCase):
     def test_lookup_action(self):
         connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
 
-        privilege = Privilege.lookup(connection, kind="execute", \
-          action="http://marklogic.com/xdmp/privileges/admin-module-write")
+        privilege = Privilege.lookup(connection, kind="execute",
+                action="http://marklogic.com/xdmp/privileges/admin-module-write")
 
         self.assertIsNotNone(privilege)
         self.assertEqual(privilege.privilege_name(), "admin-module-write")
 
     def test_create_privilege(self):
         connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-        new_privilege = Privilege("foo-privilege","http://example.com/","execute")
+        new_privilege = Privilege("foo-privilege",kind="execute",
+                                  action="http://example.com/")
 
         self.assertEqual(new_privilege.privilege_name(), "foo-privilege")
 
@@ -68,7 +70,8 @@ class TestPrivilege(unittest.TestCase):
         new_privilege.delete(connection)
 
     def test_add_role(self):
-        privilege = Privilege("foo-privilege","http://example.com/","execute")
+        privilege = Privilege("foo-privilege",kind="execute",
+                              action="http://example.com/")
 
         privilege.add_role_name(u'manage-admin')
 
@@ -77,20 +80,24 @@ class TestPrivilege(unittest.TestCase):
 
     def test_create_remove_privilege(self):
         connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-        privilege = Privilege("foo-privilege","http://example.com/","execute")
+        privilege = Privilege("foo-privilege", kind="execute",
+                              action="http://example.com/")
 
         privilege.create(connection)
 
-        the_privilege = Privilege.lookup(connection, "foo-privilege", "execute")
+        the_privilege = Privilege.lookup(connection, kind="execute",
+                                         action="http://example.com/")
         self.assertIsNotNone(the_privilege)
 
         the_privilege.delete(connection)
-        the_privilege = Privilege.lookup(connection, "foo-privilege", "execute")
+        the_privilege = Privilege.lookup(connection, kind="execute",
+                                         action="foo-privilege")
         self.assertIsNone(the_privilege)
 
     def test_save_privilege(self):
         connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-        privilege = Privilege("foo-privilege","http://example.com/","execute")
+        privilege = Privilege("foo-privilege", kind="execute",
+                              action="http://example.com/")
         privilege.create(connection)
 
         privilege.add_role_name("manage-user")

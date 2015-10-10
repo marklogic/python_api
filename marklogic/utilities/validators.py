@@ -164,8 +164,10 @@ def validate_privilege_kind(raw_val):
     """
     Validate a privilege kind.
     """
-    if raw_val not in ['uri', 'execute']:
-        raise ValidationError("Privilege kind is not a valid value", repr(raw_val))
+    if raw_val is not None:
+        if raw_val not in ['uri', 'execute']:
+            raise ValidationError("Privilege kind is not a valid value",
+                                  repr(raw_val))
 
 def validate_custom(message):
     """
