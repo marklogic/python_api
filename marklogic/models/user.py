@@ -252,7 +252,7 @@ class User(Model,PropertyLists):
         response = connection.post(uri, payload=self._config)
         return self
 
-    def read(self, connection):
+    def read(self, connection=None):
         """
         Loads the User from the MarkLogic server. This will refresh
         the properties of the object.
@@ -260,6 +260,9 @@ class User(Model,PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The User object
         """
+        if connection is None:
+            connection = self.connection
+
         user = User.lookup(connection, self._config['user-name'])
         if user is None:
             return None
@@ -268,7 +271,7 @@ class User(Model,PropertyLists):
             self.etag = user.etag
             return self
 
-    def update(self, connection):
+    def update(self, connection=None):
         """
         Updates the User on the MarkLogic server.
 
@@ -287,7 +290,7 @@ class User(Model,PropertyLists):
 
         return self
 
-    def delete(self, connection):
+    def delete(self, connection=None):
         """
         Deletes the User from the MarkLogic server.
 

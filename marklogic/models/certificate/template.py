@@ -39,7 +39,8 @@ class Template(Model):
     a certificate template.
     """
     def __init__(self, name, description, cert_request,
-                 key_type="rsa", key_length=None, pass_phrase=None):
+                 key_type="rsa", key_length=None, pass_phrase=None,
+                 connection=None, save_connection=None):
         """
         Create a new certificate template.
         """
@@ -61,6 +62,11 @@ class Template(Model):
             self._config['options'] = options
 
         self.etag = None
+        self.save_connection = save_connection
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
 
     def template_id(self):
         """
@@ -270,13 +276,16 @@ class Template(Model):
 
         return result
 
-    def create(self, connection):
+    def create(self, connection=None):
         """
         Creates the certificate template on the MarkLogic server.
 
         :param connection: The connection to a MarkLogic server
         :return: The Template object
         """
+        if connection == None:
+            connection = self.connection
+
         uri = connection.uri("certificate-templates")
         struct = self.marshal()
         response = connection.post(uri, payload=struct)
@@ -297,7 +306,7 @@ class Template(Model):
 
         return self
 
-    def read(self, connection):
+    def read(self, connection=None):
         """
         Loads the Template from the MarkLogic server. This will refresh
         the properties of the object.
@@ -306,6 +315,9 @@ class Template(Model):
 
         :return: The Template object
         """
+        if connection == None:
+            connection = self.connection
+
         if self.template_id() is None:
             validate_custom("Cannot read an unsaved template")
 
@@ -317,13 +329,16 @@ class Template(Model):
             self._config = auth._config
             return self
 
-    def update(self, connection):
+    def update(self, connection=None):
         """
         Updates the certificate template on the MarkLogic server.
 
         :param connection: The connection to a MarkLogic server
         :return: The Template object
         """
+        if connection == None:
+            connection = self.connection
+
         uri = connection.uri("certificate-templates", self.template_id())
 
         struct = self.marshal()
@@ -333,7 +348,7 @@ class Template(Model):
         response = connection.put(uri, payload=struct)
         return self
 
-    def delete(self, connection):
+    def delete(self, connection=None):
         """
         Deletes the Template from the MarkLogic server.
 
@@ -341,6 +356,9 @@ class Template(Model):
 
         :return: None
         """
+        if connection == None:
+            connection = self.connection
+
         uri = connection.uri("certificate-templates", self.template_id(),
                              properties=None)
 
@@ -349,7 +367,7 @@ class Template(Model):
 
     # ============================================================
 
-    def generate_template_certificate_authority(self, connection, valid_for):
+    def generate_template_certificate_authority(self, valid_for, connection=None):
         """
         Attempts to generate an template certificate authority.
 
@@ -357,6 +375,9 @@ class Template(Model):
 
         :return: The Template object.
         """
+        if connection == None:
+            connection = self.connection
+
         struct = {
             'operation': 'generate-template-certificate-authority',
             'valid-for': assert_type(valid_for, int)
@@ -372,8 +393,9 @@ class Template(Model):
 
         return self
 
-    def generate_temporary_certificate(self, connection, valid_for,
+    def generate_temporary_certificate(self, valid_for,
                                        common_name, dns_name, ip_addr,
+                                       connection=None,
                                        if_necessary=True):
         """
         Attempts to generate a temporary certificate.
@@ -390,6 +412,9 @@ class Template(Model):
 
         :return: The Template object.
         """
+        if connection == None:
+            connection = self.connection
+
         struct = {
             'operation': 'generate-temporary-certificate',
             'valid-for': assert_type(valid_for, int),
@@ -408,8 +433,8 @@ class Template(Model):
 
         return self
 
-    def get_certificate(self, connection,
-                        common_name, dns_name=None, ip_addr=None):
+    def get_certificate(self, common_name, dns_name=None, ip_addr=None,
+                        connection=None):
         """
         Attempts to get the relevant certificate.
 
@@ -419,6 +444,9 @@ class Template(Model):
 
         :return: The certificate or None if it isn't found.
         """
+        if connection == None:
+            connection = self.connection
+
         struct = {
             'operation': 'get-certificate',
             'common-name': common_name
@@ -439,12 +467,15 @@ class Template(Model):
         else:
             return None
 
-    def get_certificates_for_template(self, connection):
+    def get_certificates_for_template(self, connection=None):
         """
         Get a list of the certificates for this template.
 
         :return: The certificate list.
         """
+        if connection == None:
+            connection = self.connection
+
         struct = {
             'operation': 'get-certificates-for-template',
             }
@@ -459,22 +490,24 @@ class Template(Model):
         else:
             return None
 
-    def get_pending_certificate_request(self, connection,
-                                        common_name, dns_name=None, ip_addr=None):
+    def get_pending_certificate_request(self, common_name,
+                                        dns_name=None, ip_addr=None,
+                                        connection=None):
         pass
 
-    def insert_host_certificates(self, connection, certs, pkeys):
+    def insert_host_certificates(self, certs, pkeys, connection=None):
         pass
 
-    def need_certificate(self, connection,
-                         common_name, dns_name=None, ip_addr=None):
+    def need_certificate(self, common_name, dns_name=None, ip_addr=None,
+                         connection=None):
         pass
 
-    def generate_certificate_request(self, connection,
-                                     common_name, dns_name=None, ip_addr=None):
+    def generate_certificate_request(self,
+                                     common_name, dns_name=None, ip_addr=None,
+                                     connection=None):
         pass
 
-    def get_template_certificate_authority(self, connection):
+    def get_template_certificate_authority(self, connection=None):
         pass
 
     # ============================================================

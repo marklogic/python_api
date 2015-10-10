@@ -293,13 +293,16 @@ class Role(Model,PropertyLists):
             self.etag = role.etag
             return self
 
-    def update(self, connection):
+    def update(self, connection=None):
         """
         Updates the Role on the MarkLogic server.
 
         :param connection: The connection to a MarkLogic server
         :return: The Role object
         """
+        if connection is None:
+            connection = self.connection
+
         uri = connection.uri("roles", self.name)
         response = connection.put(uri, payload=self._config, etag=self.etag)
 
@@ -309,13 +312,15 @@ class Role(Model,PropertyLists):
 
         return self
 
-    def delete(self, connection):
+    def delete(self, connection=None):
         """
         Deletes the Role from the MarkLogic server.
 
         :param connection: The connection to a MarkLogic server
         :return: The Role object
         """
+        if connection is None:
+            connection = self.connection
         uri = connection.uri("roles", self.name, properties=None)
         response = connection.delete(uri)
         return self

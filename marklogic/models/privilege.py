@@ -171,7 +171,7 @@ class Privilege(Model,PropertyLists):
         result.the_kind = kind
         return result
 
-    def create(self, connection):
+    def create(self, connection=None):
         """
         Creates the Privilege on the MarkLogic server.
 
@@ -208,7 +208,7 @@ class Privilege(Model,PropertyLists):
             self.etag = priv.etag
             return self
 
-    def update(self, connection):
+    def update(self, connection=None):
         """
         Updates the Privilege on the MarkLogic server.
 
@@ -229,7 +229,7 @@ class Privilege(Model,PropertyLists):
 
         return self
 
-    def delete(self, connection):
+    def delete(self, connection=None):
         """
         Deletes the Privilege from the MarkLogic server.
 
