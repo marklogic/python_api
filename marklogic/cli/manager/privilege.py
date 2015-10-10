@@ -48,7 +48,9 @@ class PrivilegeManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            privilege = self._read(args['name'], args['json'])
+            newpriv = self._read(args['name'], args['json'])
+            newpriv.connection = privilege.connection
+            privilege = newpriv
 
         self.roles = []
         self._properties(privilege, args)
@@ -67,7 +69,9 @@ class PrivilegeManager(Manager):
         privilege.read()
 
         if args['json'] is not None:
-            privilege = self._read(args['name'], args['json'])
+            newpriv = self._read(args['name'], args['json'])
+            newpriv.connection = privilege.connection
+            privilege = newpriv
 
         self.roles = []
         self._properties(privilege, args)

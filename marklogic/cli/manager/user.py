@@ -46,7 +46,9 @@ class UserManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            user = self._read(args['name'], args['json'])
+            newuser = self._read(args['name'], args['json'])
+            newuser.connection = user.connection
+            user = newuser
 
         self.roles = []
         self._properties(user, args)
@@ -63,7 +65,9 @@ class UserManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            user = self._read(args['name'], args['json'])
+            newuser = self._read(args['name'], args['json'])
+            newuser.connection = user.connection
+            user = newuser
 
         self.roles = []
         self._properties(user, args)

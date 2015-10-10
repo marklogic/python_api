@@ -45,7 +45,9 @@ class GroupManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            group = self._read(args['name'], args['json'])
+            newgrp = self._read(args['name'], args['json'])
+            newgrp.connection = group.connection
+            group = newgrp
 
         self._properties(group, args)
 
@@ -59,7 +61,9 @@ class GroupManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            group = self._read(args['name'], args['json'])
+            newgrp = self._read(args['name'], args['json'])
+            newgrp.connection = group.connection
+            group = newgrp
 
         self._properties(group, args)
 

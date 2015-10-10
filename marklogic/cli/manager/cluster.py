@@ -43,7 +43,9 @@ class ClusterManager(Manager):
         cluster = LocalCluster(connection=connection)
 
         if args['json'] is not None:
-            cluster = self._read()
+            newclst = self._read()
+            newclst.connection = cluster.connection
+            cluster = newclst
 
         self._properties(cluster, args)
 

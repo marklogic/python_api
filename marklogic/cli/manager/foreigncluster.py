@@ -42,7 +42,9 @@ class ForeignClusterManager(Manager):
         cluster = ForeignCluster(args['name'],connection=connection)
 
         if args['json'] is not None:
-            cluster = self._read()
+            newclst = self._read()
+            newclst.connection = cluster.connection
+            cluster = newclst
 
         self._properties(cluster, args)
 
