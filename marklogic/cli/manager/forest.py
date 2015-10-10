@@ -47,9 +47,11 @@ class ForestManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            forest = self._read(args['name'], args['json'])
-            if forest.host() is None:
-                forest.set_host(args['forest_host'])
+            newforest = self._read(args['name'], args['json'])
+            newforest.connection = forest.connection
+            if newforest.host() is None:
+                newforest.set_host(args['forest_host'])
+            forest = newforest
 
         self._properties(forest, args)
         dbname = forest.database()
@@ -74,9 +76,11 @@ class ForestManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            forest = self._read(args['name'], args['json'])
-            if forest.host() is None:
-                forest.set_host(args['forest_host'])
+            newforest = self._read(args['name'], args['json'])
+            newforest.connection = forest.connection
+            if newforest.host() is None:
+                newforest.set_host(args['forest_host'])
+            forest = newforest
 
         self._properties(forest, args)
         print("Modify forest {0}...".format(args['name']))

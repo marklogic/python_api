@@ -47,7 +47,9 @@ class DatabaseManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            database = self._read(args['name'], args['json'])
+            newdb = self._read(args['name'], args['json'])
+            newdb.connection = database.connection
+            database = newdb
 
         self.forests = []
         self._properties(database, args)
@@ -64,7 +66,9 @@ class DatabaseManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            database = self._read(args['name'], args['json'])
+            newdb = self._read(args['name'], args['json'])
+            newdb.connection = database.connection
+            database = newdb
 
         self.forests = []
         self._properties(database, args)

@@ -46,7 +46,9 @@ class RoleManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            role = self._read(args['name'], args['json'])
+            newrole = self._read(args['name'], args['json'])
+            newrole.connection = role.connection
+            role = newrole
 
         self.roles = []
         self._properties(role, args)
@@ -63,7 +65,9 @@ class RoleManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            role = self._read(args['name'], args['json'])
+            newrole = self._read(args['name'], args['json'])
+            newrole.connection = role.connection
+            role = newrole
 
         self.roles = []
         self._properties(role, args)

@@ -87,7 +87,9 @@ class ServerManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            server = self._read(args['name'], args['group'], stype, args['json'])
+            newsrv = self._read(args['name'], args['group'], stype, args['json'])
+            newsrv.connection = server.connection
+            server = newsrv
 
         self._properties(server, args)
 
@@ -101,8 +103,10 @@ class ServerManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            server = self._read(args['name'], args['group'],
+            newsrv = self._read(args['name'], args['group'],
                                 server.server_type(), args['json'])
+            newsrv.connection = server.connection
+            server = newsrv
 
         self._properties(server, args)
 
