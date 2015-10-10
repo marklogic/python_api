@@ -39,7 +39,8 @@ class Privilege(Model,PropertyLists):
     """
     PRIVLIST = None
 
-    def __init__(self, name, action, kind, connection=None, save_connection=True):
+    def __init__(self, name, kind, action=None,
+                 connection=None, save_connection=True):
         validate_privilege_kind(kind)
 
         self._config = {}
@@ -164,7 +165,7 @@ class Privilege(Model,PropertyLists):
         kind = config['kind']
         validate_privilege_kind(kind)
 
-        result = Privilege("temp", "http://example.com/", kind)
+        result = Privilege("temp", kind, "http://example.com/")
         result._config = config
         result.name = config['privilege-name']
         result.the_kind = kind
@@ -188,7 +189,7 @@ class Privilege(Model,PropertyLists):
         response = connection.post(uri, payload=post_config)
         return self
 
-    def read(self, connection):
+    def read(self, connection=None):
         """
         Loads the Privilege from the MarkLogic server. This will refresh
         the properties of the object.
@@ -196,6 +197,9 @@ class Privilege(Model,PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The Privilege object
         """
+        if connection is None:
+            connection = self.connection
+
         priv = Privilege.lookup(connection, self.privilege_name(), self.kind())
         if priv is None:
             return None
@@ -242,7 +246,7 @@ class Privilege(Model,PropertyLists):
         return self
 
     @classmethod
-    def list(cls, connection, include_actions=False):
+    def list(cls, connection, kind=None, include_actions=False):
         """
         List all the privilege names. Privilege names are structured values,
         they consist of a kind and a name separated by "|".
@@ -264,17 +268,25 @@ class Privilege(Model,PropertyLists):
         json_doc = json.loads(response.text)
 
         for item in json_doc['privilege-default-list']['list-items']['list-item']:
-            if include_actions:
-                results.append("{0}|{1}|{2}" \
-                    .format(item['kind'],item['nameref'],item['action']))
+            if kind is None:
+                if include_actions:
+                    results.append("{0}|{1}|{2}" \
+                                   .format(item['kind'],item['nameref'],
+                                           item['action']))
+                else:
+                    results.append("{0}|{1}" \
+                                   .format(item['kind'],item['nameref']))
             else:
-                results.append("{0}|{1}" \
-                    .format(item['kind'],item['nameref']))
+                if item['kind'] == kind:
+                    if include_actions:
+                        results.append("{1}|{2}" \
+                                       .format(item['nameref'],item['action']))
+                    else:
+                        results.append(item['nameref'])
 
         return results
 
-    @classmethod
-    def exists(cls, connection, name, kind=None):
+    def exists(self, connection=None):
         """
         Returns true if (and only if) the specified privilege exists.
 
@@ -283,23 +295,16 @@ class Privilege(Model,PropertyLists):
         the kind is optional.
 
         :param connection: The connection to the MarkLogic database
-        :param name: The name of the privilege
-        :param kind: The kind of privilege
         :return: The privilege
         """
-        parts = name.split("|")
-        if len(parts) == 1:
-            pass
-        elif len(parts) == 2 or len(parts) == 3:
-            if kind is not None and kind != parts[0]:
-                raise validate_custom("Kinds must match")
-            kind = parts[0]
-            name = parts[1]
-        else:
-            raise validate_custom("Unparseable privilege name")
+        if connection is None:
+            connection = self.connection
 
-        uri = connection.uri("privileges", name,
-                             parameters=["kind="+kind])
+        parameters = []
+        if self.kind() is not None:
+            parameters = ["kind=" + self.kind()]
+        uri = connection.uri("privileges", self.privilege_name(),
+                             parameters=parameters)
 
         response = connection.head(uri)
 

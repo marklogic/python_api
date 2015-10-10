@@ -25,6 +25,7 @@ from marklogic.cli.manager.database import DatabaseManager
 from marklogic.cli.manager.forest import ForestManager
 from marklogic.cli.manager.marklogic import MarkLogicManager
 from marklogic.cli.manager.role import RoleManager
+from marklogic.cli.manager.privilege import PrivilegeManager
 from marklogic.cli.manager.server import ServerManager
 from marklogic.cli.manager.user import UserManager
 from marklogic.cli.manager.group import GroupManager
@@ -44,65 +45,71 @@ class Template:
         f_mgr = ForestManager()
         ml_mgr = MarkLogicManager()
         role_mgr = RoleManager()
+        priv_mgr = PrivilegeManager()
         srv_mgr = ServerManager()
         user_mgr = UserManager()
         g_mgr = GroupManager()
         cl_mgr = ClusterManager()
         fcl_mgr = ForeignClusterManager()
 
-        self._parsers = {'start':                {'code': ml_mgr.start},
-                         'status':               {'code': ml_mgr.status},
-                         'init':                 {'code': ml_mgr.init},
-                         'save':                 {'code': ml_mgr.save},
-                         'switch':               {'code': ml_mgr.switch},
-                         'clear':                {'code': ml_mgr.clear},
-                         'log':                  {'code': ml_mgr.log},
-                         'debug':                {'code': ml_mgr.debug},
-                         'run':                  {'code': None},
-                         'stop':    {'host':     {'code': ml_mgr.stop},
-                                     'cluster':  {'code': ml_mgr.stop}},
-                         'restart': {'host':     {'code': ml_mgr.restart},
-                                     'cluster':  {'code': ml_mgr.restart}},
-                         'bootstrap': {'hosts':  {'code': cl_mgr.bootstrap_hosts}},
-                         'join':    {'cluster':  {'code': cl_mgr.join}},
-                         'leave':   {'cluster':  {'code': cl_mgr.leave}},
-                         'couple':  {'clusters': {'code': cl_mgr.couple}},
-                         'get':     {'forest':   {'code': f_mgr.get},
-                                     'database': {'code': db_mgr.get},
-                                     'cluster':  {'code': cl_mgr.get},
-                                     'foreign':  {'code': fcl_mgr.get},
-                                     'group':    {'code': g_mgr.get},
-                                     'server':   {'code': srv_mgr.get},
-                                     'user':     {'code': user_mgr.get},
-                                     'role':     {'code': role_mgr.get}},
-                         'create':  {'forest':   {'code': f_mgr.create},
-                                     'database': {'code': db_mgr.create},
-                                     'group':    {'code': g_mgr.create},
-                                     'server':   {'code': srv_mgr.create},
-                                     'user':     {'code': user_mgr.create},
-                                     'role':     {'code': role_mgr.create}},
+        self._parsers = {'start':                 {'code': ml_mgr.start},
+                         'status':                {'code': ml_mgr.status},
+                         'init':                  {'code': ml_mgr.init},
+                         'save':                  {'code': ml_mgr.save},
+                         'switch':                {'code': ml_mgr.switch},
+                         'clear':                 {'code': ml_mgr.clear},
+                         'log':                   {'code': ml_mgr.log},
+                         'debug':                 {'code': ml_mgr.debug},
+                         'run':                   {'code': None},
+                         'stop':    {'host':      {'code': ml_mgr.stop},
+                                     'cluster':   {'code': ml_mgr.stop}},
+                         'restart': {'host':      {'code': ml_mgr.restart},
+                                     'cluster':   {'code': ml_mgr.restart}},
+                         'bootstrap': {'hosts': {'code': cl_mgr.bootstrap_hosts}},
+                         'join':    {'cluster':   {'code': cl_mgr.join}},
+                         'leave':   {'cluster':   {'code': cl_mgr.leave}},
+                         'couple':  {'clusters':  {'code': cl_mgr.couple}},
+                         'get':     {'forest':    {'code': f_mgr.get},
+                                     'database':  {'code': db_mgr.get},
+                                     'cluster':   {'code': cl_mgr.get},
+                                     'foreign':   {'code': fcl_mgr.get},
+                                     'group':     {'code': g_mgr.get},
+                                     'server':    {'code': srv_mgr.get},
+                                     'user':      {'code': user_mgr.get},
+                                     'role':      {'code': role_mgr.get},
+                                     'privilege': {'code': priv_mgr.get}},
+                         'create':  {'forest':    {'code': f_mgr.create},
+                                     'database':  {'code': db_mgr.create},
+                                     'group':     {'code': g_mgr.create},
+                                     'server':    {'code': srv_mgr.create},
+                                     'user':      {'code': user_mgr.create},
+                                     'role':      {'code': role_mgr.create},
+                                     'privilege': {'code': priv_mgr.create}},
                          'list':    {'forests':   {'code': f_mgr.list},
                                      'databases': {'code': db_mgr.list},
                                      'foreign':   {'code': fcl_mgr.list},
                                      'groups':    {'code': g_mgr.list},
                                      'servers':   {'code': srv_mgr.list},
                                      'users':     {'code': user_mgr.list},
-                                     'roles':     {'code': role_mgr.list}},
-                         'modify':  {'forest':   {'code': f_mgr.modify},
-                                     'database': {'code': db_mgr.modify},
-                                     'cluster':  {'code': cl_mgr.modify},
-                                     'foreign':  {'code': fcl_mgr.modify},
-                                     'group':    {'code': g_mgr.modify},
-                                     'server':   {'code': srv_mgr.modify},
-                                     'user':     {'code': user_mgr.modify},
-                                     'role':     {'code': role_mgr.modify}},
-                         'perform': {'database': {'code': db_mgr.perform}},
-                         'delete':  {'forest':   {'code': f_mgr.delete},
-                                     'database': {'code': db_mgr.delete},
-                                     'group':    {'code': g_mgr.delete},
-                                     'server':   {'code': srv_mgr.delete},
-                                     'user':     {'code': user_mgr.delete},
-                                     'role':     {'code': role_mgr.delete}}}
+                                     'roles':     {'code': role_mgr.list},
+                                     'privileges':{'code': priv_mgr.list}},
+                         'modify':  {'forest':    {'code': f_mgr.modify},
+                                     'database':  {'code': db_mgr.modify},
+                                     'cluster':   {'code': cl_mgr.modify},
+                                     'foreign':   {'code': fcl_mgr.modify},
+                                     'group':     {'code': g_mgr.modify},
+                                     'server':    {'code': srv_mgr.modify},
+                                     'user':      {'code': user_mgr.modify},
+                                     'role':      {'code': role_mgr.modify},
+                                     'privilege': {'code': priv_mgr.modify}},
+                         'perform': {'database':  {'code': db_mgr.perform}},
+                         'delete':  {'forest':    {'code': f_mgr.delete},
+                                     'database':  {'code': db_mgr.delete},
+                                     'group':     {'code': g_mgr.delete},
+                                     'server':    {'code': srv_mgr.delete},
+                                     'user':      {'code': user_mgr.delete},
+                                     'role':      {'code': role_mgr.delete},
+                                     'privilege': {'code': priv_mgr.delete}}}
 
         parser = self._make_parser('start',None,'Start the server')
         self._parsers['start']['parser'] = parser
@@ -256,6 +263,20 @@ class Template:
                             help='Additional user properties')
         self._parsers['create']['role']['parser'] = parser
 
+        parser = self._make_parser('create','privilege','Create a privilege')
+        parser.add_argument('name',
+                            help='The privilege name')
+        parser.add_argument('--kind', choices=['execute','uri'], required=True,
+                            help='The privilege kind')
+        parser.add_argument('--action', required=True,
+                            help='The URI to protect')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional user properties')
+        self._parsers['create']['privilege']['parser'] = parser
+
         parser = self._make_parser('modify','forest','Modify a forest')
         parser.add_argument('name',
                             help='The forest name')
@@ -336,6 +357,19 @@ class Template:
                             help='Additional user properties')
         self._parsers['modify']['role']['parser'] = parser
 
+        parser = self._make_parser('modify','privilege','Modify a privilege')
+        parser.add_argument('name',
+                            help='The privilege name')
+        parser.add_argument('--kind', choices=['execute','uri'],
+                            default="execute",
+                            help='The privilege kind')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional user properties')
+        self._parsers['modify']['privilege']['parser'] = parser
+
         parser = self._make_parser('perform','database','Operate on a database')
         parser.add_argument('name',
                             help='The database name')
@@ -367,6 +401,12 @@ class Template:
 
         parser = self._make_parser('list','roles','List roles')
         self._parsers['list']['roles']['parser'] = parser
+
+        parser = self._make_parser('list','privileges','List privileges')
+        parser.add_argument('--kind', choices=['execute','uri'],
+                            default="execute",
+                            help='The privilege kind')
+        self._parsers['list']['privileges']['parser'] = parser
 
         parser = self._make_parser('delete','forest','Delete a forest')
         parser.add_argument('name',
@@ -413,6 +453,13 @@ class Template:
                             help='The role name')
         self._parsers['delete']['role']['parser'] = parser
 
+        parser = self._make_parser('delete','privilege','Delete a privilege')
+        parser.add_argument('name',
+                            help='The privilege name')
+        parser.add_argument('--kind', choices=['execute','uri'], required=True,
+                            help='The privilege kind')
+        self._parsers['delete']['privilege']['parser'] = parser
+
         parser = self._make_parser('get','forest','Get forest properties')
         parser.add_argument('name',
                             help='The forest name')
@@ -456,6 +503,14 @@ class Template:
         parser.add_argument('name',
                             help='The role name')
         self._parsers['get']['role']['parser'] = parser
+
+        parser = self._make_parser('get','privilege','Get privilege properties')
+        parser.add_argument('name',
+                            help='The privilege name')
+        parser.add_argument('--kind', choices=['execute','uri'],
+                            default='execute',
+                            help='The privilege kind')
+        self._parsers['get']['privilege']['parser'] = parser
 
     def _make_parser(self, command, artifact, description=""):
         parser = argparse.ArgumentParser(description=description)
