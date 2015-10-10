@@ -37,7 +37,7 @@ class Authority(Model):
     a certificate authority. Certificate authorities are created by
     uploading trusted certificates.
     """
-    def __init__(self, certid):
+    def __init__(self, certid, connection=None, save_connection=True):
         """
         Create a new certificate authority. Except it doesn't, really.
         It just creates a reference to the certificate authority with the
@@ -46,6 +46,11 @@ class Authority(Model):
         """
         self._config = {'id': certid}
         self.id = certid
+        self.save_connection = save_connection
+        if save_connection:
+            self.connection = connection
+        else:
+            self.connection = None
 
     def certificate_id(self):
         """
@@ -137,7 +142,7 @@ class Authority(Model):
 
         return result
 
-    def read(self, connection):
+    def read(self, connection=None):
         """
         Loads the Authority from the MarkLogic server. This will refresh
         the properties of the object.
@@ -146,6 +151,9 @@ class Authority(Model):
 
         :return: The Authority object
         """
+        if connection is None:
+            connection = self.connection
+
         auth = Authority.lookup(self.id)
         if auth is None:
             return None
@@ -154,7 +162,7 @@ class Authority(Model):
             self.id = auth._config['certificate-id']
             return self
 
-    def delete(self, connection):
+    def delete(self, connection=None):
         """
         Deletes the Authority from the MarkLogic server.
 
@@ -166,6 +174,9 @@ class Authority(Model):
 
         :return: None
         """
+        if connection is None:
+            connection = self.connection
+
         uri = connection.uri("certificate-authorities", self.id,
                              properties=None)
 
