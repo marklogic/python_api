@@ -28,6 +28,7 @@ import inspect, json, logging, re, sys
 from marklogic.cli.manager import Manager
 from marklogic.models.forest import Forest
 from marklogic.models.database import Database
+from marklogic.models.cluster import LocalCluster
 
 class ForestManager(Manager):
     """
@@ -38,23 +39,36 @@ class ForestManager(Manager):
         pass
 
     def list(self, args, config, connection):
-        print(Forest.list(connection))
+        forests = Forest.list(connection)
+        print(json.dumps(forests, sort_keys=True, indent=2))
 
     def create(self, args, config, connection):
-        forest = Forest(args['name'], args['forest_host'], connection=connection)
-        if forest.exists():
-            self.logger.error("Forest already exists: {0}".format(args['name']))
-            sys.exit(1)
+        name = args['name']
+        host = args['forest_host']
 
         if args['json'] is not None:
-            newforest = self._read(args['name'], args['json'])
-            newforest.connection = forest.connection
-            if newforest.host() is None:
-                newforest.set_host(args['forest_host'])
-            forest = newforest
+            forest = self._read(name, args['json'], connection=connection)
+            name = forest.forest_name()
+            host = forest.host()
+        else:
+            forest = Forest(name, host, connection=connection)
+
+        if forest.exists():
+            self.logger.error("Forest already exists: {0}".format(name))
+            sys.exit(1)
 
         self._properties(forest, args)
         dbname = forest.database()
+
+        # Strip out properties that we know the server will reject
+        cluster = LocalCluster(connection)
+        cluster.read()
+        if cluster.security_version() is None:
+            for key in ['database-replication', 'failover-enable']:
+                if key in forest._config:
+                    del(forest._config[key])
+                    self.logger.debug("Ignoring {0}, not supported by server"
+                                      .format(key))
 
         if dbname is not None:
             database = Database(dbname)
@@ -62,7 +76,7 @@ class ForestManager(Manager):
         else:
             database = None
 
-        self.logger.info("Create forest {0}...".format(args['name']))
+        self.logger.info("Create forest {0}...".format(name))
         forest.create(connection=connection)
 
         if database is not None:
@@ -106,9 +120,19 @@ class ForestManager(Manager):
         forest.read()
         self.jprint(forest)
 
-    def _read(self, name, jsonfile):
+    def _read(self, name, jsonfile,
+              connection=None, save_connection=True):
         jf = open(jsonfile).read()
         data = json.loads(jf)
-        data['forest-name'] = name
-        forest = Forest.unmarshal(data)
+
+        if name is not None:
+            data['forest-name'] = name
+
+        if 'database' in data:
+            del(data['database'])
+
+        forest = Forest.unmarshal(data,
+                                  connection=connection,
+                                  save_connection=save_connection)
+
         return forest

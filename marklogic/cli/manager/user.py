@@ -25,6 +25,8 @@ A class to manage users.
 """
 
 import inspect, json, logging, re, sys
+from os import urandom
+from binascii import b2a_hqx
 from marklogic.cli.manager import Manager
 from marklogic.models.user import User
 
@@ -40,15 +42,22 @@ class UserManager(Manager):
         print(json.dumps(names,sort_keys=True, indent=2))
 
     def create(self, args, config, connection):
-        user = User(args['name'], args['password'], connection=connection)
+        name = args['name']
+        password = args['password']
+
+        if args['json'] is not None:
+            user = self._read(name, password, args['json'],
+                              connection=connection)
+            name = user.user_name()
+        else:
+            user = User(name, password, connection=connection)
+
+        if 'password' not in user._config:
+            user._config['password'] = str(b2a_hqx(urandom(64)))
+
         if user.exists():
             print("Error: User already exists: {0}".format(args['name']))
             sys.exit(1)
-
-        if args['json'] is not None:
-            newuser = self._read(args['name'], args['json'])
-            newuser.connection = user.connection
-            user = newuser
 
         self.roles = []
         self._properties(user, args)
@@ -100,9 +109,16 @@ class UserManager(Manager):
         else:
             super()._special_property(name,value)
 
-    def _read(self, name, jsonfile):
+    def _read(self, name, password, jsonfile,
+              connection=None, save_connection=True):
         jf = open(jsonfile).read()
         data = json.loads(jf)
-        data['user-name'] = name
-        user = User.unmarshal(data)
+
+        if name is not None:
+            data['user-name'] = name
+        if password is not None:
+            data['password'] = password
+
+        user = User.unmarshal(data, connection=connection,
+                              save_connection=save_connection)
         return user

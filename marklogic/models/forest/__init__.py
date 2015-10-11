@@ -364,8 +364,9 @@ class Forest(Model,PropertyLists):
         return result
 
     @classmethod
-    def unmarshal(cls, config):
-        result = Forest("temp")
+    def unmarshal(cls, config, connection=None, save_connection=True):
+        result = Forest("temp",
+                        connection=connection, save_connection=save_connection)
         result._config = config
         result.name = result._config['forest-name']
 
@@ -375,7 +376,8 @@ class Forest(Model,PropertyLists):
                   'database-replication', 'enabled',
                   'failover-enable', 'fast-data-directory',
                   'forest-name', 'host', 'large-data-directory',
-                  'range', 'rebalancer-enable', 'updates-allowed'
+                  'range', 'rebalancer-enable', 'updates-allowed',
+                  'database'
                   }
 
         for key in result._config:

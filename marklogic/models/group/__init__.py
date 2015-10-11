@@ -99,7 +99,8 @@ class Group(Model,PropertyLists):
         return struct
 
     @classmethod
-    def unmarshal(cls, config):
+    def unmarshal(cls, config,
+                  connection=None, save_connection=True):
         """
         Construct a new group from a flat structure. This method is
         principally used to construct an object from a Management API
@@ -109,7 +110,8 @@ class Group(Model,PropertyLists):
         :param: config: A hash of properties
         :return: A newly constructed Group object with the specified properties.
         """
-        result = Group("temp")
+        result = Group("temp", connection=connection,
+                       save_connection=save_connection)
         result._config = config
         result.name = config['group-name']
         result.etag = None
@@ -222,7 +224,7 @@ class Group(Model,PropertyLists):
             connection = self.connection
 
         uri = connection.uri("groups")
-        struct = self.marshall()
+        struct = self.marshal()
         response = connection.post(uri, payload=struct)
         return self
 

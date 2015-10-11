@@ -183,7 +183,7 @@ class Template:
         self._parsers['run']['parser'] = parser
 
         parser = self._make_parser('create','forest','Create a forest')
-        parser.add_argument('name',
+        parser.add_argument('name', nargs='?', default=None,
                             help='The forest name')
         parser.add_argument('--forest-host', default='$ML-LOCALHOST',
                             help='The host on which to create the forest')
@@ -191,13 +191,11 @@ class Template:
                             help='The properties')
         parser.add_argument('properties', nargs="*",
                             metavar="property=value",
-
-
                             help='Additional forest properties')
         self._parsers['create']['forest']['parser'] = parser
 
         parser = self._make_parser('create','database','Create a database')
-        parser.add_argument('name',
+        parser.add_argument('name', nargs='?', default=None,
                             help='The database name')
         parser.add_argument('--forest-host', default='$ML-LOCALHOST',
                             help='The host on which to create forests')
@@ -209,7 +207,7 @@ class Template:
         self._parsers['create']['database']['parser'] = parser
 
         parser = self._make_parser('create','group','Create a group')
-        parser.add_argument('name',
+        parser.add_argument('name', nargs='?', default=None,
                             help='The group name')
         parser.add_argument('--json',
                             help='The properties')
@@ -218,19 +216,20 @@ class Template:
                             help='Additional database properties')
         self._parsers['create']['group']['parser'] = parser
 
-        parser = self._make_parser('create','server','Create an application server')
-        parser.add_argument('name',
+        parser = self._make_parser('create','server',
+                                   'Create an application server2')
+        parser.add_argument('name', nargs='?', default=None,
                             help='The server name')
         parser.add_argument('--type', choices=['http','odbc','xdbc','webdav'],
                             default='http',
                             help='The type of server')
         parser.add_argument('--group', default="Default",
                             help='The group')
-        parser.add_argument('--port', type=int, required=True,
+        parser.add_argument('--port', type=int, default=0,
                             help='The port number')
-        parser.add_argument('--root', required=True,
+        parser.add_argument('--root', default=None,
                             help='The root path')
-        parser.add_argument('--database', required=True,
+        parser.add_argument('--database', default=None,
                             help='The content database')
         parser.add_argument('--modules', default=None,
                             help='The modules database')
@@ -242,9 +241,9 @@ class Template:
         self._parsers['create']['server']['parser'] = parser
 
         parser = self._make_parser('create','user','Create a user')
-        parser.add_argument('name',
+        parser.add_argument('name', nargs='?', default=None,
                             help='The user name')
-        parser.add_argument('--password', required=True,
+        parser.add_argument('--password', default=None,
                             help='The user password')
         parser.add_argument('--json',
                             help='The properties')
@@ -254,7 +253,7 @@ class Template:
         self._parsers['create']['user']['parser'] = parser
 
         parser = self._make_parser('create','role','Create a role')
-        parser.add_argument('name',
+        parser.add_argument('name', nargs='?', default=None,
                             help='The role name')
         parser.add_argument('--json',
                             help='The properties')
@@ -264,11 +263,12 @@ class Template:
         self._parsers['create']['role']['parser'] = parser
 
         parser = self._make_parser('create','privilege','Create a privilege')
-        parser.add_argument('name',
+        parser.add_argument('name', nargs='?', default=None,
                             help='The privilege name')
-        parser.add_argument('--kind', choices=['execute','uri'], required=True,
+        parser.add_argument('--kind', choices=['execute','uri'],
+                            default=None,
                             help='The privilege kind')
-        parser.add_argument('--action', required=True,
+        parser.add_argument('--action', default=None,
                             help='The URI to protect')
         parser.add_argument('--json',
                             help='The properties')

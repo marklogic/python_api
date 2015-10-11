@@ -1476,7 +1476,7 @@ class Server(Model,PropertyLists):
             return None
 
     @classmethod
-    def unmarshal(cls, config):
+    def unmarshal(cls, config, connection=None, save_connection=True):
         """
         Construct a new server from a flat structure. This method is
         principally used to construct an object from a Management API
@@ -1491,13 +1491,21 @@ class Server(Model,PropertyLists):
 
         result = None
         if config['server-type'] == 'http':
-            result = HttpServer(name, group)
+            result = HttpServer(name, group,
+                                connection=connection,
+                                save_connection=save_connection)
         if config['server-type'] == 'odbc':
-            result = OdbcServer(name, group)
+            result = OdbcServer(name, group,
+                                connection=connection,
+                                save_connection=save_connection)
         if config['server-type'] == 'xdbc':
-            result = XdbcServer(name, group)
+            result = XdbcServer(name, group,
+                                connection=connection,
+                                save_connection=save_connection)
         if config['server-type'] == 'webdav':
-            result = WebDAVServer(name, group)
+            result = WebDAVServer(name, group,
+                                connection=connection,
+                                save_connection=save_connection)
 
         if result is None:
             raise UnexpectedManagementAPIResponse("Unexpected server type")

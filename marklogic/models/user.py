@@ -209,7 +209,7 @@ class User(Model,PropertyLists):
         return struct
 
     @classmethod
-    def unmarshal(cls, config):
+    def unmarshal(cls, config, connection=None, save_connection=True):
         """
         Construct a new User from a flat structure. This method is
         principally used to construct an object from a Management API
@@ -219,7 +219,8 @@ class User(Model,PropertyLists):
         :param: config: A hash of properties
         :return: A newly constructed User object with the specified properties.
         """
-        result = User("temp")
+        result = User("temp",
+                      connection=connection, save_connection=save_connection)
         result._config = config
         result.name = config['user-name']
         result.etag = None
