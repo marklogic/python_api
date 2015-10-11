@@ -36,22 +36,25 @@ class GroupManager(Manager):
         pass
 
     def list(self, args, config, connection):
-        print(Group.list(connection))
+        groups = Group.list(connection)
+        print(json.dumps(groups, sort_keys=True, indent=2))
 
     def create(self, args, config, connection):
-        group = Group(args['name'], connection=connection)
+        name = args['name']
+
+        if args['json'] is not None:
+            group = self._read(name, args['json'], connection=connection)
+            name = group.group_name()
+        else:
+            group = Group(name, connection=connection)
+
         if group.exists():
             print("Error: Database already exists: {0}".format(args['name']))
             sys.exit(1)
 
-        if args['json'] is not None:
-            newgrp = self._read(args['name'], args['json'])
-            newgrp.connection = group.connection
-            group = newgrp
-
         self._properties(group, args)
 
-        print("Create group {0}...".format(args['name']))
+        print("Create group {0}...".format(name))
         group.create()
 
     def modify(self, args, config, connection):
@@ -87,9 +90,15 @@ class GroupManager(Manager):
         group.read()
         self.jprint(group)
 
-    def _read(self, name, jsonfile):
+    def _read(self, name, jsonfile,
+              connection=None, save_connection=True):
         jf = open(jsonfile).read()
         data = json.loads(jf)
-        data['group-name'] = name
-        group = Group.unmarshal(data)
+
+        if name is not None:
+            data['group-name'] = name
+
+        group = Group.unmarshal(data,
+                                connection=connection,
+                                save_connection=save_connection)
         return group

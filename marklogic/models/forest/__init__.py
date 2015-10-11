@@ -364,8 +364,9 @@ class Forest(Model,PropertyLists):
         return result
 
     @classmethod
-    def unmarshal(cls, config):
-        result = Forest("temp")
+    def unmarshal(cls, config, connection=None, save_connection=True):
+        result = Forest("temp",
+                        connection=connection, save_connection=save_connection)
         result._config = config
         result.name = result._config['forest-name']
 

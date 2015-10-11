@@ -61,38 +61,48 @@ class ServerManager(Manager):
         print(json.dumps(names,sort_keys=True, indent=2))
 
     def create(self, args, config, connection):
+        name = args['name']
+        group = args['group']
         stype = args['type']
-        if stype == 'http':
-            server = HttpServer(args['name'], args['group'], args['port'],
-                                args['root'], args['database'], args['modules'],
-                                connection)
-        elif stype == 'odbc':
-            server = OdbcServer(args['name'], args['group'], args['port'],
-                                args['root'], args['database'], args['modules'],
-                                connection)
-        elif stype == 'xdbc':
-            server = XdbcServer(args['name'], args['group'], args['port'],
-                                args['root'], args['database'], args['modules'],
-                                connection)
-        elif stype == 'webdav':
-            server = WebDAVServer(args['name'], args['group'], args['port'],
-                                  args['root'], args['database'], connection)
+
+        if args['json'] is not None:
+            server = self._read(name, group, stype, args['json'],
+                                connection=connection)
+            name = server.server_name()
+            group = server.group_name()
+            stype = server.server_type()
         else:
-            print("Unexpected server type: {0}".format(stype))
-            sys.exit(1)
+            if stype == 'http':
+                server = HttpServer(args['name'], args['group'], args['port'],
+                                    args['root'], args['database'],
+                                    args['modules'],
+                                    connection=connection)
+            elif stype == 'odbc':
+                server = OdbcServer(args['name'], args['group'], args['port'],
+                                    args['root'], args['database'],
+                                    args['modules'],
+                                    connection=connection)
+            elif stype == 'xdbc':
+                server = XdbcServer(args['name'], args['group'], args['port'],
+                                    args['root'], args['database'],
+                                    args['modules'],
+                                    connection=connection)
+            elif stype == 'webdav':
+                server = WebDAVServer(args['name'], args['group'], args['port'],
+                                      args['root'], args['database'],
+                                      connection=connection)
+            else:
+                print("Unexpected server type: {0}".format(stype))
+                sys.exit(1)
 
         if server.exists(connection):
             print("Error: Server already exists: {0} in group {1}"
                   .format(args['name'], args['group']))
             sys.exit(1)
 
-        if args['json'] is not None:
-            newsrv = self._read(args['name'], args['group'], stype, args['json'])
-            newsrv.connection = server.connection
-            server = newsrv
-
         self._properties(server, args)
 
+        print("Create {0} server {0}...".format(stype,name))
         server.create()
 
     def modify(self, args, config, connection):
@@ -142,12 +152,21 @@ class ServerManager(Manager):
             results = server.view(args['view'], connection)
             print(json.dumps(results, sort_keys=True, indent=2))
 
-    def _read(self, name, group, stype, jsonfile):
+    def _read(self, name, group, stype, jsonfile,
+              connection=None, save_connection=True):
         jf = open(jsonfile).read()
         data = json.loads(jf)
-        data['server-name'] = name
-        data['group-name'] = group
-        data['server-type'] = stype
+
+        if name is not None:
+            data['server-name'] = name
+
+        if group is not None:
+            data['group-name'] = group
+
+        if stype is not None:
+            data['server-type'] = stype
+
+        stype = data['server-type']
 
         if stype == 'http':
             server = HttpServer(name, group)
@@ -157,9 +176,15 @@ class ServerManager(Manager):
             server = XdbcServer(name, group)
         elif stype == 'webdav':
             server = WebDAVServer(name, group)
+        elif stype is None:
+            print("Server type must be specified.")
+            sys.ext(1)
         else:
             print("Unexpected server type: {0}".format(stype))
             sys.exit(1)
 
-        server = server.unmarshal(data)
+        server = server.unmarshal(data,
+                                  connection=connection,
+                                  save_connection=save_connection)
+
         return server

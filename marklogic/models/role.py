@@ -233,13 +233,13 @@ class Role(Model,PropertyLists):
         return self._get_config_property('privilege')
 
     @classmethod
-    def unmarshal(cls, config):
+    def unmarshal(cls, config, connection=None, save_connection=True):
         """
         Return a flat structure suitable for conversion to JSON or XML.
 
         :return: A hash of the keys in this object and their values, recursively.
         """
-        result = Role("temp")
+        result = Role("temp", connection, save_connection)
         result._config = config
         result.name = config['role-name']
         result.etag = None

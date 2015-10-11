@@ -3267,8 +3267,10 @@ class Database(Model,PropertyLists):
         return result
 
     @classmethod
-    def unmarshal(cls, config):
-        result = Database("temp")
+    def unmarshal(cls, config, hostname=None,
+                  connection=None, save_connection=True):
+        result = Database("temp", hostname,
+                          connection=connection, save_connection=save_connection)
         result._config = config
         result.name = result._config['database-name']
 

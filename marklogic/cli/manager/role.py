@@ -40,22 +40,24 @@ class RoleManager(Manager):
         print(json.dumps(names,sort_keys=True, indent=2))
 
     def create(self, args, config, connection):
-        role = Role(args['name'], connection=connection)
-        if role.exists():
-            print("Error: Role already exists: {0}".format(args['name']))
-            sys.exit(1)
+        name = args['name']
 
         if args['json'] is not None:
-            newrole = self._read(args['name'], args['json'])
-            newrole.connection = role.connection
-            role = newrole
+            role = self._read(name, args['json'], connection=connection)
+            name = role.role_name()
+        else:
+            role = Role(name, connection=connection)
+
+        if role.exists():
+            print("Error: Role already exists: {0}".format(name))
+            sys.exit(1)
 
         self.roles = []
         self._properties(role, args)
         if len(self.roles) > 0:
             role.set_role_names(self.roles)
 
-        print("Create role {0}...".format(args['name']))
+        print("Create role {0}...".format(name))
         role.create(connection)
 
     def modify(self, args, config, connection):
@@ -100,9 +102,14 @@ class RoleManager(Manager):
         else:
             super()._special_property(name,value)
 
-    def _read(self, name, jsonfile):
+    def _read(self, name, jsonfile,
+              connection=None, save_connection=True):
         jf = open(jsonfile).read()
         data = json.loads(jf)
-        data['role-name'] = name
-        role = Role.unmarshal(data)
+
+        if name is not None:
+            data['role-name'] = name
+
+        role = Role.unmarshal(data, connection=connection,
+                              save_connection=save_connection)
         return role

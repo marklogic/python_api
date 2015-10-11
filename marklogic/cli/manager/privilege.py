@@ -41,23 +41,30 @@ class PrivilegeManager(Manager):
         print(json.dumps(names,sort_keys=True, indent=2))
 
     def create(self, args, config, connection):
-        privilege = Privilege(args['name'], args['kind'], action=args['action'],
-                              connection=connection)
-        if privilege.exists():
-            print("Error: Privilege already exists: {0}".format(args['name']))
-            sys.exit(1)
+        name = args['name']
+        kind = args['kind']
+        action = args['action']
 
         if args['json'] is not None:
-            newpriv = self._read(args['name'], args['json'])
-            newpriv.connection = privilege.connection
-            privilege = newpriv
+            privilege = self._read(name, kind, action, args['json'],
+                                   connection=connection)
+            name = privilege.privilege_name()
+            kind = privilege.kind()
+            action = privilege.action()
+        else:
+            privilege = Privilege(name, kind, action=action,
+                                  connection=connection)
+
+        if privilege.exists():
+            print("Error: Privilege already exists: {0}".format(name))
+            sys.exit(1)
 
         self.roles = []
         self._properties(privilege, args)
         if len(self.roles) > 0:
             privilege.set_role_names(self.roles)
 
-        print("Create privilege {0}...".format(args['name']))
+        print("Create privilege {0}...".format(name))
         privilege.create(connection)
 
     def modify(self, args, config, connection):
@@ -106,9 +113,19 @@ class PrivilegeManager(Manager):
         else:
             super()._special_property(name,value)
 
-    def _read(self, name, jsonfile):
+    def _read(self, name, kind, action, jsonfile,
+              connection=None, save_connection=True):
         jf = open(jsonfile).read()
         data = json.loads(jf)
-        data['privilege-name'] = name
-        privilege = Privilege.unmarshal(data)
+
+        if name is not None:
+            data['privilege-name'] = name
+        if kind is not None:
+            data['kind'] = kind
+        if action is not None:
+            data['action'] = action
+
+        privilege = Privilege.unmarshal(data,
+                                        connection=connection,
+                                        save_connection=save_connection)
         return privilege
