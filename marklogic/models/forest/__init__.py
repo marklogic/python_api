@@ -376,7 +376,8 @@ class Forest(Model,PropertyLists):
                   'database-replication', 'enabled',
                   'failover-enable', 'fast-data-directory',
                   'forest-name', 'host', 'large-data-directory',
-                  'range', 'rebalancer-enable', 'updates-allowed'
+                  'range', 'rebalancer-enable', 'updates-allowed',
+                  'database'
                   }
 
         for key in result._config:

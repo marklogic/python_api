@@ -28,6 +28,7 @@ import inspect, json, logging, re, sys
 from marklogic.cli.manager import Manager
 from marklogic.models.forest import Forest
 from marklogic.models.database import Database
+from marklogic.models.cluster import LocalCluster
 
 class ForestManager(Manager):
     """
@@ -58,6 +59,16 @@ class ForestManager(Manager):
 
         self._properties(forest, args)
         dbname = forest.database()
+
+        # Strip out properties that we know the server will reject
+        cluster = LocalCluster(connection)
+        cluster.read()
+        if cluster.security_version() is None:
+            for key in ['database-replication', 'failover-enable']:
+                if key in forest._config:
+                    del(forest._config[key])
+                    self.logger.debug("Ignoring {0}, not supported by server"
+                                      .format(key))
 
         if dbname is not None:
             database = Database(dbname)
