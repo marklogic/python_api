@@ -43,7 +43,7 @@ class ClusterManager(Manager):
         cluster = LocalCluster(connection=connection)
 
         if args['json'] is not None:
-            newclst = self._read()
+            newclst = self._read(args['json'])
             newclst.connection = cluster.connection
             cluster = newclst
 
@@ -100,7 +100,7 @@ class ClusterManager(Manager):
         self.logger.info("Removing {0} from cluster...".format(args['host']))
         cluster.remove_host(args['host'])
 
-    def _read(self):
+    def _read(self, jsonfile):
         jf = open(jsonfile).read()
         data = json.loads(jf)
         cluster = LocalCluster.unmarshal(data)

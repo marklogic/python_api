@@ -58,19 +58,19 @@ class GroupManager(Manager):
         group.create()
 
     def modify(self, args, config, connection):
-        group = Group(args['name'], connection=connection)
+        name = args['name']
+        group = Group(name, connection=connection)
         if not group.exists():
-            print("Error: Group does not exist: {0}".format(args['name']))
+            print("Error: Group does not exist: {0}".format(name))
             sys.exit(1)
 
         if args['json'] is not None:
-            newgrp = self._read(args['name'], args['json'])
-            newgrp.connection = group.connection
-            group = newgrp
+            group = self._read(None, args['json'], connection=connection)
+            group.name = name
 
         self._properties(group, args)
 
-        print("Modify group {0}...".format(args['name']))
+        print("Modify group {0}...".format(name))
         group.update(connection=connection)
 
     def delete(self, args, config, connection):

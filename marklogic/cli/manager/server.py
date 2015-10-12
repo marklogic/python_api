@@ -106,17 +106,19 @@ class ServerManager(Manager):
         server.create()
 
     def modify(self, args, config, connection):
-        server = Server.lookup(connection, args['name'], args['group'])
+        name = args['name']
+        group = args['group']
+        server = Server.lookup(connection, name, group)
         if server is None:
             print("Error: Server does not exist: {0} in group {1}"
-                  .format(args['name'], args['group']))
+                  .format(name,group))
             sys.exit(1)
 
         if args['json'] is not None:
-            newsrv = self._read(args['name'], args['group'],
-                                server.server_type(), args['json'])
-            newsrv.connection = server.connection
-            server = newsrv
+            server = self._read(None, group,
+                                server.server_type(), args['json'],
+                                connection=connection)
+            server.name = name
 
         self._properties(server, args)
 

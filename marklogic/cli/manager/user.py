@@ -68,15 +68,15 @@ class UserManager(Manager):
         user.create()
 
     def modify(self, args, config, connection):
-        user = User(args['name'], connection=connection)
+        name = args['name']
+        user = User(name, connection=connection)
         if not user.exists():
             print("Error: User does not exist: {0}".format(args['name']))
             sys.exit(1)
 
         if args['json'] is not None:
-            newuser = self._read(args['name'], args['json'])
-            newuser.connection = user.connection
-            user = newuser
+            user = self._read(None, None, args['json'], connection=connection)
+            user.name = name
 
         self.roles = []
         self._properties(user, args)

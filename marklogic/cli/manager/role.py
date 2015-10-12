@@ -61,22 +61,22 @@ class RoleManager(Manager):
         role.create(connection)
 
     def modify(self, args, config, connection):
-        role = Role(args['name'], connection=connection)
+        name = args['name']
+        role = Role(name, connection=connection)
         if not role.exists():
-            print("Error: Role does not exist: {0}".format(args['name']))
+            print("Error: Role does not exist: {0}".format(name))
             sys.exit(1)
 
         if args['json'] is not None:
-            newrole = self._read(args['name'], args['json'])
-            newrole.connection = role.connection
-            role = newrole
+            role = self._read(None, args['json'],connection=connection)
+            role.name = name
 
         self.roles = []
         self._properties(role, args)
         if len(self.roles) > 0:
             role.set_role_names(self.roles)
 
-        print("Modify role {0}...".format(args['name']))
+        print("Modify role {0}...".format(name))
         role.update(connection=connection)
 
     def delete(self, args, config, connection):

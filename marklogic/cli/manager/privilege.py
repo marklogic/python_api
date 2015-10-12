@@ -68,24 +68,26 @@ class PrivilegeManager(Manager):
         privilege.create(connection)
 
     def modify(self, args, config, connection):
-        privilege = Privilege(args['name'], args['kind'], connection=connection)
+        name = args['name']
+        kind = args['kind']
+        privilege = Privilege(name, kind, connection=connection)
         if not privilege.exists():
-            print("Error: Privilege does not exist: {0}".format(args['name']))
+            print("Error: Privilege does not exist: {0}".format(name))
             sys.exit(1)
 
         privilege.read()
 
         if args['json'] is not None:
-            newpriv = self._read(args['name'], args['json'])
-            newpriv.connection = privilege.connection
-            privilege = newpriv
+            privilege = self._read(None, kind, None, args['json'],
+                                connection=connection)
+            privilege.name = name
 
         self.roles = []
         self._properties(privilege, args)
         if len(self.roles) > 0:
             privilege.set_role_names(self.roles)
 
-        print("Modify privilege {0}...".format(args['name']))
+        print("Modify privilege {0}...".format(name))
         privilege.update(connection=connection)
 
     def delete(self, args, config, connection):
