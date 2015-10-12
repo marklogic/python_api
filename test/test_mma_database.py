@@ -29,7 +29,7 @@ from marklogic.connection import Connection
 from requests.auth import HTTPDigestAuth
 from test.resources import TestConnection as tc
 
-class MmaTestDatabase(unittest.TestCase):
+class TestMmaDatabase(unittest.TestCase):
     """
     Basic creation test function.
     """

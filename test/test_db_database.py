@@ -31,7 +31,7 @@ from requests.auth import HTTPDigestAuth
 from test.resources import TestConnection as tc
 from test.settings import DatabaseSettings as ds
 
-class TestDatabase(unittest.TestCase):
+class TestDbDatabase(unittest.TestCase):
     """
     Basic creation test function.
 

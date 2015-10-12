@@ -26,20 +26,7 @@ import unittest
 from marklogic.models import Database
 from marklogic.models.database.path import PathNamespace
 
-# "path-namespaces": {
-#     "path-namespace": [
-#         {
-#             "prefix": "inv",
-#             "namespace-uri": "http:\/\/foo.bar.com\/invoice"
-#         },
-#         {
-#             "prefix": "bill",
-#             "namespace-uri": "http:\/\/foo.bar.com\/billing"
-#         }
-#     ]
-# }
-
-class TestPaths(unittest.TestCase):
+class TestDbPaths(unittest.TestCase):
 
     def test_create_paths(self):
         db = Database(u'testdb')

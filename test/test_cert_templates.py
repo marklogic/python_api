@@ -27,7 +27,7 @@ from marklogic.models.certificate.request import Request
 from marklogic.models.certificate.template import Template
 from test.resources import TestConnection as tc
 
-class TestRequest(unittest.TestCase):
+class TestCertRequest(unittest.TestCase):
     def test_template(self):
         connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
 
