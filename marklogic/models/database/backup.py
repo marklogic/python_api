@@ -161,7 +161,7 @@ class DatabaseBackup:
             'job-id': self.job_id
             }
 
-        uri = connection.uri("databases", database_name, properties=None)
+        uri = connection.uri("databases", self.database_name, properties=None)
         response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
@@ -179,7 +179,7 @@ class DatabaseBackup:
         for key in self.settings:
             payload[key] = self.settings[key]
 
-        uri = connection.uri("databases", database_name, properties=None)
+        uri = connection.uri("databases", self.database_name, properties=None)
         response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
@@ -200,7 +200,7 @@ class DatabaseBackup:
             'keep-num-backups': assert_type(keep_num, int)
             }
 
-        uri = connection.uri("databases", database_name, properties=None)
+        uri = connection.uri("databases", self.database_name, properties=None)
         response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
@@ -292,7 +292,7 @@ class DatabaseRestore:
         if self.host_name is not None:
             payload['host-name'] = self.host_name
 
-        uri = connection.uri("databases", database_name, properties=None)
+        uri = connection.uri("databases", self.database_name, properties=None)
         response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
@@ -309,7 +309,7 @@ class DatabaseRestore:
             'job-id': self.job_id
             }
 
-        uri = connection.uri("databases", database_name, properties=None)
+        uri = connection.uri("databases", self.database_name, properties=None)
         response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
@@ -327,7 +327,7 @@ class DatabaseRestore:
         for key in self.settings:
             payload[key] = self.settings[key]
 
-        uri = connection.uri("databases", database_name, properties=None)
+        uri = connection.uri("databases", self.database_name, properties=None)
         response = connection.post(uri, payload=payload)
 
         return json.loads(response.text)
