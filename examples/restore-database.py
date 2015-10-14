@@ -2,7 +2,7 @@
 #
 # Copyright 2015 MarkLogic Corporation
 #
-# This script backs up the named databases. Or all databases.
+# This script restores the named databases. Or all databases.
 
 import argparse, json, logging, re, sys, time
 from marklogic.exceptions import UnsupportedOperation
@@ -12,14 +12,14 @@ from marklogic import MarkLogic
 from requests.auth import HTTPDigestAuth
 from resources import TestConnection as tc
 
-class BackupDatabases:
+class RestoreDatabases:
     def __init__(self):
         self.marklogic       = None
         self.host            = "localhost"
         self.adminuser       = "admin"
         self.adminpass       = "admin"
         self.databases       = None
-        self.backup_root     = None
+        self.restore_root     = None
         self.journal_arch    = False
         self.lag_limit       = 30
         self.incremental     = False
@@ -43,11 +43,11 @@ class BackupDatabases:
     def set_databases(self, databases):
         self.databases = databases
 
-    def set_backup_root(self, directory):
+    def set_restore_root(self, directory):
         if directory is not None:
-            self.backup_root = directory
-            if not self.backup_root.endswith("/"):
-                self.backup_root += "/"
+            self.restore_root = directory
+            if not self.restore_root.endswith("/"):
+                self.restore_root += "/"
         return self
 
     def set_journal_archiving(self, archiving):
@@ -70,7 +70,7 @@ class BackupDatabases:
         self.dry_run = dry_run
         return self
 
-    def backup_databases(self):
+    def restore_databases(self):
         conn = Connection(self.host,
                           HTTPDigestAuth(self.adminuser, self.adminpass))
         self.marklogic = MarkLogic(conn)
@@ -80,8 +80,8 @@ class BackupDatabases:
         if self.databases is None:
             self.databases = actual_databases
 
-        if self.backup_root is None:
-            raise UnsupportedOperation("You must specify the backup root.")
+        if self.restore_root is None:
+            raise UnsupportedOperation("You must specify the restore root.")
 
         if self.max_parallel <= 0:
             self.max_parallel = 1
@@ -109,30 +109,39 @@ class BackupDatabases:
                 running += 1
                 done = False
 
-                print("Backing up {0}".format(dbname))
+                print("Restoring {0}".format(dbname))
                 if not self.dry_run:
                     db = self.marklogic.database(dbname)
-                    bkp = db.backup(self.backup_root + dbname, connection=conn)
-                    status_list[dbname] = bkp
-                    response = bkp.status()
-                    if response['status'] != 'in-progress':
-                        print("{0}: {1}".format(dbname, response['status']))
+                    rst = db.restore(self.restore_root + dbname, connection=conn)
+                    status_list[dbname] = rst
+                    response = rst.status()
+                    for forest in response['forest']:
+                        if forest['status'] != 'in-progress':
+                            print("Forest {0}: {1}"
+                                  .format(forest['forest-name'],
+                                          forest['status']))
 
             if self.dry_run:
                 if running > 0 or len(queue) > 0:
-                    print("{0} backups in dry-run; {1} in queue..."
+                    print("{0} restores in dry-run; {1} in queue..."
                           .format(running, len(queue)))
                     running = 0
             else:
                 if len(status_list) > 0:
                     new_list = {}
                     for dbname in status_list:
-                        bkp = status_list[dbname]
-                        response = bkp.status()
-                        print("{0}: {1}".format(dbname, response['status']))
-                        if response['status'] == 'in-progress':
+                        rst = status_list[dbname]
+                        response = rst.status()
+                        fdone = True
+                        for forest in response['forest']:
+                            print("Forest {0}: {1}"
+                                  .format(forest['forest-name'],
+                                          forest['status']))
+                            if forest['status'] == 'in-progress':
+                                fdone = False
+                        if not fdone:
                             done = False
-                            new_list[dbname] = bkp
+                            new_list[dbname] = rst
                         else:
                             running -= 1
                             wait = min_wait
@@ -142,12 +151,12 @@ class BackupDatabases:
                     if not done:
                         status_list = new_list
                         if running < maxp and len(queue) != 0:
-                            print("Running: {0} backups running; {1} in queue..."
+                            print("Running: {0} restores running; {1} in queue..."
                                   .format(running, len(queue)))
                             wait = min_wait
                             print("")
                         else:
-                            print("Waiting {0}s: {1} backups running; {2} in queue..."
+                            print("Waiting {0}s: {1} restores running; {2} in queue..."
                                   .format(wait, running, len(queue)))
                             time.sleep(wait)
                             if wait < max_wait:
@@ -155,7 +164,7 @@ class BackupDatabases:
                             print("")
 
 def main():
-    parser = argparse.ArgumentParser(description="Backup databases")
+    parser = argparse.ArgumentParser(description="Restore databases")
 
     parser.add_argument('--host', default='localhost',
                         metavar='HOST',
@@ -167,13 +176,13 @@ def main():
     parser.add_argument('--database', nargs='+',
                         help='The database name')
     parser.add_argument('--root',
-                        help='The root directory for backups (on the host!)')
+                        help='The root directory for restores (on the host!)')
     parser.add_argument('--journal-archiving', action='store_true',
                         help='Turn on journal archiving')
     parser.add_argument('--incremental', action='store_true',
-                        help='Perform incremental backup')
+                        help='Perform incremental restore')
     parser.add_argument('--max-parallel', default=5, type=int,
-                        help='Maximum number of backups to run in parallel.')
+                        help='Maximum number of restores to run in parallel.')
     parser.add_argument('--lag-limit',
                         help='The lag limit')
     parser.add_argument('--dry-run', action='store_true',
@@ -183,33 +192,33 @@ def main():
 
     args = vars(parser.parse_args())
 
-    backup = BackupDatabases()
+    restore = RestoreDatabases()
 
     for opt in args:
         arg = args[opt]
 
         if opt == 'host':
-            backup.set_host(arg)
+            restore.set_host(arg)
         elif opt == 'user':
-            backup.set_user(arg)
+            restore.set_user(arg)
         elif opt == 'password':
-            backup.set_pass(arg)
+            restore.set_pass(arg)
         elif opt == 'database':
-            backup.set_databases(arg)
+            restore.set_databases(arg)
         elif opt == 'root':
-            backup.set_backup_root(arg)
+            restore.set_restore_root(arg)
         elif opt == 'journal_archiving':
-            backup.set_journal_archiving(arg)
+            restore.set_journal_archiving(arg)
         elif opt == 'incremental':
-            backup.set_incremental(arg)
+            restore.set_incremental(arg)
         elif opt == 'lag_limit':
-            backup.set_lag_limit(arg)
+            restore.set_lag_limit(arg)
         elif opt == 'max_parallel':
-            backup.set_max_parallel(arg)
+            restore.set_max_parallel(arg)
         elif opt == 'database':
-            backup.set_database(arg)
+            restore.set_database(arg)
         elif opt == 'dry_run':
-            backup.set_dry_run(arg)
+            restore.set_dry_run(arg)
         elif opt == 'debug':
             pass
         else:
@@ -220,9 +229,9 @@ def main():
         logging.basicConfig(level=logging.WARNING)
         logging.getLogger("requests").setLevel(logging.WARNING)
         logging.getLogger("marklogic").setLevel(logging.DEBUG)
-        logging.getLogger("marklogic.connection").setLevel(logging.INFO)
+        logging.getLogger("marklogic.connection").setLevel(logging.DEBUG)
 
-    backup.backup_databases()
+    restore.restore_databases()
 
 if __name__ == '__main__':
   main()
