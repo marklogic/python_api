@@ -1185,6 +1185,18 @@ class Server(Model,PropertyLists):
         self._config['ssl-require-client-certificate'] = ssl_require_client_certificate
         return self
 
+    def ssl_client_certificate_pems(self):
+        return self.get_property_list('ssl-client-certificate-pem')
+
+    def set_ssl_client_certificate_pems(self, pems):
+        return self.set_property_list('ssl-client-certificate-pem', pems, str)
+
+    def add_ssl_client_certificate_pem(self, pem):
+        return self.add_to_property_list('ssl-client-certificate-pem', pem, str)
+
+    def remove_ssl_client_certificate_pem(self, pem):
+        return self.remove_from_property_list('ssl-client-certificate-pem', pem, str)
+
     def threads(self):
         """
         The maximum number of server threads allowed.
