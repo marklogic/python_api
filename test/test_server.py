@@ -26,6 +26,7 @@ import unittest
 from marklogic.connection import Connection
 from marklogic.models.server import Server, HttpServer, XdbcServer
 from marklogic.models.server import OdbcServer, WebDAVServer
+from marklogic.models.cluster import LocalCluster
 from test.resources import TestConnection as tc
 
 class TestServer(unittest.TestCase):
@@ -98,6 +99,19 @@ class TestServer(unittest.TestCase):
         self.assertIsNone(server)
 
     def test_ssl_certificate_pems(self):
+        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
+        cluster = LocalCluster(connection=connection)
+        version = cluster.version()
+
+        if (version.startswith("4") or version.startswith("5")
+            or version.startswith("6") or version.startswith("7")
+            or version.startswith("8.0-1") or version.startswith("8.0-2")
+            or version.startswith("8.0-3")):
+            pass
+        else:
+            self._test_ssl_certificate_pems()
+
+    def _test_ssl_certificate_pems(self):
         connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
         server = HttpServer("foo-http", "Default", 10101, '/', 'Documents')
         self.assertEqual(server.server_name(), "foo-http")
