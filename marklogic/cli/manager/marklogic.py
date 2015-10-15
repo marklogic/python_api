@@ -26,8 +26,8 @@ A class to manage setup activities on the server.
 
 import json, logging, os, re, requests, shutil, socket, subprocess, sys, time
 from http.client import BadStatusLine
-from requests.packages.urllib3.exceptions import ProtocolError
-from requests.exceptions import ConnectionError
+from requests.packages.urllib3.exceptions import ProtocolError,ReadTimeoutError
+from requests.exceptions import ConnectionError,ReadTimeout
 from marklogic.cli.manager import Manager
 from marklogic.models.user import User
 from marklogic.models.host import Host
@@ -100,7 +100,6 @@ class MarkLogicManager(Manager):
             status = "up"
         except TypeError:
             self.logger.debug("{0}: {1}".format(response.status_code,
-
                                            response.text))
             pass
         except BadStatusLine:
@@ -110,6 +109,12 @@ class MarkLogicManager(Manager):
         except ProtocolError:
             self.logger.debug("{0}: {1}".format(response.status_code,
                                            response.text))
+            pass
+        except ReadTimeoutError:
+            self.logger.debug("ReadTimeoutError error...")
+            pass
+        except ReadTimeout:
+            self.logger.debug("ReadTimeout error...")
             pass
         except ConnectionError:
             self.logger.debug("Connection error...")
