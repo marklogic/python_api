@@ -65,6 +65,25 @@ class LocalCluster(Model):
 
         return self
 
+    def view(self, viewname, connection=None):
+        if connection is None:
+            connection = self.connection
+
+        uri = connection.uri("", properties=None, parameters=["view="+viewname])
+        response = connection.get(uri)
+
+        if response.status_code == 200:
+            return json.loads(response.text)
+        else:
+            return None
+
+    def version(self):
+        status = self.view("status")
+        if status is None:
+            return None
+        else:
+            return status["local-cluster-status"]["version"]
+
     def update(self, connection=None):
         if connection is None:
             connection = self.connection

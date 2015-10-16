@@ -8,13 +8,14 @@ from marklogic.connection import Connection
 from marklogic.cli.template import Template
 
 class MMA():
-  def __init__(self):
+  def __init__(self,connection=None):
     try:
       inifile = "{0}/.marklogic.ini".format(os.environ['HOME'])
     except KeyError:
       print("Configuration problem, no HOME in environment?")
       sys.exit(1)
 
+    self.connection = connection
     self.config = configparser.ConfigParser()
     self.config.read(inifile)
     self.cli = Template()
@@ -133,17 +134,18 @@ class MMA():
              args['credentials'])
       sys.exit(1)
 
-    host = args['hostname']
-    conn = Connection(host, HTTPDigestAuth(username, password))
+    if self.connection is None:
+      host = args['hostname']
+      self.connection = Connection(host, HTTPDigestAuth(username, password))
 
     # do it!
     if command == 'run':
       self.process_script(args['script'])
     else:
       if artifact is None:
-        templ["code"](args, self.config, conn)
+        templ["code"](args, self.config, self.connection)
       else:
-        templ[artifact]["code"](args, self.config, conn)
+        templ[artifact]["code"](args, self.config, self.connection)
 
   def process_script(self, scriptfn):
     print("Running", scriptfn)

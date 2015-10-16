@@ -26,7 +26,7 @@ from marklogic.connection import Connection
 from marklogic.models.certificate.authority import Authority
 from test.resources import TestConnection as tc
 
-class TestAuthority(unittest.TestCase):
+class TestCertAuthority(unittest.TestCase):
     def test_list(self):
         connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
 

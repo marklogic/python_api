@@ -34,7 +34,7 @@ class ServerManager(Manager):
     The ServerManager performs operations on servers.
     """
     def __init__(self):
-        pass
+        self.logger = logging.getLogger("marklogic.cli")
 
     def list(self, args, config, connection):
         stype = args['type']
@@ -73,22 +73,22 @@ class ServerManager(Manager):
             stype = server.server_type()
         else:
             if stype == 'http':
-                server = HttpServer(args['name'], args['group'], args['port'],
+                server = HttpServer(name, group, args['port'],
                                     args['root'], args['database'],
                                     args['modules'],
                                     connection=connection)
             elif stype == 'odbc':
-                server = OdbcServer(args['name'], args['group'], args['port'],
+                server = OdbcServer(name, group, args['port'],
                                     args['root'], args['database'],
                                     args['modules'],
                                     connection=connection)
             elif stype == 'xdbc':
-                server = XdbcServer(args['name'], args['group'], args['port'],
+                server = XdbcServer(name, group, args['port'],
                                     args['root'], args['database'],
                                     args['modules'],
                                     connection=connection)
             elif stype == 'webdav':
-                server = WebDAVServer(args['name'], args['group'], args['port'],
+                server = WebDAVServer(name, group, args['port'],
                                       args['root'], args['database'],
                                       connection=connection)
             else:
@@ -97,26 +97,28 @@ class ServerManager(Manager):
 
         if server.exists(connection):
             print("Error: Server already exists: {0} in group {1}"
-                  .format(args['name'], args['group']))
+                  .format(name, group))
             sys.exit(1)
 
         self._properties(server, args)
 
-        print("Create {0} server {0}...".format(stype,name))
+        print("Create {0} server {1}...".format(stype,name))
         server.create()
 
     def modify(self, args, config, connection):
-        server = Server.lookup(connection, args['name'], args['group'])
+        name = args['name']
+        group = args['group']
+        server = Server.lookup(connection, name, group)
         if server is None:
             print("Error: Server does not exist: {0} in group {1}"
-                  .format(args['name'], args['group']))
+                  .format(name,group))
             sys.exit(1)
 
         if args['json'] is not None:
-            newsrv = self._read(args['name'], args['group'],
-                                server.server_type(), args['json'])
-            newsrv.connection = server.connection
-            server = newsrv
+            server = self._read(None, group,
+                                server.server_type(), args['json'],
+                                connection=connection)
+            server.name = name
 
         self._properties(server, args)
 

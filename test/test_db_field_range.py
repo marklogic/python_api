@@ -27,7 +27,7 @@ from marklogic.models.database.index import FieldRangeIndex
 from marklogic.models.database.field import PathField, RootField, FieldPath
 from marklogic.models.database.field import IncludedElement, ExcludedElement
 
-class TestField(unittest.TestCase):
+class TestDbFieldRange(unittest.TestCase):
     def test_create_field(self):
         db = Database("testdb")
 

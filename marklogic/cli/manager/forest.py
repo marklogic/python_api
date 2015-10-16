@@ -84,20 +84,20 @@ class ForestManager(Manager):
             database.update(connection)
 
     def modify(self, args, config, connection):
-        forest = Database(args['name'], connection=connection)
+        name = args['name']
+        forest = Forest(name, connection=connection)
         if not forest.exists():
-            print("Error: Forest does not exist: {0}".format(args['name']))
+            print("Error: Forest does not exist: {0}".format(name))
             sys.exit(1)
 
         if args['json'] is not None:
-            newforest = self._read(args['name'], args['json'])
-            newforest.connection = forest.connection
-            if newforest.host() is None:
-                newforest.set_host(args['forest_host'])
-            forest = newforest
+            forest = self._read(None, args['json'], connection=connection)
+            if forest.host() is None and 'forest_host' in args:
+                forest.set_host(args['forest_host'])
+            forest.name = name
 
         self._properties(forest, args)
-        print("Modify forest {0}...".format(args['name']))
+        print("Modify forest {0}...".format(name))
         forest.update(connection=connection)
 
     def delete(self, args, config, connection):

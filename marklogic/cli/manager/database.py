@@ -63,21 +63,23 @@ class DatabaseManager(Manager):
         database.create(connection=connection)
 
     def modify(self, args, config, connection):
-        database = Database(args['name'], connection=connection)
+        name = args['name']
+        database = Database(name, connection=connection)
         if not database.exists():
             print("Error: Database does not exist: {0}".format(args['name']))
             sys.exit(1)
 
         if args['json'] is not None:
-            database = self._read(args['name'], args['json'],
+            database = self._read(None, args['json'],
                                   connection=connection)
+            database.name = name
 
         self.forests = []
         self._properties(database, args)
         if len(self.forests) > 0:
             database.set_forest_names(self.forests)
 
-        print("Modify database {0}...".format(args['name']))
+        print("Modify database {0}...".format(name))
         database.update(connection=connection)
 
     def delete(self, args, config, connection):

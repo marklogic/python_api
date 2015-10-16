@@ -24,7 +24,7 @@ from __future__ import unicode_literals, print_function, absolute_import
 import unittest
 from marklogic.models.certificate.request import Request
 
-class TestRequest(unittest.TestCase):
+class TestCertRequest(unittest.TestCase):
     def test_request(self):
         req = Request(countryName="US", stateOrProvinceName="TX",
                       localityName="Austin", organizationName="MarkLogic",
