@@ -214,6 +214,17 @@ def validate_point_format(raw_val):
     if raw_val not in ['point', 'lat-long-point']:
         raise ValidationError("Invalid point format", repr(raw_val))
 
+def validate_geohash_precision(raw_val):
+    """
+    Validate a geospatial hash precision.
+    """
+    if type(raw_val) is str:
+        raw_val = int(raw_val)
+    if type(raw_val) is not int:
+        raise ValidationError("Geohash precision must be an integer")
+    if raw_val > 12 or raw_val < 1:
+        raise ValidationError("Geohash precision must be 1-12, inclusive")
+
 def validate_capability(raw_val):
     """
     Validate a capability.

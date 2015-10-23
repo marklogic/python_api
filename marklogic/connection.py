@@ -47,6 +47,7 @@ class Connection:
         self.root = root
         self.version = version
         self.logger = logging.getLogger("marklogic.connection")
+        self.payload_logger = logging.getLogger("marklogic.connection.payloads")
 
     # You'd expect parameters to be a dictionary, but then it couldn't
     # have repeated keys, so it's an array.
@@ -87,8 +88,8 @@ class Connection:
     def get(self, uri, accept="application/json"):
         headers = {'accept': accept}
         self.logger.debug("GET  {0}...".format(uri))
-        self.logger.debug("Headers:")
-        self.logger.debug(json.dumps(headers, indent=2))
+        self.payload_logger.debug("Headers:")
+        self.payload_logger.debug(json.dumps(headers, indent=2))
 
         self.response = requests.get(uri, auth=self.auth, headers=headers)
         return self._response()
@@ -102,14 +103,14 @@ class Connection:
             headers['if-match'] = etag
 
         self.logger.debug("POST {0}...".format(uri))
-        self.logger.debug("Headers:")
-        self.logger.debug(json.dumps(headers, indent=2))
+        self.payload_logger.debug("Headers:")
+        self.payload_logger.debug(json.dumps(headers, indent=2))
         if payload != None:
-            self.logger.debug("Payload:")
+            self.payload_logger.debug("Payload:")
             if content_type == 'application/json':
-                self.logger.debug(json.dumps(payload, indent=2))
+                self.payload_logger.debug(json.dumps(payload, indent=2))
             else:
-                self.logger.debug(payload)
+                self.payload_logger.debug(payload)
 
         if payload is None:
             self.response = requests.post(uri, auth=self.auth, headers=headers)
@@ -132,14 +133,14 @@ class Connection:
             headers['if-match'] = etag
 
         self.logger.debug("PUT  {0}...".format(uri))
-        self.logger.debug("Headers:")
-        self.logger.debug(json.dumps(headers, indent=2))
+        self.payload_logger.debug("Headers:")
+        self.payload_logger.debug(json.dumps(headers, indent=2))
         if payload != None:
-            self.logger.debug("Payload:")
+            self.payload_logger.debug("Payload:")
             if content_type == 'application/json':
-                self.logger.debug(json.dumps(payload, indent=2))
+                self.payload_logger.debug(json.dumps(payload, indent=2))
             else:
-                self.logger.debug(payload)
+                self.payload_logger.debug(payload)
 
         if payload is None:
             self.response = requests.put(uri, auth=self.auth, headers=headers)
@@ -158,14 +159,14 @@ class Connection:
             headers['if-match'] = etag
 
         self.logger.debug("DELETE {0}...".format(uri))
-        self.logger.debug("Headers:")
-        self.logger.debug(json.dumps(headers, indent=2))
+        self.payload_logger.debug("Headers:")
+        self.payload_logger.debug(json.dumps(headers, indent=2))
         if payload != None:
-            self.logger.debug("Payload:")
+            self.payload_logger.debug("Payload:")
             if content_type == 'application/json':
-                self.logger.debug(json.dumps(payload, indent=2))
+                self.payload_logger.debug(json.dumps(payload, indent=2))
             else:
-                self.logger.debug(payload)
+                self.payload_logger.debug(payload)
 
         if payload is None:
             self.response = requests.delete(uri, auth=self.auth, headers=headers)
@@ -179,7 +180,7 @@ class Connection:
         response = self.response
 
         self.logger.debug("Status code: {0}".format(response.status_code))
-        self.logger.debug(response.text)
+        self.payload_logger.debug(response.text)
 
         if response.status_code < 300:
             pass
