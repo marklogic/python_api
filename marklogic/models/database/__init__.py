@@ -38,6 +38,7 @@ from marklogic.models.database.index import ElementRangeIndex, AttributeRangeInd
 from marklogic.models.database.index import PathRangeIndex, FieldRangeIndex
 from marklogic.models.database.index import GeospatialElementIndex
 from marklogic.models.database.index import GeospatialPathIndex
+from marklogic.models.database.index import GeospatialRegionIndex
 from marklogic.models.database.index import GeospatialElementChildIndex
 from marklogic.models.database.index import GeospatialElementPairIndex
 from marklogic.models.database.index import GeospatialElementAttributePairIndex
@@ -3576,6 +3577,13 @@ class Database(Model,PropertyLists):
                                                index['invalid-values'])
                     olist.append(temp)
                 result._config['geospatial-path-index'] = olist
+            elif key == 'geospatial-region-index':
+                for index in result._config['geospatial-region-index']:
+                    temp = GeospatialRegionIndex(index['path-expression'],
+                                                 index['coordinate-system'],
+                                                 index['geohash-precision'])
+                    olist.append(temp)
+                result._config['geospatial-region-index'] = olist
             elif key == 'merge-blackout':
                 for blackout in result._config['merge-blackout']:
                     temp = None
@@ -3707,6 +3715,7 @@ class Database(Model,PropertyLists):
                 or key == 'range-path-index'
                 or key == 'geospatial-element-index'
                 or key == 'geospatial-path-index'
+                or key == 'geospatial-region-index'
                 or key == 'geospatial-element-child-index'
                 or key == 'geospatial-element-pair-index'
                 or key == 'geospatial-element-attribute-pair-index'
@@ -3788,6 +3797,9 @@ class Database(Model,PropertyLists):
         elif isinstance(index_def, GeospatialPathIndex):
             return self.add_to_property_list('geospatial-path-index',
                                              index_def, GeospatialPathIndex)
+        elif isinstance(index_def, GeospatialRegionIndex):
+            return self.add_to_property_list('geospatial-region-index',
+                                             index_def, GeospatialRegionIndex)
         else:
             raise ValidationError('Not an index', index_def)
 

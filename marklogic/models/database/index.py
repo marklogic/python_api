@@ -27,6 +27,8 @@ from marklogic.utilities.validators import validate_index_invalid_value_actions
 from marklogic.utilities.validators import validate_boolean
 from marklogic.utilities.validators import validate_collation
 from marklogic.utilities.validators import validate_coordinate_system
+from marklogic.utilities.validators import validate_point_format
+from marklogic.utilities.validators import validate_geohash_precision
 
 class _Index(Model):
     """
@@ -440,7 +442,7 @@ class _GeospatialIndex(_Index):
 
         :return: The index object
         """
-        # FIXME: validate_point_format(point_format)
+        validate_point_format(point_format)
         self._config['point-format'] = point_format
         return self
 
@@ -651,4 +653,22 @@ class GeospatialElementAttributePairIndex(GeospatialElementPairIndex):
             'coordinate-system': coordinate_system,
             'range-value-positions': range_value_positions,
             'invalid-values': invalid_values
+        }
+
+class GeospatialRegionIndex(_GeospatialIndex, _PathExpressionIndex):
+    """
+    A geospatial region index.
+    """
+    def __init__(self, path_expr,
+                 coordinate_system="wgs84", geohash_precision=6):
+        """
+        Create a geospatial region index.
+        """
+        validate_coordinate_system(coordinate_system)
+        validate_geohash_precision(geohash_precision)
+
+        self._config = {
+            'path-expression': path_expr,
+            'coordinate-system': coordinate_system,
+            'geohash-precision': geohash_precision
         }
