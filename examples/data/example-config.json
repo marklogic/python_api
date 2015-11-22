@@ -1,0 +1,39 @@
+{
+	"roles":[
+		{
+			"role-name":"example-role"
+		}
+	],
+	"privileges":[
+		
+	],
+	"users":[
+		{
+			"user-name":"exampleUser",
+			"password":"password",
+			"description":"Example User"
+		}
+	],
+	"forests":[
+		{
+			"forest-name":"exampleDB-Forest-001",
+			"host":"localhost.localdomain"
+		}
+	],
+	"databases":[
+		{
+			"database-name":"exampleDB"
+		}
+	],
+	"servers":[
+		{
+			"server-name":"exampleHttpServer",
+			"group-name":"Default",
+			"server-type":"http",
+			"root":"/",
+			"port":"8888",
+			"content-database":"exampleDB",
+			"modules-database":"exampleDB"
+		}
+	]
+}
