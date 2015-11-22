@@ -601,6 +601,14 @@ class Field(Model,PropertyLists):
                         item['attribute-value'])
                     elems.append(elem)
                 self._config[key] = elems
+            elif key == 'tokenizer-override':
+                elems = []
+                for item in field[key]:
+                    over = TokenizerOverride(
+                        item['character'],
+                        item['tokenizer-class'])
+                    elems.append(over)
+                self._config[key] = elems
             elif key == 'tokenizer-overrides':
                 if field[key] is None:
                     pass
