@@ -337,12 +337,11 @@ class MarkLogicManager(Manager):
     def debug(self, args, config, connection):
         section = config[args['config']]
         if 'diagnostic-events' in section:
-            events = section['diagnostic-events'].strip()
-            if events == '':
-                events = []
-            else:
-                events = re.sub(r'\s+', '', events)
-                events = events.split(',')
+            events = []
+            devents = section['diagnostic-events'].strip()
+            if devents != '':
+                for event in devents.split(","):
+                    events.append(event.strip())
         else:
             events = []
 
