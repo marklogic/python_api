@@ -64,7 +64,10 @@ class MarkLogicManager(Manager):
 
     def init(self, args, config, connection):
         status = self.status(args,config,connection,internal=True)
-        if status != 'up':
+        if status == 'up':
+            print("Cannot initialize a running host!")
+            sys.exit(1)
+        else:
             if connection.host == 'localhost':
                 try:
                     data = config[args['config']]['datadir']
