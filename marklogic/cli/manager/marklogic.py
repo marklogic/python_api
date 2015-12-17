@@ -64,7 +64,10 @@ class MarkLogicManager(Manager):
 
     def init(self, args, config, connection):
         status = self.status(args,config,connection,internal=True)
-        if status != 'up':
+        if status == 'up':
+            print("Cannot initialize a running host!")
+            sys.exit(1)
+        else:
             if connection.host == 'localhost':
                 try:
                     data = config[args['config']]['datadir']
@@ -337,12 +340,11 @@ class MarkLogicManager(Manager):
     def debug(self, args, config, connection):
         section = config[args['config']]
         if 'diagnostic-events' in section:
-            events = section['diagnostic-events'].strip()
-            if events == '':
-                events = []
-            else:
-                events = re.sub(r'\s+', '', events)
-                events = events.split(',')
+            events = []
+            devents = section['diagnostic-events'].strip()
+            if devents != '':
+                for event in devents.split(","):
+                    events.append(event.strip())
         else:
             events = []
 
