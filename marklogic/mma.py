@@ -135,8 +135,13 @@ class MMA():
       sys.exit(1)
 
     if self.connection is None:
-      host = args['hostname']
-      self.connection = Connection(host, HTTPDigestAuth(username, password))
+      host = args['hostname'].split(":")[0]
+      try:
+        mgmt_port = args['hostname'].split(":")[1]
+      except IndexError:
+        mgmt_port = 8002
+      self.connection = Connection(host, HTTPDigestAuth(username, password),
+                                     management_port=mgmt_port)
 
     # do it!
     if command == 'run':
