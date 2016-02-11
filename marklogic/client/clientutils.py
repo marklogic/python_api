@@ -25,18 +25,18 @@ Client utility functions
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-import json, logging, time
-from marklogic.connection import Connection
-from marklogic.client.exceptions import *
+import logging
 from marklogic.client.eval import Eval
 from requests_toolbelt import MultipartDecoder
 
 class ClientUtils:
     """
-    The ClientUtils class encapsulates an object with a variety of utility methods.
-    They're not static because it's convenient to have the connection cached.
+    The ClientUtils class provides a few utility methods.
+
+    They're not static because it's convenient to have the connection
+    cached.
     """
-    def __init__(self,connection=None,save_connection=True):
+    def __init__(self, connection=None, save_connection=True):
         """
         Create a ClientUtils object.
         """
