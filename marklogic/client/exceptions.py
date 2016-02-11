@@ -28,6 +28,7 @@ class MLClientException(Exception):
     Base class for MarkLogic client exceptions.
     """
     def __init__(self, message):
+        super(MLClientException, self).__init__()
         self._message = message
 
 class UnauthorizedAPIRequest(MLClientException):

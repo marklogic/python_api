@@ -25,16 +25,14 @@ Support the v1/transactions endpoint
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-import json, logging, time
-from marklogic.connection import Connection
-from marklogic.client.exceptions import *
+import json, logging
 from requests_toolbelt import MultipartDecoder
 
 class Transactions:
+    """The Transactions class encapsulates a call to the Client API
+    v1/transactions endpoint.
     """
-    The Transactions class encapsulates a call to the Client API v1/transactions endpoint.
-    """
-    def __init__(self,connection=None,save_connection=True):
+    def __init__(self, connection=None, save_connection=True):
         """
         Create a transactions object.
         """
@@ -47,12 +45,14 @@ class Transactions:
         self.clear()
 
     def _get(self, name):
+        """Internal method to conditionally get a config variable"""
         if name in self._config:
             return self._config[name]
         else:
             return None
 
     def _set(self, name, value):
+        """Internal method to conditionally set a config variable"""
         if name in self._config:
             del self._config[name]
         if value is not None:
@@ -60,30 +60,46 @@ class Transactions:
         return self
 
     def set_name(self, name):
+        """Set the transaction name"""
         return self._set('name', name)
 
     def name(self):
+        """Get the transaction name"""
         return self._get('name')
 
     def set_txid(self, txid):
+        """Set the transaction ID"""
         return self._set('txid', txid)
 
     def txid(self):
+        """Get the transaction ID"""
         return self._get('txid')
 
     def set_timeLimit(self, limit):
+        """Set the transaction time limit"""
         return self._set('timeLimit', limit)
 
     def timeLimit(self):
+        """Get the transaction time limit"""
         return self._get('timeLimit')
 
     def set_database(self, dbname):
+        """Set the database"""
         return self._set('database', dbname)
 
     def database(self):
+        """Get the database"""
         return self._get('database')
 
     def set_format(self, form):
+        """
+        Set the format parameter for responses.
+
+        If the format is 'json', the accept header will be set to
+        application/json, otherwise the accept header will be set to
+        application/xml. If you want to specify a different accept
+        header, call set_accept() after calling set_format().
+        """
         self._set('format', form)
         if form == "json":
             self._config['accept'] = "application/json"
@@ -92,19 +108,28 @@ class Transactions:
         return self
 
     def format(self):
+        """Get the format"""
         return self._get('format')
 
     def set_accept(self, accept):
+        """Set the accept header"""
         return self._set('accept', accept)
 
     def accept(self):
+        """Get the accept header"""
         return self._get('accept')
 
     def clear(self):
+        """Clear the object; return it to its initial state"""
         self._config = {}
         self._config['accept'] = "application/xml"
 
     def create(self, connection=None):
+        """Create a transaction.
+
+        If successful, the transaction ID will be set in the configuration
+        of this object.
+        """
         if connection is None:
             connection = self.connection
 
@@ -117,7 +142,8 @@ class Transactions:
 
         params = "?" + "&".join(fields)
 
-        response = connection.post(uri + params, payload=None, content_type="text/plain",
+        response = connection.post(uri + params, payload=None, \
+                                       content_type="text/plain", \
                                        accept="application/json")
 
         if response.status_code == 200:
@@ -127,6 +153,7 @@ class Transactions:
         return response
 
     def get(self, txid=None, connection=None):
+        """Get the properties associated with the transaction."""
         if connection is None:
             connection = self.connection
 
@@ -146,12 +173,15 @@ class Transactions:
         return response
 
     def commit(self, txid=None, connection=None):
+        """Commit the transaction"""
         return self._result("commit", txid, connection)
 
     def rollback(self, txid=None, connection=None):
+        """Roll back the transaction"""
         return self._result("rollback", txid, connection)
 
     def _result(self, result, txid=None, connection=None):
+        """Internal method to commit or rollback a transaction."""
         if connection is None:
             connection = self.connection
 
@@ -166,8 +196,7 @@ class Transactions:
         uri = connection.client_uri("transactions")
         uri = uri + "/" + txid + "?result=" + result
 
-        response = connection.post(uri, payload=data, accept=self._config['accept'])
+        response = connection.post(uri, payload=data, \
+                                       accept=self._config['accept'])
 
         return response
-
-
