@@ -45,7 +45,8 @@ setup(
     long_description=long_description,
     packages=find_packages(exclude=['test']),
     install_requires=[
-        'requests>=2.5.0'
+        'requests>=2.5.0',
+        'requests_toolbelt>=0.6.0'
     ],
     include_package_data=True,
     platforms='any',

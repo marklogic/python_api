@@ -38,7 +38,7 @@ class Connection:
     """
     def __init__(self, host, auth,
                  protocol="http", port=8000, management_port=8002,
-                 root="manage", version="v2"):
+                 root="manage", version="v2", client_version="v1"):
         self.host = host
         self.auth = auth
         self.protocol = protocol
@@ -46,6 +46,7 @@ class Connection:
         self.management_port = management_port
         self.root = root
         self.version = version
+        self.client_version = client_version
         self.logger = logging.getLogger("marklogic.connection")
         self.payload_logger = logging.getLogger("marklogic.connection.payloads")
 
@@ -80,13 +81,32 @@ class Connection:
 
         return uri
 
+    def client_uri(self, path, protocol=None, host=None, port=None, version=None):
+        if protocol is None:
+            protocol = self.protocol
+        if host is None:
+            host = self.host
+        if port is None:
+            port = self.port
+        if version is None:
+            version = self.client_version
+
+        uri = "{0}://{1}:{2}/{3}/{4}" \
+          .format(protocol, host, port, version, path)
+
+        return uri
+
     def head(self, uri, accept="application/json"):
         self.logger.debug("HEAD {0}...".format(uri))
         self.response = requests.head(uri, auth=self.auth)
         return self._response()
 
-    def get(self, uri, accept="application/json"):
-        headers = {'accept': accept}
+    def get(self, uri, accept="application/json", headers=None):
+        if headers is None:
+            headers = {'accept': accept}
+        else:
+            headers['accept'] = accept
+
         self.logger.debug("GET  {0}...".format(uri))
         self.payload_logger.debug("Headers:")
         self.payload_logger.debug(json.dumps(headers, indent=2))
@@ -145,8 +165,12 @@ class Connection:
         if payload is None:
             self.response = requests.put(uri, auth=self.auth, headers=headers)
         else:
-            self.response = requests.put(uri, json=payload,
-                                         auth=self.auth, headers=headers)
+            if content_type == "application/json":
+                self.response = requests.put(uri, json=payload,
+                                                 auth=self.auth, headers=headers)
+            else:
+                self.response = requests.put(uri, data=payload,
+                                                 auth=self.auth, headers=headers)
 
         return self._response()
 
