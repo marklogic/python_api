@@ -23,11 +23,11 @@ from marklogic.connection import Connection
 conn = Connection("192.168.200.162", HTTPDigestAuth("admin","admin"))
 
 uri = "http://192.168.200.162:8004/LATEST/config/properties"
-data = open("./props.json", 'rb').read()
+data = open("./data/props.json", 'rb').read()
 response = conn.putFile(uri=uri, data=data)
 print(response)
 
-uri = "http://192.168.200.162:8004/LATEST/config/transforms/accessControl"
-data = open("./accessControl.sjs", 'rb').read()
+uri = "http://192.168.200.162:8004/LATEST/config/transforms/simpleExtension"
+data = open("./data/simpleExtension.sjs", 'rb').read()
 response = conn.putFile(uri=uri, data=data, content_type="application/vnd.marklogic-javascript")
 print(response)
