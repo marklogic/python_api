@@ -175,6 +175,22 @@ class Connection:
 
         return self._response()
 
+    def putFile(self, uri, data, etag=None,
+            content_type="application/json", accept="application/json"):
+
+        headers = {'content-type': content_type,
+                   'accept': accept}
+        if etag is not None:
+            headers['if-match'] = etag
+
+        self.logger.debug("PUT  {0}...".format(uri))
+        self.payload_logger.debug("Headers:")
+        self.payload_logger.debug(json.dumps(headers, indent=2))
+
+        self.response = requests.put(uri, data=data, auth=self.auth, headers=headers, verify=self.verify)
+
+        return self._response()
+
     def delete(self, uri, payload=None, etag=None,
                content_type="application/json", accept="application/json"):
 
