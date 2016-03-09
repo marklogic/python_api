@@ -50,9 +50,15 @@ project and run `python setup.py install`.
 Running Tests
 =============
 
-To run tests, edit the `test/resources.py` and `tests/settings.py`
-files to match your MarkLogic setup. The tests reference these values
-to connect with your MarkLogic server.
+Edit the `test/resources.py` and `tests/settings.py` files to match your
+MarkLogic setup. The tests reference these values to connect with
+your MarkLogic server.
+
+To run tests
+
+```
+python3 setup.py test
+```
 
 Credits
 =======
