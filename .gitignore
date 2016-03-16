@@ -58,3 +58,7 @@ target/
 
 # Examples cruft
 examples/.mlcp/
+
+# Configuration files
+mlconfig.json
+.python-version
