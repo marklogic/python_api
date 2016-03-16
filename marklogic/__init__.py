@@ -21,7 +21,6 @@ A MarkLogic server
 import logging
 import requests
 import json
-import logging
 from marklogic.connection import Connection
 from marklogic.models.cluster import LocalCluster
 from marklogic.models.host import Host
@@ -32,18 +31,18 @@ from marklogic.models.database import Database
 from marklogic.models.forest import Forest
 from requests.auth import HTTPDigestAuth
 from marklogic.models.server import Server, HttpServer, WebDAVServer
-from marklogic.models.server import OdbcServer, XdbcServer, WebDAVServer
-from marklogic.exceptions import *
+from marklogic.models.server import OdbcServer, XdbcServer
+from marklogic.exceptions import InvalidAPIRequest, UnexpectedManagementAPIResponse
 
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 
 class MarkLogic:
     """
-    The server class provides methods for manipulating a server cluster
+    The MarkLogic class represents a local cluster.
     """
     def __init__(self, connection=None, save_connection=True):
         """
-        Create a server object
+        Create a MarkLogic object.
         """
         self.save_connection = save_connection
         if save_connection:
@@ -53,6 +52,9 @@ class MarkLogic:
         self.logger = logging.getLogger("marklogic")
 
     def cluster(self, connection=None):
+        """
+        Get information about the local cluster.
+        """
         if connection is None:
             cluster = LocalCluster(self.connection, self.save_connection)
         else:
@@ -61,12 +63,18 @@ class MarkLogic:
         return cluster.read()
 
     def groups(self, connection=None):
+        """
+        Get a list of the groups in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
         return Group.list(connection)
 
     def group(self, group_name, connection=None):
+        """
+        Get the named group.
+        """
         if connection is None:
             group = Group(group_name, self.connection, self.save_connection)
         else:
@@ -75,12 +83,18 @@ class MarkLogic:
         return group.read()
 
     def hosts(self, connection=None):
+        """
+        Get a list of the hosts in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
         return Host.list(connection)
 
     def host(self, host_name, connection=None):
+        """
+        Get the named host.
+        """
         if connection is None:
             host = Host(host_name, self.connection, self.save_connection)
         else:
@@ -89,12 +103,18 @@ class MarkLogic:
         return host.read()
 
     def databases(self, connection=None):
+        """
+        Get a list of the databases in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
         return Database.list(connection)
 
     def database(self, database_name, host=None, connection=None):
+        """
+        Get the named database.
+        """
         if host is None:
             if connection is None:
                 db = Database(database_name, connection=self.connection,
@@ -118,12 +138,18 @@ class MarkLogic:
             return db.read(connection)
 
     def forests(self, connection=None):
+        """
+        Get a list of the forests in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
         return Forest.list(connection)
 
     def forest(self, forest_name, host=None, connection=None):
+        """
+        Get the named forest.
+        """
         if host is None:
             if connection is None:
                 db = Forest(forest_name, connection=self.connection,
@@ -147,12 +173,18 @@ class MarkLogic:
             return db.read(connection)
 
     def servers(self, connection=None):
+        """
+        Get a list of the servers in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
         return Server.list(connection)
 
     def http_servers(self, connection=None):
+        """
+        Get a list of the HTTP servers in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
@@ -161,6 +193,9 @@ class MarkLogic:
     def http_server(self, name, group='Default', port=0, root='/',
                     content_db_name=None, modules_db_name=None,
                     connection=None):
+        """
+        Get the named HTTP server.
+        """
         if connection is None:
              server = HttpServer(name, group, port, root,
                                  content_db_name, modules_db_name,
@@ -183,6 +218,9 @@ class MarkLogic:
         return server
 
     def odbc_servers(self, connection=None):
+        """
+        Get a list of the ODBC servers in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
@@ -191,15 +229,18 @@ class MarkLogic:
     def odbc_server(self, name, group='Default', port=0, root='/',
                     content_db_name=None, modules_db_name=None,
                     connection=None):
+        """
+        Get the named ODBC server.
+        """
         if connection is None:
-             server = OdbcServer(name, group, port, root,
-                                 content_db_name, modules_db_name,
-                                 connection=self.connection,
-                                 save_connection=self.save_connection)
+            server = OdbcServer(name, group, port, root,
+                                content_db_name, modules_db_name,
+                                connection=self.connection,
+                                save_connection=self.save_connection)
         else:
-             server = OcbcServer(name, group, port, root,
-                                 content_db_name, modules_db_name,
-                                 connection=connection, save_connection=False)
+            server = OdbcServer(name, group, port, root,
+                                content_db_name, modules_db_name,
+                                connection=connection, save_connection=False)
 
         if connection is None:
             server = server.read(self.connection)
@@ -213,6 +254,9 @@ class MarkLogic:
         return server
 
     def xdbc_servers(self, connection=None):
+        """
+        Get a list of the XDBC servers in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
@@ -221,15 +265,18 @@ class MarkLogic:
     def xdbc_server(self, name, group='Default', port=0, root='/',
                     content_db_name=None, modules_db_name=None,
                     connection=None):
+        """
+        Get the named XDBC server.
+        """
         if connection is None:
-             server = XdbcServer(name, group, port, root,
-                                 content_db_name, modules_db_name,
-                                 connection=self.connection,
-                                 save_connection=self.save_connection)
+            server = XdbcServer(name, group, port, root,
+                                content_db_name, modules_db_name,
+                                connection=self.connection,
+                                save_connection=self.save_connection)
         else:
-             server = XdbcServer(name, group, port, root,
-                                 content_db_name, modules_db_name,
-                                 connection=connection, save_connection=False)
+            server = XdbcServer(name, group, port, root,
+                                content_db_name, modules_db_name,
+                                connection=connection, save_connection=False)
 
         if connection is None:
             server = server.read(self.connection)
@@ -243,6 +290,9 @@ class MarkLogic:
         return server
 
     def webdav_servers(self, connection=None):
+        """
+        Get a list of the WebDAV servers in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
@@ -250,15 +300,18 @@ class MarkLogic:
 
     def webdav_server(self, name, group='Default', port=0, root='/',
                       content_db_name=None, connection=None):
+        """
+        Get the named WebDAV server.
+        """
         if connection is None:
-             server = WebDAVServer(name, group, port, root,
-                                   content_db_name,
-                                   connection=self.connection,
-                                   save_connection=self.save_connection)
+            server = WebDAVServer(name, group, port, root,
+                                  content_db_name,
+                                  connection=self.connection,
+                                  save_connection=self.save_connection)
         else:
-             server = WebDAVServer(name, group, port, root,
-                                   content_db_name,
-                                   connection=connection, save_connection=False)
+            server = WebDAVServer(name, group, port, root,
+                                  content_db_name,
+                                  connection=connection, save_connection=False)
 
         if connection is None:
             server = server.read(self.connection)
@@ -272,12 +325,18 @@ class MarkLogic:
         return server
 
     def users(self, connection=None):
+        """
+        Get a list of the users in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
         return User.list(connection)
 
     def user(self, user_name, password=None, connection=None):
+        """
+        Get the named user.
+        """
         if connection is None:
             connection = self.connection
             user = User(user_name, password, self.connection, self.save_connection)
@@ -287,12 +346,16 @@ class MarkLogic:
         return user.read(connection)
 
     def roles(self, connection=None):
+        """
+        Get a list of the roles in the local cluster.
+        """
         if connection is None:
             connection = self.connection
 
         return Role.list(connection)
 
     def role(self, role_name, connection=None):
+        """ Get the named role. """
         if connection is None:
             connection = self.connection
             role = Role(role_name, connection)
@@ -304,7 +367,7 @@ class MarkLogic:
     # =================================================================
 
     @classmethod
-    def instance_init(cls,host):
+    def instance_init(cls, host):
         """
         Performs first-time initialization of a newly installed server.
 
@@ -312,7 +375,7 @@ class MarkLogic:
         """
         conn = Connection(host, None)
 
-        uri = "{0}://{1}:8001/admin/v1/init".format(conn.protocol,conn.host)
+        uri = "{0}://{1}:8001/admin/v1/init".format(conn.protocol, conn.host)
 
         logger = logging.getLogger("marklogic")
         logger.debug("Initializing {0}".format(host))
