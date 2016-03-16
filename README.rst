@@ -50,9 +50,24 @@ project and run `python setup.py install`.
 Running Tests
 =============
 
-To run tests, edit the `test/resources.py` and `tests/settings.py`
-files to match your MarkLogic setup. The tests reference these values
-to connect with your MarkLogic server.
+The tests run using a default configuration:
+
+.. code-block: json
+    {
+        "hostname": "localhost",
+        "username": "admin",
+        "password": "admin",
+        "protocol": "http",
+        "port": 8000,
+        "management-port": 8002,
+        "root": "manage",
+        "version": "v2",
+        "client-version": "v1"
+    }
+
+If you want to change any of those defaults, create an `mlconfig.json`
+file in the `python_api` directory. You can omit the properties that
+you don’t need to change.
 
 Credits
 =======
