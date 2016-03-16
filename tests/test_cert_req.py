@@ -19,24 +19,22 @@
 #
 # Norman Walsh      05/13/2015     Initial development
 
-from __future__ import unicode_literals, print_function, absolute_import
-
-import unittest
+from mlconfig import MLConfig
 from marklogic.models.certificate.request import Request
 
-class TestCertRequest(unittest.TestCase):
+class TestCertRequest(MLConfig):
     def test_request(self):
         req = Request(countryName="US", stateOrProvinceName="TX",
                       localityName="Austin", organizationName="MarkLogic",
                       emailAddress="Norman.Walsh@marklogic.com",
                       version=0)
 
-        self.assertEqual("US", req.countryName())
-        self.assertEqual("TX", req.stateOrProvinceName())
-        self.assertEqual("Austin", req.localityName())
-        self.assertEqual("Norman.Walsh@marklogic.com", req.emailAddress())
-        self.assertEqual(0, req.version())
-        self.assertIsNone(req.v3ext())
+        assert "US" == req.countryName()
+        assert "TX" == req.stateOrProvinceName()
+        assert "Austin" == req.localityName()
+        assert "Norman.Walsh@marklogic.com" == req.emailAddress()
+        assert 0 == req.version()
+        assert req.v3ext() is None
 
         ext = {
             "nsCertType": {
@@ -54,8 +52,4 @@ class TestCertRequest(unittest.TestCase):
                       emailAddress="Norman.Walsh@marklogic.com",
                       version=0, v3ext=ext)
 
-        self.assertEqual("SSL Server", req.v3ext()["nsCertType"]["value"])
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert "SSL Server" == req.v3ext()["nsCertType"]["value"]

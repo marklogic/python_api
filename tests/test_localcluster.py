@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import
-
 #
 # Copyright 2015 MarkLogic Corporation
 #
@@ -22,29 +20,21 @@ from __future__ import unicode_literals, print_function, absolute_import
 # Norman Walsh      05/01/2015     Initial development
 #
 
-import unittest, logging
-from marklogic.connection import Connection
+from mlconfig import MLConfig
 from marklogic.models.cluster import LocalCluster
-from test.resources import TestConnection as tc
 
-class TestLocalCluster(unittest.TestCase):
+class TestLocalCluster(MLConfig):
     def test_lookup(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-        cluster = LocalCluster.lookup(connection)
-        self.assertIsNotNone(cluster)
+        cluster = LocalCluster.lookup(self.connection)
+        assert cluster is not None
 
     def test_status_view(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-        cluster = LocalCluster(connection=connection)
+        cluster = LocalCluster(connection=self.connection)
         status = cluster.view("status")
-        self.assertIsNotNone(status)
+        assert status is not None
 
     def test_version(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-        cluster = LocalCluster(connection=connection)
+        cluster = LocalCluster(connection=self.connection)
         status = cluster.view("status")
         version = status["local-cluster-status"]["version"]
-        self.assertIsNotNone(version)
-
-if __name__ == "__main__":
-    unittest.main()
+        assert version is not None
