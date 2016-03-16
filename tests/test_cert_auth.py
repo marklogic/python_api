@@ -19,24 +19,18 @@
 #
 # Norman Walsh      05/13/2015     Initial development
 
-from __future__ import unicode_literals, print_function, absolute_import
-
-import unittest
-from marklogic.connection import Connection
+from mlconfig import MLConfig
 from marklogic.models.certificate.authority import Authority
-from test.resources import TestConnection as tc
 
-class TestCertAuthority(unittest.TestCase):
+class TestCertAuthority(MLConfig):
     def test_list(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
+        names = Authority.list(self.connection, include_names=True)
 
-        names = Authority.list(connection, include_names=True)
-
-        self.assertGreater(len(names), 100)
+        assert len(names) > 50
         found = False
         for name in names:
             found = found or "Equifax" in name
-        self.assertEqual(True, found)
+        assert found
 
     def test_create(self):
         pem = ("-----BEGIN CERTIFICATE-----\n"
@@ -58,25 +52,20 @@ class TestCertAuthority(unittest.TestCase):
                "I0Bo+VZSaShQKipBEHS8sP8=\n"
                "-----END CERTIFICATE-----\n")
 
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
+        cert = Authority.create(self.connection, pem)
 
-        cert = Authority.create(connection, pem)
+        assert cert is not None
+        assert cert.enabled()
+        assert cert.properties() is not None
 
-        self.assertIsNotNone(cert)
-        self.assertEqual('true', cert.enabled())
-        self.assertIsNotNone(cert.properties())
-
-        cert.delete(connection)
-
+        cert.delete(self.connection)
 
     def test_lookup(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
+        names = Authority.list(self.connection)
+        auth = Authority.lookup(self.connection, names[0])
 
-        names = Authority.list(connection)
-        auth = Authority.lookup(connection, names[0])
-
-        self.assertIsNotNone(auth)
-        self.assertEqual(auth.certificate_id(), names[0])
+        assert auth is not None
+        assert auth.certificate_id() == names[0]
 
 # Not yet supported by underlying API
 #    def test_toggle_enable(self):
@@ -98,6 +87,3 @@ class TestCertAuthority(unittest.TestCase):
 #        auth.read(connection)
 #
 #        self.assertEqual(not newvalue, auth.enabled())
-
-if __name__ == "__main__":
-    unittest.main()

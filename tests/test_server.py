@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import
-
 #
 # Copyright 2015 MarkLogic Corporation
 #
@@ -22,102 +20,88 @@ from __future__ import unicode_literals, print_function, absolute_import
 # Norman Walsh      05/01/2015     Initial development
 #
 
-import unittest
-from marklogic.connection import Connection
+from mlconfig import MLConfig
 from marklogic.models.server import Server, HttpServer, XdbcServer
 from marklogic.models.server import OdbcServer, WebDAVServer
 from marklogic.models.cluster import LocalCluster
-from test.resources import TestConnection as tc
 
-class TestServer(unittest.TestCase):
+class TestServer(MLConfig):
 
     def test_list(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-
-        names = Server.list(connection)
-        self.assertGreater(len(names), 3)
-        self.assertIn("Default|Manage", names)
+        names = Server.list(self.connection)
+        assert len(names) > 3
+        assert "Default|Manage" in names
 
     def test_lookup(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
+        server = Server.lookup(self.connection, "Manage")
 
-        server = Server.lookup(connection, "Manage")
-
-        self.assertIsNotNone(server)
-        self.assertEqual(server.server_name(), "Manage")
+        assert server is not None
+        assert "Manage" == server.server_name()
 
     def test_load(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-
         server = HttpServer("Manage", "Default")
-        self.assertEqual(server.server_name(), "Manage")
-        self.assertIsNotNone(server.read(connection))
-        self.assertEqual("http", server.server_type())
+        assert "Manage" == server.server_name()
+        assert server.read(self.connection) is not None
+        assert "http" == server.server_type()
 
     def test_create_http_server(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
         server = HttpServer("foo-http", "Default", 10101, '/', 'Documents')
-        self.assertEqual(server.server_name(), "foo-http")
-        server.create(connection)
-        self.assertIsNotNone(server)
-        self.assertEqual("http", server.server_type())
-        server.delete(connection)
-        server = Server.lookup(connection, "foo-http")
-        self.assertIsNone(server)
+        assert "foo-http" == server.server_name()
+        server.create(self.connection)
+        assert server is not None
+        assert "http" == server.server_type()
+        server.delete(self.connection)
+        server = Server.lookup(self.connection, "foo-http")
+        assert server is None
 
     def test_create_odbc_server(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
         server = OdbcServer("foo-odbc", "Default", 10101, '/', 'Documents')
-        self.assertEqual(server.server_name(), "foo-odbc")
-        server.create(connection)
-        self.assertIsNotNone(server)
-        self.assertEqual("odbc", server.server_type())
-        server.delete(connection)
-        server = Server.lookup(connection, "foo-odbc")
-        self.assertIsNone(server)
+        assert "foo-odbc" == server.server_name()
+        server.create(self.connection)
+        assert server is not None
+        assert "odbc" == server.server_type()
+        server.delete(self.connection)
+        server = Server.lookup(self.connection, "foo-odbc")
+        assert server is None
 
     def test_create_xdbc_server(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
         server = XdbcServer("foo-xdbc", "Default", 10101, '/', 'Documents')
-        self.assertEqual(server.server_name(), "foo-xdbc")
-        server.create(connection)
-        self.assertIsNotNone(server)
-        self.assertEqual("xdbc", server.server_type())
-        server.delete(connection)
-        server = Server.lookup(connection, "foo-xdbc")
-        self.assertIsNone(server)
+        assert "foo-xdbc" == server.server_name()
+        server.create(self.connection)
+        assert server is not None
+        assert "xdbc" == server.server_type()
+        server.delete(self.connection)
+        server = Server.lookup(self.connection, "foo-xdbc")
+        assert server is None
 
     def test_create_webdav_server(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
         server = WebDAVServer("foo-webdav", "Default", 10101, '/', 'Documents')
-        self.assertEqual(server.server_name(), "foo-webdav")
-        server.create(connection)
-        self.assertIsNotNone(server)
-        self.assertEqual("webdav", server.server_type())
-        server.delete(connection)
-        server = Server.lookup(connection, "foo-webdav")
-        self.assertIsNone(server)
+        assert "foo-webdav" == server.server_name()
+        server.create(self.connection)
+        assert server is not None
+        assert "webdav" == server.server_type()
+        server.delete(self.connection)
+        server = Server.lookup(self.connection, "foo-webdav")
+        assert server is None
 
     def test_ssl_certificate_pems(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-        cluster = LocalCluster(connection=connection)
+        cluster = LocalCluster(connection=self.connection)
         version = cluster.version()
 
         if (version.startswith("4") or version.startswith("5")
             or version.startswith("6") or version.startswith("7")
             or version.startswith("8.0-1") or version.startswith("8.0-2")
-            or version.startswith("8.0-3")):
+            or version.startswith("8.0-3") or version.startswith("8.0-4")):
             pass
         else:
             self._test_ssl_certificate_pems()
 
     def _test_ssl_certificate_pems(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
         server = HttpServer("foo-http", "Default", 10101, '/', 'Documents')
-        self.assertEqual(server.server_name(), "foo-http")
-        server.create(connection)
-        self.assertIsNotNone(server)
-        self.assertEqual("http", server.server_type())
+        assert "foo-http" == server.server_name()
+        server.create(self.connection)
+        assert server is not None
+        assert "http" == server.server_type()
 
         pem1 = "-----BEGIN CERTIFICATE-----\n\
 MIICgjCCAeugAwIBAgIBBDANBgkqhkiG9w0BAQQFADBTMQswCQYDVQQGEwJVUzEc\n\
@@ -154,20 +138,17 @@ Z70Br83gcfxaz2TE4JaY0KNA4gGK7ycH8WUBikQtBmV1UsCGECAhX2xrD2yuCRyv\n\
 -----END CERTIFICATE-----"
 
         server.add_ssl_client_certificate_pem(pem1)
-        server.update(connection)
-        server.read(connection)
+        server.update(self.connection)
+        server.read(self.connection)
 
-        self.assertEqual(1, len(server.ssl_client_certificate_pems()))
+        assert 1 == len(server.ssl_client_certificate_pems())
 
         server.set_ssl_client_certificate_pems([pem1,pem2])
-        server.update(connection)
-        server.read(connection)
+        server.update(self.connection)
+        server.read(self.connection)
 
-        self.assertEqual(2, len(server.ssl_client_certificate_pems()))
+        assert 2 == len(server.ssl_client_certificate_pems())
 
-        server.delete(connection)
-        server = Server.lookup(connection, "foo-http")
-        self.assertIsNone(server)
-
-if __name__ == "__main__":
-    unittest.main()
+        server.delete(self.connection)
+        server = Server.lookup(self.connection, "foo-http")
+        assert server is None

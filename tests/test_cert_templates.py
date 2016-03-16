@@ -19,44 +19,35 @@
 #
 # Norman Walsh      05/13/2015     Initial development
 
-from __future__ import unicode_literals, print_function, absolute_import
-
-import unittest
-from marklogic.connection import Connection
+from mlconfig import MLConfig
 from marklogic.models.certificate.request import Request
 from marklogic.models.certificate.template import Template
-from test.resources import TestConnection as tc
 
-class TestCertRequest(unittest.TestCase):
+class TestCertRequest(MLConfig):
     def test_template(self):
-        connection = Connection.make_connection(tc.hostname, tc.admin, tc.password)
-
         req = Request(countryName="US", stateOrProvinceName="TX",
                       localityName="Austin", organizationName="MarkLogic",
                       emailAddress="Norman.Walsh@marklogic.com",
                       version=0)
         temp = Template("Test Template", "Test description", req)
 
-        self.assertEqual("Test Template", temp.template_name())
+        assert "Test Template" == temp.template_name()
 
-        temp.create(connection)
+        temp.create(self.connection)
 
-        names = Template.list(connection)
+        names = Template.list(self.connection)
 
-        self.assertGreater(len(names), 0)
-        self.assertIn(temp.template_id(), names)
+        assert len(names) > 0
+        assert temp.template_id() in names
 
         temp.set_template_name("New Name")
         temp.set_template_description("New Description")
-        temp.update(connection)
-        self.assertIsNotNone(temp)
+        temp.update(self.connection)
+        assert temp is not None
 
-        newtemp = Template.lookup(connection, temp.template_id())
-        self.assertEqual(temp.template_name(), newtemp.template_name())
+        newtemp = Template.lookup(self.connection, temp.template_id())
+        assert temp.template_name() == newtemp.template_name()
 
-        temp.delete(connection)
+        temp.delete(self.connection)
 
-        self.assertIsNotNone(temp)
-
-if __name__ == "__main__":
-    unittest.main()
+        assert temp is not None

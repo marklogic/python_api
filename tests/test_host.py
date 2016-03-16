@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import
-
 #
 # Copyright 2015 MarkLogic Corporation
 #
@@ -22,20 +20,11 @@ from __future__ import unicode_literals, print_function, absolute_import
 # Paul Hoehne       03/26/2015     Initial development
 #
 
-import unittest
-from marklogic.connection import Connection
+from mlconfig import MLConfig
 from marklogic.models import Host
-from requests.auth import HTTPDigestAuth
-from test.resources import TestConnection as tc
 
-class TestHost(unittest.TestCase):
-
+class TestHost(MLConfig):
     def test_list_hosts(self):
-        conn = Connection(tc.hostname, HTTPDigestAuth(tc.admin, tc.password))
-
-        hosts = Host.list(conn)
-        self.assertGreater(len(hosts), 0)
-        self.assertIsNotNone(hosts[0])
-
-if __name__ == "__main__":
-    unittest.main()
+        hosts = Host.list(self.connection)
+        assert len(hosts) > 0
+        assert hosts

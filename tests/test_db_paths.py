@@ -22,24 +22,21 @@ from __future__ import unicode_literals, print_function, absolute_import
 # Paul Hoehne       03/05/2015     Initial development
 #
 
-import unittest
+from mlconfig import MLConfig
 from marklogic.models import Database
 from marklogic.models.database.path import PathNamespace
 
-class TestDbPaths(unittest.TestCase):
+class TestDbPaths(MLConfig):
 
     def test_create_paths(self):
         db = Database(u'testdb')
 
-        self.assertNotIn('path-namespaces', db._config)
+        assert 'path-namespaces' not in db._config
         return_val = db.add_path_namespace(PathNamespace("inv", "http://foo.bar.com/invoice"))
 
         namespaces = db.path_namespaces()
-        self.assertEqual(1, len(namespaces))
-        self.assertEqual("inv", namespaces[0].prefix())
-        self.assertEqual('http://foo.bar.com/invoice', namespaces[0].namespace_uri())
+        assert 1 == len(namespaces)
+        assert "inv" == namespaces[0].prefix()
+        assert 'http://foo.bar.com/invoice' == namespaces[0].namespace_uri()
 
-        self.assertEqual(db, return_val)
-
-if __name__ == "__main__":
-    unittest.main()
+        assert db == return_val

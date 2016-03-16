@@ -19,93 +19,85 @@
 # Paul Hoehne       03/05/2015     Initial development
 #
 
-import unittest
-
+from mlconfig import MLConfig
 from marklogic.models.database.index import FieldRangeIndex
 from marklogic.models.database import Database
-from marklogic.models.database.index import FieldRangeIndex
 from marklogic.models.database.field import PathField, RootField, FieldPath
 from marklogic.models.database.field import IncludedElement, ExcludedElement
 
-class TestDbFieldRange(unittest.TestCase):
+class TestDbFieldRange(MLConfig):
     def test_create_field(self):
         db = Database("testdb")
 
-        self.assertNotIn('field', db._config)
+        assert 'field' not in db._config
 
         field = PathField("invoice-id", FieldPath("bill:invoice-id", 1))
         field.add_field_path(FieldPath("inv:id", 1))
 
         result = db.add_field(field)
-        self.assertIn('field', db._config)
-        self.assertEqual(result, db)
+        assert 'field' in  db._config
+        assert result == db
 
-        self.assertEqual(1, len(db._config['field']))
-
-        field = db.fields()[0]
-        self.assertEqual("invoice-id", field.field_name())
+        assert 1 == len(db._config['field'])
 
         field = db.fields()[0]
-        self.assertEqual(2, len(field.field_paths()))
+        assert "invoice-id" == field.field_name()
 
-        self.assertEqual("bill:invoice-id", field.field_paths()[0].path())
-        self.assertEqual(1, field.field_paths()[0].weight())
+        field = db.fields()[0]
+        assert 2 == len(field.field_paths())
+
+        assert "bill:invoice-id" == field.field_paths()[0].path()
+        assert 1 == field.field_paths()[0].weight()
 
     def test_include_references(self):
-        db = Database("testdb")
+        field = RootField("invoice-id", \
+                              includes=[IncludedElement("http://foo.bar.com/invoice", "id")])
 
-        field = RootField("invoice-id", includes=[IncludedElement("http://foo.bar.com/invoice", "id")])
-
-        self.assertEqual(1, len(field.included_elements()))
-        self.assertEqual("http://foo.bar.com/invoice", field.included_elements()[0].namespace_uri())
-        self.assertEqual("id", field.included_elements()[0].localname())
+        assert 1 == len(field.included_elements())
+        assert "http://foo.bar.com/invoice" == field.included_elements()[0].namespace_uri()
+        assert "id" == field.included_elements()[0].localname()
 
     def test_exclude_references(self):
-        db = Database("testdb")
+        field = RootField("invoice-id", \
+                              excludes=[ExcludedElement("http://foo.bar.com/invoice", "id")])
 
-        field = RootField("invoice-id", excludes=[ExcludedElement("http://foo.bar.com/invoice", "id")])
-
-        self.assertEqual(1, len(field.excluded_elements()))
-        self.assertEqual("http://foo.bar.com/invoice", field.excluded_elements()[0].namespace_uri())
-        self.assertEqual("id", field.excluded_elements()[0].localname())
+        assert 1 == len(field.excluded_elements())
+        assert "http://foo.bar.com/invoice" == field.excluded_elements()[0].namespace_uri()
+        assert"id" == field.excluded_elements()[0].localname()
 
 
     def test_create_element_reference(self):
         element_reference = IncludedElement("http://foo.bar.com/invoice", "id")
 
-        self.assertEqual("http://foo.bar.com/invoice",
-                         element_reference.namespace_uri())
-        self.assertEqual("id", element_reference.localname())
+        assert "http://foo.bar.com/invoice" == element_reference.namespace_uri()
+        assert "id" == element_reference.localname()
 
         element_reference = IncludedElement("http://foo.bar.com/invoice",
                                             "id", attribute_localname="foo")
 
-        self.assertEqual("foo", element_reference.attribute_localname())
+        assert "foo" == element_reference.attribute_localname()
 
         element_reference = IncludedElement("http://foo.bar.com/invoice", "id",
                             attribute_namespace_uri="http://foo.bar.com/billing",
                             attribute_localname="bill")
 
-        self.assertEqual("http://foo.bar.com/billing",
-                         element_reference.attribute_namespace_uri())
+        assert "http://foo.bar.com/billing" == element_reference.attribute_namespace_uri()
 
         element_reference = ExcludedElement("http://foo.bar.com/invoice", "id")
 
-        self.assertEqual("http://foo.bar.com/invoice",
-                         element_reference.namespace_uri())
-        self.assertEqual("id", element_reference.localname())
+        assert "http://foo.bar.com/invoice" == element_reference.namespace_uri()
+        assert "id" == element_reference.localname()
 
         element_reference = ExcludedElement("http://foo.bar.com/invoice",
                                             "id", attribute_localname="foo")
 
-        self.assertEqual("foo", element_reference.attribute_localname())
+        assert "foo" == element_reference.attribute_localname()
 
         element_reference = ExcludedElement("http://foo.bar.com/invoice", "id",
                             attribute_namespace_uri="http://foo.bar.com/billing",
                             attribute_localname="bill")
 
-        self.assertEqual("http://foo.bar.com/billing",
-                         element_reference.attribute_namespace_uri())
+        assert "http://foo.bar.com/billing" == element_reference.attribute_namespace_uri()
 
     #
     # {
@@ -126,12 +118,8 @@ class TestDbFieldRange(unittest.TestCase):
         db.add_index(range_field)
 
         index = db.field_range_indexes()[0]
-        self.assertEqual("invoice-id", index.field_name())
-        self.assertEqual("int", index.scalar_type())
+        assert "invoice-id" == index.field_name()
+        assert "int" == index.scalar_type()
 
         indexes = db.field_range_indexes()
-        self.assertEqual(1, len(indexes))
-
-if __name__ == "__main__":
-    unittest.main()
-
+        assert 1 == len(indexes)
