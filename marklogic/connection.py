@@ -114,11 +114,15 @@ class Connection:
         self.response = requests.get(uri, auth=self.auth, headers=headers)
         return self._response()
 
-    def post(self, uri, payload=None, etag=None,
+    def post(self, uri, payload=None, etag=None, headers=None,
              content_type="application/json", accept="application/json"):
 
-        headers = {'content-type': content_type,
-                   'accept': accept}
+        if headers == None:
+            headers = {}
+
+        headers['content-type'] = content_type
+        headers['accept'] = accept
+
         if etag is not None:
             headers['if-match'] = etag
 
