@@ -3,7 +3,6 @@
 import sys
 import re
 import os
-import json
 import pwd
 import logging
 import argparse
@@ -16,52 +15,52 @@ from marklogic.exceptions import *
 class Docker:
     def __init__(self):
         self.marklogic = None
-        self.uname=pwd.getpwuid(os.getuid()).pw_name
-        self.adminuser="admin"
-        self.adminpass="admin"
-        self.realm="public"
-        self.imatch="ml[0-9]"
-        self.bootimage=None
-        self.localimage=False
-        self.count=None
-        self.couple=None
-        self.couple_user=None
-        self.couple_pass=None
-        self.name=None
-        self.blacklist_file="/tmp/{0}.docker.skip".format(self.uname)
-        self.blacklist={}
-        self.container_list=[]
-        self.cluster_list=[]
-        self.containers={}
-        self.localip=None
-        self.ipaddr={}
-        self.hostname={}
+        self.uname = pwd.getpwuid(os.getuid()).pw_name
+        self.adminuser = "admin"
+        self.adminpass = "admin"
+        self.realm = "public"
+        self.imatch = "ml[0-9]"
+        self.bootimage = None
+        self.localimage = False
+        self.count = None
+        self.couple = None
+        self.couple_user = None
+        self.couple_pass = None
+        self.name = None
+        self.blacklist_file = "/tmp/{0}.docker.skip".format(self.uname)
+        self.blacklist = {}
+        self.container_list = []
+        self.cluster_list = []
+        self.containers = {}
+        self.localip = None
+        self.ipaddr = {}
+        self.hostname = {}
 
-    def set_credentials(self,user,password):
+    def set_credentials(self, user, password):
         self.adminuser = user
         self.adminpass = password
 
-    def set_realm(self,realm):
+    def set_realm(self, realm):
         self.realm = realm
 
-    def set_image_match(self,match):
+    def set_image_match(self, match):
         self.imatch = match
 
-    def set_boot_image(self,image):
+    def set_boot_image(self, image):
         self.bootimage = image
         self.localimage = (image == "localhost")
 
-    def set_count(self,count):
+    def set_count(self, count):
         self.count = count
 
-    def set_couple(self,couple):
+    def set_couple(self, couple):
         self.couple = couple
 
-    def set_couple_credentials(self,user,password):
+    def set_couple_credentials(self, user, password):
         self.couple_user = user
         self.couple_pass = password
 
-    def set_name(self,name):
+    def set_name(self, name):
         self.name = name
 
     def setup_cluster(self):
@@ -92,7 +91,8 @@ class Docker:
             pass
         else:
             self.bootimage = self.pick_image(self.bootimage)
-            self.container_list.remove(self.bootimage)
+            if self.bootimage in self.container_list:
+                self.container_list.remove(self.bootimage)
 
         self.cluster_list = self.pick_containers()
 
@@ -127,7 +127,7 @@ class Docker:
 
         if self.couple is not None:
             for couple in self.couple:
-                print("{0}: couple with {1}...".format(bootip,couple))
+                print("{0}: couple with {1}...".format(bootip, couple))
                 altconn = Connection(couple,
                                      HTTPDigestAuth(self.couple_user,
                                                     self.couple_pass))
@@ -143,7 +143,7 @@ class Docker:
             hostname = self.hostname[container]
         else:
             hostname = container
-        print("{0}: initialize host {1}...".format(ip,hostname))
+        print("{0}: initialize host {1}...".format(ip, hostname))
         try:
             host = MarkLogic.instance_init(ip)
         except UnauthorizedAPIRequest:
@@ -155,14 +155,14 @@ class Docker:
         return host.just_initialized()
 
     def ml_join(self, bootip, ip):
-        print("{0}: join cluster with {1}...".format(ip,bootip))
+        print("{0}: join cluster with {1}...".format(ip, bootip))
         cluster = self.marklogic.cluster()
         host = Host(ip)
         cluster.add_host(host)
 
     def ml_security(self, ip, container):
         print("{0}: initialize security...".format(ip))
-        MarkLogic.instance_admin(ip,self.realm,self.adminuser,self.adminpass)
+        MarkLogic.instance_admin(ip, self.realm, self.adminuser, self.adminpass)
         self.blacklist[container] = "boot"
         self.save_blacklist()
 
@@ -238,7 +238,7 @@ class Docker:
         f = open(self.blacklist_file, "w")
         for key in self.blacklist:
             if self.blacklist[key] != "gone":
-                f.write("{0} {1}\n".format(key,self.blacklist[key]))
+                f.write("{0} {1}\n".format(key, self.blacklist[key]))
         f.close()
 
     def find_containers(self):
