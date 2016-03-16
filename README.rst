@@ -52,7 +52,6 @@ Running Tests
 
 The tests run using a default configuration:
 
-.. code-block: json
     {
         "hostname": "localhost",
         "username": "admin",
