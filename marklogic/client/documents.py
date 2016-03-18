@@ -24,8 +24,8 @@
 Support the v1/documents endpoint
 """
 
-from __future__ import unicode_literals, print_function, absolute_import
 import logging
+from urllib import parse
 from marklogic.utilities import PropertyLists
 from marklogic.client.exceptions import InvalidAPIRequest, UnsupportedOperation
 from requests.packages.urllib3.fields import RequestField
@@ -565,9 +565,9 @@ class Documents(PropertyLists):
         params = []
         if uri is None:
             for uri in self._config['uri']:
-                params.append("uri=" + uri)
+                params.append("uri=" + parse.quote(uri))
         else:
-            params.append("uri=" + uri)
+            params.append("uri=" + parse.quote(uri))
 
         for key in ['database', 'format', 'transform', 'txid']:
             if key in self._config:
