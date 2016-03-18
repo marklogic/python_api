@@ -44,7 +44,7 @@ class MarkLogicDatabaseMirror:
         self.config = None
         self.connection = None
         self.database = None
-        self.dryrun = None
+        self.dryrun = False
         self.hostname = None
         self.list = None
         self.mdir = None
@@ -57,7 +57,7 @@ class MarkLogicDatabaseMirror:
         self.ucdir = None
         self.umdir = None
         self.utils = None
-        self.verbose = None
+        self.verbose = False
         self.logger = logging.getLogger("marklogic.examples.mldbmirror")
 
     def connect(self, args):
@@ -337,7 +337,7 @@ class MarkLogicDatabaseMirror:
 
             bulk.add(docs)
 
-            if self.verbose is not None:
+            if self.verbose:
                 print("-> {}".format(target))
 
             if upload_size > self.threshold:
@@ -365,7 +365,7 @@ class MarkLogicDatabaseMirror:
         delcount = 0
         for uri in urihash:
             if uri.startswith(self.root):
-                if self.verbose is not None:
+                if self.verbose:
                     print("DEL {}".format(uri))
                 docs.add_uri(uri)
                 delcount += 1
