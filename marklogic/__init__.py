@@ -24,6 +24,7 @@ import json
 from marklogic.connection import Connection
 from marklogic.models.cluster import LocalCluster
 from marklogic.models.host import Host
+from marklogic.models.task import Task
 from marklogic.models.user import User
 from marklogic.models.role import Role
 from marklogic.models.group import Group
@@ -363,6 +364,27 @@ class MarkLogic:
             role = User(role_name, connection, False)
 
         return role.read(connection)
+
+    def tasks(self, connection=None):
+        """
+        Get a list of the scheduled tasks.
+        """
+        if connection is None:
+            connection = self.connection
+
+        return Task.list(connection)
+
+    def task(self, taskid, group="Default", connection=None):
+        """
+        Get the task with a particular task-id.
+        """
+        if connection is None:
+            task = Task.lookup(self.connection, taskid, group)
+            task.set_connection(self.connection, self.save_connection)
+        else:
+            task = Task.lookup(connection, taskid, group)
+
+        return task
 
     # =================================================================
 
