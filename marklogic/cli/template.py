@@ -31,6 +31,7 @@ from marklogic.cli.manager.user import UserManager
 from marklogic.cli.manager.group import GroupManager
 from marklogic.cli.manager.cluster import ClusterManager
 from marklogic.cli.manager.foreigncluster import ForeignClusterManager
+from marklogic.cli.manager.task import TaskManager
 
 """
 Templates for the command line interface.
@@ -51,6 +52,7 @@ class Template:
         g_mgr = GroupManager()
         cl_mgr = ClusterManager()
         fcl_mgr = ForeignClusterManager()
+        task_mgr = TaskManager()
 
         self._parsers = {'start':                 {'code': ml_mgr.start},
                          'status':                {'code': ml_mgr.status},
@@ -77,6 +79,7 @@ class Template:
                                      'server':    {'code': srv_mgr.get},
                                      'user':      {'code': user_mgr.get},
                                      'role':      {'code': role_mgr.get},
+                                     'task':      {'code': task_mgr.get},
                                      'privilege': {'code': priv_mgr.get}},
                          'create':  {'forest':    {'code': f_mgr.create},
                                      'database':  {'code': db_mgr.create},
@@ -84,6 +87,7 @@ class Template:
                                      'server':    {'code': srv_mgr.create},
                                      'user':      {'code': user_mgr.create},
                                      'role':      {'code': role_mgr.create},
+                                     'task':      {'code': task_mgr.create},
                                      'privilege': {'code': priv_mgr.create}},
                          'list':    {'forests':   {'code': f_mgr.list},
                                      'databases': {'code': db_mgr.list},
@@ -92,6 +96,7 @@ class Template:
                                      'servers':   {'code': srv_mgr.list},
                                      'users':     {'code': user_mgr.list},
                                      'roles':     {'code': role_mgr.list},
+                                     'tasks':     {'code': task_mgr.list},
                                      'privileges':{'code': priv_mgr.list}},
                          'modify':  {'forest':    {'code': f_mgr.modify},
                                      'database':  {'code': db_mgr.modify},
@@ -101,6 +106,7 @@ class Template:
                                      'server':    {'code': srv_mgr.modify},
                                      'user':      {'code': user_mgr.modify},
                                      'role':      {'code': role_mgr.modify},
+                                     'task':      {'code': task_mgr.modify},
                                      'privilege': {'code': priv_mgr.modify}},
                          'perform': {'database':  {'code': db_mgr.perform}},
                          'delete':  {'forest':    {'code': f_mgr.delete},
@@ -109,6 +115,7 @@ class Template:
                                      'server':    {'code': srv_mgr.delete},
                                      'user':      {'code': user_mgr.delete},
                                      'role':      {'code': role_mgr.delete},
+                                     'task':      {'code': task_mgr.delete},
                                      'privilege': {'code': priv_mgr.delete}}}
 
         parser = self._make_parser('start',None,'Start the server')
@@ -277,6 +284,19 @@ class Template:
                             help='Additional user properties')
         self._parsers['create']['privilege']['parser'] = parser
 
+        parser = self._make_parser('create','task','Create a task')
+        parser.add_argument('--type', choices=['daily','hourly','minutely', \
+                                                   'monthly', 'weekly', 'once'], \
+                            help='The type of task')
+        parser.add_argument('--group', default="Default",
+                            help='The group')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional user properties')
+        self._parsers['create']['task']['parser'] = parser
+
         parser = self._make_parser('modify','forest','Modify a forest')
         parser.add_argument('name',
                             help='The forest name')
@@ -370,6 +390,18 @@ class Template:
                             help='Additional user properties')
         self._parsers['modify']['privilege']['parser'] = parser
 
+        parser = self._make_parser('modify','task','Modify a task')
+        parser.add_argument('id',
+                            help='The task ID')
+        parser.add_argument('--group', default="Default",
+                            help='The group')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional user properties')
+        self._parsers['modify']['task']['parser'] = parser
+
         parser = self._make_parser('perform','database','Operate on a database')
         parser.add_argument('name',
                             help='The database name')
@@ -407,6 +439,9 @@ class Template:
                             default="execute",
                             help='The privilege kind')
         self._parsers['list']['privileges']['parser'] = parser
+
+        parser = self._make_parser('list','tasks','List tasks')
+        self._parsers['list']['tasks']['parser'] = parser
 
         parser = self._make_parser('delete','forest','Delete a forest')
         parser.add_argument('name',
@@ -460,6 +495,13 @@ class Template:
                             help='The privilege kind')
         self._parsers['delete']['privilege']['parser'] = parser
 
+        parser = self._make_parser('delete','task','Delete a task')
+        parser.add_argument('id',
+                            help='The task ID')
+        parser.add_argument('--group', default="Default",
+                            help='The group')
+        self._parsers['delete']['task']['parser'] = parser
+
         parser = self._make_parser('get','forest','Get forest properties')
         parser.add_argument('name',
                             help='The forest name')
@@ -511,6 +553,13 @@ class Template:
                             default='execute',
                             help='The privilege kind')
         self._parsers['get']['privilege']['parser'] = parser
+
+        parser = self._make_parser('get','task','Get task properties')
+        parser.add_argument('id',
+                            help='The task ID')
+        parser.add_argument('--group', default="Default",
+                            help='The group')
+        self._parsers['get']['task']['parser'] = parser
 
     def _make_parser(self, command, artifact, description=""):
         parser = argparse.ArgumentParser(description=description)
