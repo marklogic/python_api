@@ -19,6 +19,7 @@ import argparse
 import io
 import json
 import logging
+import math
 import os
 import re
 import sys
@@ -659,7 +660,12 @@ class MarkLogicDatabaseMirror:
             stamp = stanza['timestamp']
 
         if stamp is not None:
-            stamp = stamp[0:len(stamp)-1] + "+0000"
+            if stamp.endswith("Z"):
+                stamp = stamp[0:len(stamp)-1] + "+0000"
+            else:
+                # Convert ...+05:00 to ...+0500
+                stamp = stamp[0:len(stamp)-3] + stamp[len(stamp)-2:len(stamp)]
+
             stamp = datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%S%z")
 
         if not self.dryrun:
@@ -720,8 +726,15 @@ class MarkLogicDatabaseMirror:
 
     def get_timestamps(self, uris):
         """Get the database timestamp for these URIs"""
+        chunksize = 500
+        chunkcount = math.floor((len(uris) + chunksize - 1) / chunksize)
+        chunk = 0
+
         stamps = []
-        for seg in self._chunks(uris, 10):
+        for seg in self._chunks(uris, chunksize):
+            chunk += 1
+            if self.verbose:
+                print("\t-> chunk {} of {} ...".format(chunk, chunkcount))
             stamps += self.utils.last_modified(self.database, seg)
 
         # FIXME: make the XQuery return a single object
