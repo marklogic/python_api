@@ -41,7 +41,7 @@ class TaskManager(Manager):
 
     def create(self, args, config, connection):
         if args['json'] is not None:
-            task = self._read(args['json'], args['group'])
+            task = self._read(None, args['json'], args['group'])
         else:
             task = Task(connection=connection)
 
@@ -84,7 +84,7 @@ class TaskManager(Manager):
         jf = open(jsonfile).read()
         data = json.loads(jf)
 
-        if 'task-type' not in data:
+        if task is not None and 'task-type' not in data:
             data['task-type'] = task.type()
 
         task = Task.unmarshal(data)
