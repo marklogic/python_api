@@ -150,7 +150,11 @@ class Group(Model,PropertyLists):
                   'triple-value-cache-timeout',
                   'xdqp-ssl-allow-sslv3', 'xdqp-ssl-allow-tls',
                   'xdqp-ssl-ciphers', 'xdqp-ssl-enabled',
-                  'xdqp-timeout'
+                  'xdqp-timeout', 'opsdirector-config',
+                  'opsdirector-logging', 'opsdirector-metering',
+                  'opsdirector-session-uri', 'telemetry-config',
+                  'telemetry-logging', 'telemetry-metering',
+                  'telemetry-session-uri'
                   }
 
         for key in result._config:
