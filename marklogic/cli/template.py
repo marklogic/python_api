@@ -32,6 +32,7 @@ from marklogic.cli.manager.group import GroupManager
 from marklogic.cli.manager.cluster import ClusterManager
 from marklogic.cli.manager.foreigncluster import ForeignClusterManager
 from marklogic.cli.manager.task import TaskManager
+from marklogic.cli.manager.amp import AmpManager
 
 """
 Templates for the command line interface.
@@ -53,6 +54,7 @@ class Template:
         cl_mgr = ClusterManager()
         fcl_mgr = ForeignClusterManager()
         task_mgr = TaskManager()
+        amp_mgr = AmpManager()
 
         self._parsers = {'start':                 {'code': ml_mgr.start},
                          'status':                {'code': ml_mgr.status},
@@ -80,6 +82,7 @@ class Template:
                                      'user':      {'code': user_mgr.get},
                                      'role':      {'code': role_mgr.get},
                                      'task':      {'code': task_mgr.get},
+                                     'amp':       {'code': amp_mgr.get},
                                      'privilege': {'code': priv_mgr.get}},
                          'create':  {'forest':    {'code': f_mgr.create},
                                      'database':  {'code': db_mgr.create},
@@ -88,6 +91,7 @@ class Template:
                                      'user':      {'code': user_mgr.create},
                                      'role':      {'code': role_mgr.create},
                                      'task':      {'code': task_mgr.create},
+                                     'amp':       {'code': amp_mgr.create},
                                      'privilege': {'code': priv_mgr.create}},
                          'list':    {'forests':   {'code': f_mgr.list},
                                      'databases': {'code': db_mgr.list},
@@ -97,6 +101,7 @@ class Template:
                                      'users':     {'code': user_mgr.list},
                                      'roles':     {'code': role_mgr.list},
                                      'tasks':     {'code': task_mgr.list},
+                                     'amps':      {'code': amp_mgr.list},
                                      'privileges':{'code': priv_mgr.list}},
                          'modify':  {'forest':    {'code': f_mgr.modify},
                                      'database':  {'code': db_mgr.modify},
@@ -107,6 +112,7 @@ class Template:
                                      'user':      {'code': user_mgr.modify},
                                      'role':      {'code': role_mgr.modify},
                                      'task':      {'code': task_mgr.modify},
+                                     'amp':       {'code': amp_mgr.modify},
                                      'privilege': {'code': priv_mgr.modify}},
                          'perform': {'database':  {'code': db_mgr.perform}},
                          'delete':  {'forest':    {'code': f_mgr.delete},
@@ -116,6 +122,7 @@ class Template:
                                      'user':      {'code': user_mgr.delete},
                                      'role':      {'code': role_mgr.delete},
                                      'task':      {'code': task_mgr.delete},
+                                     'amp':       {'code': amp_mgr.delete},
                                      'privilege': {'code': priv_mgr.delete}}}
 
         parser = self._make_parser('start',None,'Start the server')
@@ -297,6 +304,20 @@ class Template:
                             help='Additional user properties')
         self._parsers['create']['task']['parser'] = parser
 
+        parser = self._make_parser('create','amp','Create an task')
+        parser.add_argument('name', nargs='?', default=None,
+                            help='The amp name (function name)')
+        parser.add_argument('--namespace', default=None,
+                            help='The amp namespace')
+        parser.add_argument('--document', default=None,
+                            help='The document uri namespace')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional user properties')
+        self._parsers['create']['amp']['parser'] = parser
+
         parser = self._make_parser('modify','forest','Modify a forest')
         parser.add_argument('name',
                             help='The forest name')
@@ -402,6 +423,20 @@ class Template:
                             help='Additional user properties')
         self._parsers['modify']['task']['parser'] = parser
 
+        parser = self._make_parser('modify','amp','Modify an amp')
+        parser.add_argument('name', nargs='?', default=None,
+                            help='The amp name (function name)')
+        parser.add_argument('--namespace', default=None,
+                            help='The amp namespace')
+        parser.add_argument('--document', default=None,
+                            help='The document uri namespace')
+        parser.add_argument('--json',
+                            help='The properties')
+        parser.add_argument('properties', nargs="*",
+                            metavar="property=value",
+                            help='Additional user properties')
+        self._parsers['modify']['amp']['parser'] = parser
+
         parser = self._make_parser('perform','database','Operate on a database')
         parser.add_argument('name',
                             help='The database name')
@@ -442,6 +477,9 @@ class Template:
 
         parser = self._make_parser('list','tasks','List tasks')
         self._parsers['list']['tasks']['parser'] = parser
+
+        parser = self._make_parser('list','amps','List amps')
+        self._parsers['list']['amps']['parser'] = parser
 
         parser = self._make_parser('delete','forest','Delete a forest')
         parser.add_argument('name',
@@ -502,6 +540,15 @@ class Template:
                             help='The group')
         self._parsers['delete']['task']['parser'] = parser
 
+        parser = self._make_parser('delete','amp','Delete an amp')
+        parser.add_argument('name',
+                            help='The amp name (function name)')
+        parser.add_argument('--namespace', required=True,
+                            help='The amp namespace')
+        parser.add_argument('--document', required=True,
+                            help='The document uri namespace')
+        self._parsers['delete']['amp']['parser'] = parser
+
         parser = self._make_parser('get','forest','Get forest properties')
         parser.add_argument('name',
                             help='The forest name')
@@ -560,6 +607,15 @@ class Template:
         parser.add_argument('--group', default="Default",
                             help='The group')
         self._parsers['get']['task']['parser'] = parser
+
+        parser = self._make_parser('get','amp','Get amp properties')
+        parser.add_argument('name',
+                            help='The amp name (function name)')
+        parser.add_argument('--namespace', required=True,
+                            help='The amp namespace')
+        parser.add_argument('--document', required=True,
+                            help='The document uri namespace')
+        self._parsers['get']['amp']['parser'] = parser
 
     def _make_parser(self, command, artifact, description=""):
         parser = argparse.ArgumentParser(description=description)

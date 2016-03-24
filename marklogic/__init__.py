@@ -25,6 +25,7 @@ from marklogic.connection import Connection
 from marklogic.models.cluster import LocalCluster
 from marklogic.models.host import Host
 from marklogic.models.task import Task
+from marklogic.models.amp import Amp
 from marklogic.models.user import User
 from marklogic.models.role import Role
 from marklogic.models.group import Group
@@ -385,6 +386,28 @@ class MarkLogic:
             task = Task.lookup(connection, taskid, group)
 
         return task
+
+    def amps(self, connection=None):
+        """
+        Get a list of amps.
+        """
+        if connection is None:
+            connection = self.connection
+
+        return Amp.list(connection)
+
+    def amp(self, local_name=None, namespace=None, document_uri=None, \
+                connection=None):
+        """
+        Get a particular amp.
+        """
+        if connection is None:
+            amp = Amp.lookup(self.connection, local_name, namespace, document_uri)
+            amp.set_connection(self.connection, self.save_connection)
+        else:
+            amp = Amp.lookup(connection, local_name, namespace, document_uri)
+
+        return amp
 
     # =================================================================
 
