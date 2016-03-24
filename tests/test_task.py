@@ -17,7 +17,7 @@
 # File History
 # ------------
 #
-# Paul Hoehne       03/26/2015     Initial development
+# Norman Walsh      22 Mar 2016    Initial development
 #
 
 from mlconfig import MLConfig
