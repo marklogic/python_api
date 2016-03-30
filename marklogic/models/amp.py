@@ -170,7 +170,7 @@ class Amp(Model, PropertyLists):
             connection = self.connection
 
         amp = Amp.lookup(connection, self.local_name(), self.namespace(), \
-                             self.document_uri())
+                             self.document_uri(), self.modules_database())
 
         if amp is not None:
             self._config = amp._config
@@ -189,9 +189,8 @@ class Amp(Model, PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = connection.uri("amps", self.local_name(), \
-                                 parameters=["namespace="+self.namespace(), \
-                                                 "document-uri="+self.document_uri()])
+        uri = connection.uri("amps", self.local_name(), parameters=self._params())
+
         struct = self.marshal()
         response = connection.put(uri, payload=struct, etag=self.etag)
         if response.status_code != 204:
@@ -214,8 +213,7 @@ class Amp(Model, PropertyLists):
             connection = self.connection
 
         uri = connection.uri("amps", self.local_name(), properties=None, \
-                                 parameters=["namespace="+self.namespace(), \
-                                                 "document-uri="+self.document_uri()])
+                                 parameters=self._params())
 
         response = connection.delete(uri)
         if response.status_code != 204:
@@ -234,12 +232,12 @@ class Amp(Model, PropertyLists):
             connection = self.connection
 
         amp = Amp.lookup(connection, self.local_name(), self.namespace(), \
-                             self.document_uri())
+                             self.document_uri(), self.modules_database())
 
         return amp is not None
 
     @classmethod
-    def lookup(cls, connection, local_name, namespace, document_uri):
+    def lookup(cls, connection, local_name, namespace, document_uri, modules_database=None):
         """
         Look up an individual amp.
 
@@ -249,9 +247,12 @@ class Amp(Model, PropertyLists):
         :param document_uri: The URI of the document that contains the amped function
         :return: The amp.
         """
-        uri = connection.uri("amps", local_name, \
-                                 parameters=["namespace="+namespace, \
-                                                 "document-uri="+document_uri])
+        params = ["namespace="+namespace, \
+                      "document-uri="+document_uri]
+        if modules_database is not None:
+            params.append("modules-database="+modules_database)
+
+        uri = connection.uri("amps", local_name, parameters=params)
         response = connection.get(uri)
         if response.status_code == 200:
             result = Amp.unmarshal(json.loads(response.text))
@@ -303,3 +304,10 @@ class Amp(Model, PropertyLists):
         for key in self._config:
             struct[key] = self._config[key]
         return struct
+
+    def _params(self):
+        parameters = []
+        for key in ["namespace", "document-uri", "modules-database"]:
+            if key in self._config:
+                parameters.append(key + "=" + self._config[key])
+        return parameters
