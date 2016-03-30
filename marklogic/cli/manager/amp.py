@@ -45,18 +45,15 @@ class AmpManager(Manager):
         else:
             amp = Amp()
 
-        for key in args:
-            value = args[key]
-            if value is not None:
-                if key == "name":
-                    amp.set_local_name(value)
-                if key == "namespace":
-                    amp.set_namespace(value)
-                if key == "document":
-                    amp.set_document_uri(value)
-
+        self._handle_args(amp, args)
         self._handle_properties(amp, args)
+
+        if amp.exists(connection=connection):
+            print("Error: Amp already exists: {0}".format(amp.local_name()))
+            sys.exit(1)
+
         amp.create(connection=connection)
+        print("Created amp {}".format(amp.local_name()))
 
     def modify(self, args, config, connection):
         if args['json'] is not None:
@@ -64,21 +61,31 @@ class AmpManager(Manager):
         else:
             amp = Amp()
 
-        for key in args:
-            value = args[key]
-            if value is not None:
-                if key == "name":
-                    amp.set_local_name(value)
-                if key == "namespace":
-                    amp.set_namespace(value)
-                if key == "document":
-                    amp.set_document_uri(value)
-
+        self._handle_args(amp, args)
         self._handle_properties(amp, args)
         amp.update(connection=connection)
 
     def delete(self, args, config, connection):
         amp = Amp()
+
+        self._handle_args(amp, args)
+        self._handle_properties(amp, args)
+        amp.delete(connection=connection)
+
+    def get(self, args, config, connection):
+        amp = Amp()
+
+        self._handle_args(amp, args)
+        self._handle_properties(amp, args)
+
+        if not amp.exists(connection=connection):
+            print("Error: Amp does not exist: {0}".format(args['name']))
+            sys.exit(1)
+
+        amp.read(connection=connection)
+        self.jprint(amp)
+
+    def _handle_args(self, amp, args):
         for key in args:
             value = args[key]
             if value is not None:
@@ -88,19 +95,8 @@ class AmpManager(Manager):
                     amp.set_namespace(value)
                 if key == "document":
                     amp.set_document_uri(value)
-
-        self._handle_properties(amp, args)
-        amp.delete(connection=connection)
-
-    def get(self, args, config, connection):
-        amp = Amp(local_name=args['name'], namespace=args['namespace'], \
-                      document_uri=args['document'], connection=connection)
-        if not amp.exists():
-            print("Error: Amp does not exist: {0}".format(args['name']))
-            sys.exit(1)
-
-        amp.read(connection=connection)
-        self.jprint(amp)
+                if key == "modules":
+                    amp.set_modules_database(value)
 
     def _handle_properties(self, amp, args):
         # Handled specially because of the weird overlap between options and properties
@@ -126,6 +122,10 @@ class AmpManager(Manager):
                     if args['document'] is not None:
                         self._duparg('document')
                     amp.set_document_uri(value)
+                elif name == "modules-database":
+                    if args['modules'] is not None:
+                        self._duparg('modules')
+                    amp.set_modules_database(value)
                 elif name == "role":
                     if seen_role:
                         amp.add_role_name(value)

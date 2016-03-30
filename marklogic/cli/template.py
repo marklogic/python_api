@@ -311,6 +311,8 @@ class Template:
                             help='The amp namespace')
         parser.add_argument('--document', default=None,
                             help='The document uri namespace')
+        parser.add_argument('--modules', default=None,
+                            help='The modules database')
         parser.add_argument('--json',
                             help='The properties')
         parser.add_argument('properties', nargs="*",
@@ -430,6 +432,8 @@ class Template:
                             help='The amp namespace')
         parser.add_argument('--document', default=None,
                             help='The document uri namespace')
+        parser.add_argument('--modules', default=None,
+                            help='The modules database')
         parser.add_argument('--json',
                             help='The properties')
         parser.add_argument('properties', nargs="*",
@@ -547,6 +551,8 @@ class Template:
                             help='The amp namespace')
         parser.add_argument('--document', required=True,
                             help='The document uri namespace')
+        parser.add_argument('--modules', default=None,
+                            help='The modules database')
         self._parsers['delete']['amp']['parser'] = parser
 
         parser = self._make_parser('get','forest','Get forest properties')
@@ -615,6 +621,8 @@ class Template:
                             help='The amp namespace')
         parser.add_argument('--document', required=True,
                             help='The document uri namespace')
+        parser.add_argument('--modules', default=None,
+                            help='The modules database')
         self._parsers['get']['amp']['parser'] = parser
 
     def _make_parser(self, command, artifact, description=""):
