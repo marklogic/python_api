@@ -3499,7 +3499,7 @@ class Database(Model,PropertyLists):
                     else:
                         root = False
                         if 'include-root' in field:
-                            root = (field['include-root'] == 'true')
+                            root = field['include-root']
                         if field['field-name'] == "":
                             temp = WordQuery(root)
                         else:
@@ -3527,7 +3527,7 @@ class Database(Model,PropertyLists):
                         index['latitude-namespace-uri'],
                         index['latitude-localname'],
                         index['coordinate-system'],
-                        index['range-value-positions'] == 'true',
+                        index['range-value-positions'],
                         index['invalid-values'])
                     olist.append(temp)
                 result._config['geospatial-element-attribute-pair-index'] = olist
@@ -3540,7 +3540,7 @@ class Database(Model,PropertyLists):
                         index['localname'],
                         index['coordinate-system'],
                         index['point-format'],
-                        index['range-value-positions'] == 'true',
+                        index['range-value-positions'],
                         index['invalid-values'])
                     olist.append(temp)
                 result._config['geospatial-element-child-index'] = olist
@@ -3550,7 +3550,7 @@ class Database(Model,PropertyLists):
                                                   index['localname'],
                                                   index['coordinate-system'],
                                                   index['point-format'],
-                                                  index['range-value-positions'] == 'true',
+                                                  index['range-value-positions'],
                                                   index['invalid-values'])
                     olist.append(temp)
                 result._config['geospatial-element-index'] = olist
@@ -3564,7 +3564,7 @@ class Database(Model,PropertyLists):
                         index['latitude-namespace-uri'],
                         index['latitude-localname'],
                         index['coordinate-system'],
-                        index['range-value-positions'] == 'true',
+                        index['range-value-positions'],
                         index['invalid-values'])
                     olist.append(temp)
                 result._config['geospatial-element-pair-index'] = olist
@@ -3573,7 +3573,7 @@ class Database(Model,PropertyLists):
                     temp = GeospatialPathIndex(index['path-expression'],
                                                index['coordinate-system'],
                                                index['point-format'],
-                                               index['range-value-positions'] == 'true',
+                                               index['range-value-positions'],
                                                index['invalid-values'])
                     olist.append(temp)
                 result._config['geospatial-path-index'] = olist
@@ -3668,7 +3668,7 @@ class Database(Model,PropertyLists):
                                                index['namespace-uri'],
                                                index['localname'],
                                                index['collation'],
-                                               index['range-value-positions'] == 'true',
+                                               index['range-value-positions'],
                                                index['invalid-values'])
                     olist.append(temp)
                 result._config['range-element-attribute-index'] = olist
@@ -3678,7 +3678,7 @@ class Database(Model,PropertyLists):
                                              index['namespace-uri'],
                                              index['localname'],
                                              index['collation'],
-                                             index['range-value-positions'] == 'true',
+                                             index['range-value-positions'],
                                              index['invalid-values'])
                     olist.append(temp)
                 result._config['range-element-index'] = olist
@@ -3687,7 +3687,7 @@ class Database(Model,PropertyLists):
                     temp = FieldRangeIndex(index['scalar-type'],
                                            index['field-name'],
                                            index['collation'],
-                                           index['range-value-positions'] == 'true',
+                                           index['range-value-positions'],
                                            index['invalid-values'])
                     olist.append(temp)
                 result._config['range-field-index'] = olist
@@ -3696,7 +3696,7 @@ class Database(Model,PropertyLists):
                     temp = PathRangeIndex(index['scalar-type'],
                                           index['path-expression'],
                                           index['collation'],
-                                          index['range-value-positions'] == 'true',
+                                          index['range-value-positions'],
                                           index['invalid-values'])
                     olist.append(temp)
                 result._config['range-path-index'] = olist
