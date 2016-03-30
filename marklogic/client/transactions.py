@@ -25,7 +25,9 @@ Support the v1/transactions endpoint
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-import json, logging
+import json, logging, re, sys
+from marklogic import MarkLogic
+from marklogic.exceptions import UnexpectedManagementAPIResponse
 from requests_toolbelt import MultipartDecoder
 
 class Transactions:
@@ -134,9 +136,9 @@ class Transactions:
             connection = self.connection
 
         fields = []
-        for key in ['name', 'database']:
+        for key in ['name', 'database', 'timeLimit']:
             if key in self._config:
-                fields.append(key + "=" + self._config[key])
+                fields.append(key + "=" + str(self._config[key]))
 
         uri = connection.client_uri("transactions")
 
@@ -169,7 +171,6 @@ class Transactions:
         uri = uri + "/" + txid
 
         response = connection.get(uri, accept=self._config['accept'])
-
         return response
 
     def commit(self, txid=None, connection=None):
@@ -179,6 +180,39 @@ class Transactions:
     def rollback(self, txid=None, connection=None):
         """Roll back the transaction"""
         return self._result("rollback", txid, connection)
+
+    def max_timeLimit(self, connection=None):
+        if connection is None:
+            connection = self.connection
+
+        # Work out which appserver we're running against
+        # 1. It's usually 'App-Services'
+        marklogic = MarkLogic(connection)
+        server = marklogic.http_server('App-Services')
+        if server.exists() and server.port() == connection.port:
+            pass
+        else:
+            slist = marklogic.http_servers()
+            server = None
+            while slist and server is None:
+                group, name = re.split("\\|", slist.pop())
+                try:
+                    check = marklogic.http_server(name, group=group)
+                    if check.port() == connection.port:
+                        server = check
+                except UnexpectedManagementAPIResponse:
+                    pass
+                except:
+                    raise
+
+        if (server is not None and server.exists() \
+                and server.port() == connection.port):
+            return server.max_time_limit()
+        else:
+            # Oh, heck, just go with a default
+            return 600
+
+        sys.exit(1)
 
     def _result(self, result, txid=None, connection=None):
         """Internal method to commit or rollback a transaction."""
