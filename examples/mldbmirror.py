@@ -52,6 +52,7 @@ class MarkLogicDatabaseMirror:
         self.mirror = False
         self.path = None
         self.port = None
+        self.management_port = None
         self.regex = []
         self.root = None
         self.threshold = BULKTHRESHOLD
@@ -108,16 +109,23 @@ class MarkLogicDatabaseMirror:
                     self.port = self.config['port']
                 else:
                     self.port = 8000
+                if 'management-port' in self.config:
+                    self.management_port = self.config['management-port']
+                else:
+                    self.management_port = 8002
         else:
-            self.hostname = args['hostname'].split(":")[0]
-            try:
-                self.port = args['hostname'].split(":")[1]
-            except IndexError:
-                self.port = 8000
+            parts = args['hostname'].split(":")
+            self.hostname = parts.pop(0)
+            self.management_port = 8002
+            self.port = 8000
+            if parts:
+                self.management_port = parts.pop(0)
+            if parts:
+                self.port = parts.pop(0)
 
         self.connection \
           = Connection(self.hostname, HTTPDigestAuth(adminuser, adminpass), \
-                           port=self.port)
+                           port=self.port, management_port=self.management_port)
 
         self.utils = ClientUtils(self.connection)
 
@@ -126,6 +134,7 @@ class MarkLogicDatabaseMirror:
         trans = Transactions(self.connection)
         if not self.dryrun:
             trans.set_database(self.database)
+            trans.set_timeLimit(trans.max_timeLimit())
             trans.create()
             txid = trans.txid()
 
@@ -235,9 +244,7 @@ class MarkLogicDatabaseMirror:
                 if key in stamps:
                     source = upload_map[key]['content']
                     statinfo = os.stat(source)
-                    stamp = stamps[key]
-                    stamp = stamp[0:len(stamp)-1] + "+0000"
-                    stamp = datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%S%z")
+                    stamp = self._convert_timestamp(stamps[key])
                     if statinfo.st_mtime < stamp.timestamp():
                         uptodate.append(key)
 
@@ -385,6 +392,7 @@ class MarkLogicDatabaseMirror:
         trans = Transactions(self.connection)
         if not self.dryrun:
             trans.set_database(self.database)
+            trans.set_timeLimit(trans.max_timeLimit())
             trans.create()
 
         try:
@@ -476,18 +484,31 @@ class MarkLogicDatabaseMirror:
         stamps = self.get_timestamps(alluris)
 
         down_map = {}
-
+        skip_list = []
         for uri in uris:
             if not self.can_store_on_filesystem(uri):
                 raise RuntimeError("Cannot save URI:", uri)
 
-            down_map[uri] = {"content": self.path + uri}
-            if uri in stamps:
-                down_map[uri]['timestamp'] = stamps[uri]
+            localfile = self.path + uri
+            skip = False
+            if uri in stamps and os.path.exists(localfile):
+                statinfo = os.stat(localfile)
+                stamp = self._convert_timestamp(stamps[uri])
+                skip = statinfo.st_mtime >= stamp.timestamp()
 
-        self._download_map(trans, down_map)
+            if skip:
+                skip_list.append(localfile)
+            else:
+                down_map[uri] = {"content": localfile}
+                if uri in stamps:
+                    down_map[uri]['timestamp'] = stamps[uri]
 
-    def _download_map(self, trans, down_map):
+        if len(skip_list) > 0:
+            print("Skipping {} locally up-to-date files".format(len(skip_list)))
+
+        self._download_map(trans, down_map, skip_list)
+
+    def _download_map(self, trans, down_map, skip_list=[]):
         """Download from an internally constructed map."""
         filehash = {}
         if not self.mirror:
@@ -546,7 +567,11 @@ class MarkLogicDatabaseMirror:
 
         delfiles = []
         for path in filehash.keys():
-            delfiles.append(self.path + path)
+            localfile = self.path + path
+            if localfile in skip_list:
+                pass
+            else:
+                delfiles.append(localfile)
 
         if not self.mirror and delfiles:
             if self.regex or self.list:
@@ -655,18 +680,10 @@ class MarkLogicDatabaseMirror:
 
         #print(stanza)
 
-        stamp = None
         if 'timestamp' in stanza:
-            stamp = stanza['timestamp']
-
-        if stamp is not None:
-            if stamp.endswith("Z"):
-                stamp = stamp[0:len(stamp)-1] + "+0000"
-            else:
-                # Convert ...+05:00 to ...+0500
-                stamp = stamp[0:len(stamp)-3] + stamp[len(stamp)-2:len(stamp)]
-
-            stamp = datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%S%z")
+            stamp = self._convert_timestamp(stanza['timestamp'])
+        else:
+            stamp = None
 
         if not self.dryrun:
             if not os.path.exists(os.path.dirname(contfn)):
@@ -839,6 +856,17 @@ class MarkLogicDatabaseMirror:
             config['config'] = config["config"] + localconfig['config']
 
         self.config = config
+
+    def _convert_timestamp(self, stamp):
+        """ Convert ISO 8601 dateTime to a, uh, datetime """
+        if stamp.endswith("Z"):
+            stamp = stamp[0:len(stamp)-1] + "+0000"
+        else:
+            # Convert ...+05:00 to ...+0500
+            stamp = stamp[0:len(stamp)-3] + stamp[len(stamp)-2:len(stamp)]
+        stamp = datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%S%z")
+        return stamp
+
 
 def main():
     """Main"""
