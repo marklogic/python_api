@@ -497,7 +497,7 @@ class Documents(PropertyLists):
             xml += "<rapi:collections>\n"
             for collection in self._config['collection']:
                 xml += "<rapi:collection>{}</rapi:collection>\n".format(collection)
-            xml += "</rapi:collections\n"
+            xml += "</rapi:collections>\n"
 
         if self.permissions:
             xml += "<rapi:permissions>\n"
