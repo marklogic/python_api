@@ -551,31 +551,31 @@ class Field(Model,PropertyLists):
             if key == 'stemmed-searches':
                 self._config[key] = field[key]
             elif key == 'word-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'word-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'field-value-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'field-value-positions':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'fast-phrase-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'fast-case-sensitive-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'fast-diacritic-sensitive-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'trailing-wildcard-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'trailing-wildcard-word-positions':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'three-character-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'three-character-word-positions':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'two-character-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'one-character-searches':
-                self._config[key] = (field[key] == 'true')
+                self._config[key] = field[key]
             elif key == 'word-lexicon':
                 self._config[key] = field[key]
             elif key == 'included-element':
