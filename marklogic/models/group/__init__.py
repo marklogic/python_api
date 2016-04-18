@@ -151,9 +151,9 @@ class Group(Model,PropertyLists):
                   'xdqp-ssl-allow-sslv3', 'xdqp-ssl-allow-tls',
                   'xdqp-ssl-ciphers', 'xdqp-ssl-enabled',
                   'xdqp-timeout', 'opsdirector-config',
-                  'opsdirector-logging', 'opsdirector-metering',
+                  'opsdirector-log-level', 'opsdirector-metering',
                   'opsdirector-session-uri', 'telemetry-config',
-                  'telemetry-logging', 'telemetry-metering',
+                  'telemetry-log-level', 'telemetry-metering',
                   'telemetry-session-uri'
                   }
 
