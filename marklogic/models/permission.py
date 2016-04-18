@@ -26,12 +26,11 @@ Classes for manipulating MarkLogic permissions.
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import json
 from marklogic.models.model import Model
-from marklogic.utilities.validators import *
-from marklogic.exceptions import *
+from marklogic.utilities.validators import validate_capability
 
-class Permission(Model,object):
+
+class Permission(Model, object):
     """
     The Permission class encapsulates a MarkLogic permission.
     A permission is the combination of a role and a capability.

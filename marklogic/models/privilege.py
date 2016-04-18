@@ -26,14 +26,16 @@ Classes for manipulating MarkLogic privileges.
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-import json, logging
-import marklogic.exceptions
+import json
+import logging
+from marklogic.exceptions import UnexpectedManagementAPIResponse
 from marklogic.models.model import Model
 from marklogic.utilities.validators import validate_custom
 from marklogic.utilities.validators import validate_privilege_kind
 from marklogic.utilities import PropertyLists
 
-class Privilege(Model,PropertyLists):
+
+class Privilege(Model, PropertyLists):
     """
     The Privilege class encapsulates a MarkLogic privilege.
     """
@@ -141,26 +143,25 @@ class Privilege(Model,PropertyLists):
         return self.remove_from_property_list('role', remove_role)
 
     def marshal(self):
-        """
-        Return a flat structure suitable for conversion to JSON or XML.
+        """Return a flat structure suitable for conversion to JSON or XML.
 
-        :return: A hash of the keys in this object and their values, recursively.
+        :return: A hash of the keys in this object and their values,
+        recursively.
         """
-        struct = { }
+        struct = {}
         for key in self._config:
-            struct[key] = self._config[key];
+            struct[key] = self._config[key]
         return struct
 
     @classmethod
     def unmarshal(cls, config, connection=None, save_connection=True):
-        """
-        Construct a new Privilege from a flat structure. This method is
+        """Construct a new Privilege from a flat structure. This method is
         principally used to construct an object from a Management API
         payload. The configuration passed in is largely assumed to be
         valid.
 
-        :param: config: A hash of properties
-        :return: A newly constructed Privilege object with the specified properties.
+        :param: config: A hash of properties :return: A newly
+        constructed Privilege object with the specified properties.
         """
         kind = config['kind']
         validate_privilege_kind(kind)
@@ -265,7 +266,7 @@ class Privilege(Model,PropertyLists):
         response = connection.get(uri)
 
         if response.status_code != 200:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+            raise UnexpectedManagementAPIResponse(response.text)
 
         results = []
         json_doc = json.loads(response.text)
@@ -273,17 +274,18 @@ class Privilege(Model,PropertyLists):
         for item in json_doc['privilege-default-list']['list-items']['list-item']:
             if kind is None:
                 if include_actions:
-                    results.append("{0}|{1}|{2}" \
-                                   .format(item['kind'],item['nameref'],
+                    results.append("{0}|{1}|{2}"
+                                   .format(item['kind'], item['nameref'],
                                            item['action']))
                 else:
-                    results.append("{0}|{1}" \
-                                   .format(item['kind'],item['nameref']))
+                    results.append("{0}|{1}"
+                                   .format(item['kind'], item['nameref']))
             else:
                 if item['kind'] == kind:
                     if include_actions:
-                        results.append("{1}|{2}" \
-                                       .format(item['nameref'],item['action']))
+                        results.append("{1}|{2}"
+                                       .format(item['nameref'],
+                                               item['action']))
                     else:
                         results.append(item['nameref'])
 
@@ -312,11 +314,11 @@ class Privilege(Model,PropertyLists):
         response = connection.head(uri)
 
         if response.status_code == 200:
-        	return True
+            return True
         elif response.status_code == 404:
             return False
         else:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+            raise UnexpectedManagementAPIResponse(response.text)
 
     @classmethod
     def lookup(cls, connection, name=None, kind=None, action=None):
@@ -395,4 +397,3 @@ class Privilege(Model,PropertyLists):
         Reset the cache of saved privileges.
         """
         Privilege.PRIVLIST = None
-

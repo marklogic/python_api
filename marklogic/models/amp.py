@@ -27,19 +27,21 @@ Amp related classes for manipulating MarkLogic amps
 # FIXME: add docstrings
 # FIXME: check types of arguments
 
-import json, logging
+import json
+import logging
 from marklogic.utilities import PropertyLists
 from marklogic.models.model import Model
 from marklogic.exceptions import UnexpectedManagementAPIResponse
+
 
 class Amp(Model, PropertyLists):
     """
     The Amp class encapsulates a MarkLogic amp.
     """
 
-    def __init__(self, local_name=None, namespace=None, document_uri=None, \
-                     modules_database=None, role=None, \
-                     connection=None, save_connection=True):
+    def __init__(self, local_name=None, namespace=None, document_uri=None,
+                 modules_database=None, role=None,
+                 connection=None, save_connection=True):
         """
         Create an amp
         """
@@ -53,10 +55,10 @@ class Amp(Model, PropertyLists):
         if modules_database is not None:
             self._config['modules-database'] = modules_database
         if role is not None:
-            if isinstance(role,list):
+            if isinstance(role, list):
                 self._config['role'] = role
             else:
-                self._config['role'] = [ role ]
+                self._config['role'] = [role]
 
         self.etag = None
         if save_connection:
@@ -169,8 +171,8 @@ class Amp(Model, PropertyLists):
         if connection is None:
             connection = self.connection
 
-        amp = Amp.lookup(connection, self.local_name(), self.namespace(), \
-                             self.document_uri(), self.modules_database())
+        amp = Amp.lookup(connection, self.local_name(), self.namespace(),
+                         self.document_uri(), self.modules_database())
 
         if amp is not None:
             self._config = amp._config
@@ -189,7 +191,8 @@ class Amp(Model, PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = connection.uri("amps", self.local_name(), parameters=self._params())
+        uri = connection.uri("amps", self.local_name(),
+                             parameters=self._params())
 
         struct = self.marshal()
         response = connection.put(uri, payload=struct, etag=self.etag)
@@ -212,8 +215,8 @@ class Amp(Model, PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = connection.uri("amps", self.local_name(), properties=None, \
-                                 parameters=self._params())
+        uri = connection.uri("amps", self.local_name(), properties=None,
+                             parameters=self._params())
 
         response = connection.delete(uri)
         if response.status_code != 204:
@@ -228,27 +231,28 @@ class Amp(Model, PropertyLists):
         :param connection: The connection to the MarkLogic database
         :return: True if the amp exists
         """
-        if connection == None:
+        if connection is None:
             connection = self.connection
 
-        amp = Amp.lookup(connection, self.local_name(), self.namespace(), \
-                             self.document_uri(), self.modules_database())
+        amp = Amp.lookup(connection, self.local_name(), self.namespace(),
+                         self.document_uri(), self.modules_database())
 
         return amp is not None
 
     @classmethod
-    def lookup(cls, connection, local_name, namespace, document_uri, modules_database=None):
-        """
-        Look up an individual amp.
+    def lookup(cls, connection, local_name, namespace, document_uri,
+               modules_database=None):
+        """Look up an individual amp.
 
         :param connection: A connection to a MarkLogic server
         :param local_name: The name of the amped function
         :param namespace: The namespace URI of the amped function
-        :param document_uri: The URI of the document that contains the amped function
+        :param document_uri: The URI of the document that contains the
+        amped function
         :return: The amp.
         """
-        params = ["namespace="+namespace, \
-                      "document-uri="+document_uri]
+        params = ["namespace="+namespace,
+                  "document-uri="+document_uri]
         if modules_database is not None:
             params.append("modules-database="+modules_database)
 
@@ -284,9 +288,9 @@ class Amp(Model, PropertyLists):
             result = []
             if amp_count > 0:
                 for item in response_json['amp-default-list']['list-items']['list-item']:
-                    result.append({"local-name": item['nameref'], \
-                                       "namespace": item['namespace'], \
-                                       "document-uri": item['document-uri']})
+                    result.append({"local-name": item['nameref'],
+                                   "namespace": item['namespace'],
+                                   "document-uri": item['document-uri']})
         else:
             raise UnexpectedManagementAPIResponse(response.text)
 
@@ -300,7 +304,7 @@ class Amp(Model, PropertyLists):
         return result
 
     def marshal(self):
-        struct = { }
+        struct = {}
         for key in self._config:
             struct[key] = self._config[key]
         return struct

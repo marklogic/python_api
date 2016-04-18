@@ -27,11 +27,13 @@ Role related classes for manipulating MarkLogic roles
 from __future__ import unicode_literals, print_function, absolute_import
 
 import json
-import marklogic.exceptions
+from marklogic.exceptions import UnexpectedManagementAPIResponse
 from marklogic.models.model import Model
 from marklogic.utilities import PropertyLists
+from marklogic.utilities.validators import validate_custom
 
-class Role(Model,PropertyLists):
+
+class Role(Model, PropertyLists):
     """
     The Role class encapsulates a MarkLogic role.  It provides
     methods to set/get database attributes.  The use of methods will
@@ -170,7 +172,7 @@ class Role(Model,PropertyLists):
         else:
             raise validate_custom("Unparseable privilege name")
 
-        key = "{0}|{1}".format(kind,name)
+        key = "{0}|{1}".format(kind, name)
         return self.add_to_property_list('privilege', key)
 
     def set_privileges(self, names):
@@ -184,17 +186,7 @@ class Role(Model,PropertyLists):
 
         :return: The role object
         """
-        for name in names:
-            parts = name.split("|")
-            if len(parts) == 1:
-                pass
-            elif len(parts) == 2:
-                if kind is not None and kind != parts[0]:
-                    raise validate_custom("Kinds must match")
-                kind = parts[0]
-                name = parts[1]
-            else:
-                raise validate_custom("Unparseable privilege name")
+        # FIXME: validate names?
         return self.set_property_list('privilege', names)
 
     def remove_privilege(self, name, kind=None):
@@ -221,7 +213,7 @@ class Role(Model,PropertyLists):
         else:
             raise validate_custom("Unparseable privilege name")
 
-        key = "{0}|{1}".format(kind,name)
+        key = "{0}|{1}".format(kind, name)
         return self.remove_from_property_list('privilege', key)
 
     def privileges(self):
@@ -234,10 +226,10 @@ class Role(Model,PropertyLists):
 
     @classmethod
     def unmarshal(cls, config, connection=None, save_connection=True):
-        """
-        Return a flat structure suitable for conversion to JSON or XML.
+        """Return a flat structure suitable for conversion to JSON or XML.
 
-        :return: A hash of the keys in this object and their values, recursively.
+        :return: A hash of the keys in this object and their values,
+        recursively.
         """
         result = Role("temp", connection, save_connection)
         result._config = config
@@ -255,9 +247,9 @@ class Role(Model,PropertyLists):
         :param: config: A hash of properties
         :return: A newly constructed Role object with the specified properties.
         """
-        struct = { }
+        struct = {}
         for key in self._config:
-            struct[key] = self._config[key];
+            struct[key] = self._config[key]
         return struct
 
     def create(self, connection=None):
@@ -267,7 +259,7 @@ class Role(Model,PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The Role object
         """
-        if connection == None:
+        if connection is None:
             connection = self.connection
 
         uri = connection.uri("roles")
@@ -338,7 +330,7 @@ class Role(Model,PropertyLists):
         response = connection.get(uri)
 
         if response.status_code != 200:
-            raise exceptions.UnexpectedManagementAPIResponse(response.text)
+            raise UnexpectedManagementAPIResponse(response.text)
 
         results = []
         json_doc = json.loads(response.text)
@@ -355,7 +347,7 @@ class Role(Model,PropertyLists):
         :param connection: The connection to the MarkLogic database
         :return: The role
         """
-        if connection == None:
+        if connection is None:
             connection = self.connection
 
         role = Role.lookup(connection, self.role_name())

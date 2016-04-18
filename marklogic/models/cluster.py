@@ -25,18 +25,19 @@ Cluster class for manipulating MarkLogic clusters
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-import json, logging, time
+import json
+import logging
 from marklogic.connection import Connection
-from requests.exceptions import ConnectionError
 from marklogic.models.model import Model
-from marklogic.exceptions import *
 from marklogic.models.host import Host
+from marklogic.exceptions import UnexpectedManagementAPIResponse
+
 
 class LocalCluster(Model):
     """
     The LocalCluster class encapsulates the local cluster.
     """
-    def __init__(self,connection=None,save_connection=True):
+    def __init__(self,connection=None, save_connection=True):
         """
         Create a local cluster.
         """
@@ -69,7 +70,8 @@ class LocalCluster(Model):
         if connection is None:
             connection = self.connection
 
-        uri = connection.uri("", properties=None, parameters=["view="+viewname])
+        uri = connection.uri("", properties=None,
+                             parameters=["view="+viewname])
         response = connection.get(uri)
 
         if response.status_code == 200:
@@ -105,8 +107,8 @@ class LocalCluster(Model):
             connection = self.connection
 
         uri = "{0}://{1}:{2}/manage/v2".format(
-            connectin.protocol, connection.host, connection.management_port)
-        struct = {'operation':'restart-local-cluster'}
+            connection.protocol, connection.host, connection.management_port)
+        struct = {'operation': 'restart-local-cluster'}
         response = connection.post(uri, payload=struct)
         return self
 
@@ -116,7 +118,7 @@ class LocalCluster(Model):
 
         uri = "{0}://{1}:{2}/manage/v2".format(
             connection.protocol, connection.host, connection.management_port)
-        struct = {'operation':'shutdown-local-cluster'}
+        struct = {'operation': 'shutdown-local-cluster'}
         response = connection.post(uri, payload=struct)
         return None
 
@@ -151,7 +153,7 @@ class LocalCluster(Model):
         return result
 
     def marshal(self):
-        struct = { }
+        struct = {}
         for key in self._config:
             if (key == 'bootstrap-host'):
                 jlist = []
@@ -159,7 +161,7 @@ class LocalCluster(Model):
                     jlist.append(index._config)
                 struct[key] = jlist
             else:
-                struct[key] = self._config[key];
+                struct[key] = self._config[key]
         return struct
 
     def add_host(self, host, connection=None):
@@ -170,21 +172,22 @@ class LocalCluster(Model):
             host = Host(host)
 
         xml = host._get_server_config()
-        cfgzip = self._post_server_config(xml,connection)
+        cfgzip = self._post_server_config(xml, connection)
 
         host_connection = Connection(host.host_name(), connection.auth)
-        host._post_cluster_config(cfgzip,host_connection)
+        host._post_cluster_config(cfgzip, host_connection)
 
     def remove_host(self, host, connection=None):
         if connection is None:
             connection = self.connection
 
         uri = "{0}://{1}:8001/admin/v1/host-config?remote-host={2}" \
-          .format(connection.protocol, connection.host, host)
+              .format(connection.protocol, connection.host, host)
 
         response = connection.delete(uri)
 
-    def couple(self, other_cluster, connection=None, other_cluster_connection=None):
+    def couple(self, other_cluster, connection=None,
+               other_cluster_connection=None):
         if connection is None:
             connection = self.connection
         if other_cluster_connection is None:
@@ -206,7 +209,7 @@ class LocalCluster(Model):
         struct = self.marshal()
         response = other_cluster_connection.post(uri, payload=struct)
 
-    def _post_server_config(self,xml,connection):
+    def _post_server_config(self, xml, connection):
         """
         Send the server configuration to the a bootstrap host on the
         cluster to which you wish to couple. This is the first half of
@@ -221,7 +224,7 @@ class LocalCluster(Model):
             connection.protocol, connection.host)
 
         struct = {'group': 'Default',
-                  'server-config': xml }
+                  'server-config': xml}
 
         response = connection.post(uri, payload=struct,
                                    content_type='application/x-www-form-urlencoded')
@@ -258,7 +261,7 @@ class LocalCluster(Model):
         """
         return self._get_config_property('ssl-fips-enabled')
 
-    def set_ssl_fips_enabled(self,value=True):
+    def set_ssl_fips_enabled(self, value=True):
         """
         Set the ssl-fips-enabled.
 
@@ -284,7 +287,7 @@ class LocalCluster(Model):
         """
         return self._get_config_property('cluster-name')
 
-    def set_cluster_name(self,value):
+    def set_cluster_name(self, value):
         """
         Set the cluster-name.
 
@@ -294,11 +297,12 @@ class LocalCluster(Model):
         self._validate(value, 'string')
         return self._set_config_property('cluster-name', value)
 
+
 class ForeignCluster(Model):
     """
     The ForeignCluster class encapsulates a foreign cluster.
     """
-    def __init__(self,name,connection=None,save_connection=True):
+    def __init__(self,name,connection=None, save_connection=True):
         """
         Create a foreign cluster.
         """
@@ -394,7 +398,7 @@ class ForeignCluster(Model):
         return result
 
     def marshal(self):
-        struct = { }
+        struct = {}
         for key in self._config:
             if (key == 'foreign-bootstrap-host'):
                 jlist = []
@@ -407,7 +411,7 @@ class ForeignCluster(Model):
                     jlist.append(substruct)
                 struct[key] = jlist
             else:
-                struct[key] = self._config[key];
+                struct[key] = self._config[key]
 
         return struct
 
@@ -430,7 +434,7 @@ class ForeignCluster(Model):
         """
         return self._get_config_property('xdqp-ssl-allow-tls')
 
-    def set_xdqp_ssl_allow_tls(self,value=True):
+    def set_xdqp_ssl_allow_tls(self, value=True):
         """
         Set the xdqp-ssl-allow-tls.
 
@@ -448,7 +452,7 @@ class ForeignCluster(Model):
         """
         return self._get_config_property('foreign-protocol')
 
-    def set_foreign_protocol(self,value):
+    def set_foreign_protocol(self, value):
         """
         Set the foreign-protocol.
 
@@ -466,7 +470,7 @@ class ForeignCluster(Model):
         """
         return self._get_config_property('xdqp-ssl-allow-sslv3')
 
-    def set_xdqp_ssl_allow_sslv3(self,value=True):
+    def set_xdqp_ssl_allow_sslv3(self, value=True):
         """
         Set the xdqp-ssl-allow-sslv3.
 
@@ -492,7 +496,7 @@ class ForeignCluster(Model):
         """
         return self._get_config_property('host-timeout')
 
-    def set_host_timeout(self,value):
+    def set_host_timeout(self, value):
         """
         Set the host-timeout.
 
@@ -510,7 +514,7 @@ class ForeignCluster(Model):
         """
         return self._get_config_property('xdqp-timeout')
 
-    def set_xdqp_timeout(self,value):
+    def set_xdqp_timeout(self, value):
         """
         Set the xdqp-timeout.
 
@@ -528,7 +532,7 @@ class ForeignCluster(Model):
         """
         return self._get_config_property('xdqp-ssl-enabled')
 
-    def set_xdqp_ssl_enabled(self,value=True):
+    def set_xdqp_ssl_enabled(self, value=True):
         """
         Set the xdqp-ssl-enabled.
 
@@ -546,7 +550,7 @@ class ForeignCluster(Model):
         """
         return self._get_config_property('xdqp-ssl-ciphers')
 
-    def set_xdqp_ssl_ciphers(self,value):
+    def set_xdqp_ssl_ciphers(self, value):
         """
         Set the xdqp-ssl-ciphers.
 
@@ -556,11 +560,12 @@ class ForeignCluster(Model):
         self._validate(value, 'string')
         return self._set_config_property('xdqp-ssl-ciphers', value)
 
+
 class BootstrapHost(Model):
     """
     The BootstrapHost class encapsulates a MarkLogic cluster bootstrap host.
     """
-    def __init__(self,host_id,host_name,connect_port):
+    def __init__(self, host_id, host_name, connect_port):
         self._config = {'bootstrap-host-id': host_id,
                         'bootstrap-host-name': host_name,
                         'bootstrap-connect-port': connect_port}
