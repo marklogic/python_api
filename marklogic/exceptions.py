@@ -23,6 +23,7 @@
 MarkLogic exception classes.
 """
 
+
 class MLManageException(Exception):
     """
     Base class for MarkLogic manage exceptions.
@@ -38,6 +39,7 @@ class UnauthorizedAPIRequest(MLManageException):
     """
     pass
 
+
 class UnsupportedOperation(MLManageException):
     """
     This exception class is for exceptions that arise from attempts to
@@ -45,6 +47,7 @@ class UnsupportedOperation(MLManageException):
 
     """
     pass
+
 
 class InvalidAPIRequest(MLManageException):
     """
@@ -55,18 +58,16 @@ class InvalidAPIRequest(MLManageException):
     """
     pass
 
-class UnexpectedManagementAPIResponse(MLManageException):
-    """
-    This exception class is for exceptions that arise from unexpected management
-    API responses.
 
+class UnexpectedManagementAPIResponse(MLManageException):
+    """This exception class is for exceptions that arise from unexpected
+    management API responses.
     """
     pass
 
-class UnexpectedAPIResponse(MLManageException):
-    """
-    This exception class is for exceptions that arise from unexpected REST api
-    responses when dealing with search or documents.
 
+class UnexpectedAPIResponse(MLManageException):
+    """This exception class is for exceptions that arise from unexpected
+    REST api responses when dealing with search or documents.
     """
     pass

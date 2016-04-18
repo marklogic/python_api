@@ -25,16 +25,18 @@ Host related classes for manipulating MarkLogic hosts
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-import json, logging, time
+import json
+import logging
 from marklogic.models.model import Model
 from marklogic.connection import Connection
-from marklogic.exceptions import *
+from marklogic.exceptions import UnexpectedManagementAPIResponse
+
 
 class Host(Model):
     """
     The Host class encapsulates a MarkLogic host.
     """
-    def __init__(self,name=None,connection=None,save_connection=True):
+    def __init__(self, name=None, connection=None, save_connection=True):
         """
         Create a host.
         """
@@ -184,7 +186,7 @@ class Host(Model):
             connection = self.connection
 
         uri = connection.uri("hosts", self.name, properties=None)
-        struct = {'operation':'restart'}
+        struct = {'operation': 'restart'}
         response = connection.post(uri, payload=struct)
         return self
 
@@ -200,7 +202,7 @@ class Host(Model):
             connection = self.connection
 
         uri = connection.uri("hosts", self.name, properties=None)
-        struct = {'operation':'shutdown'}
+        struct = {'operation': 'shutdown'}
         response = connection.post(uri, payload=struct)
         return None
 
@@ -256,7 +258,7 @@ class Host(Model):
         return result
 
     def marshal(self):
-        struct = { }
+        struct = {}
         for key in self._config:
             struct[key] = self._config[key]
         return struct
@@ -266,9 +268,9 @@ class Host(Model):
             cluster_connection = cluster.connection
 
         xml = self._get_server_config()
-        cfgzip = cluster._post_server_config(xml,cluster_connection)
+        cfgzip = cluster._post_server_config(xml, cluster_connection)
         connection = Connection(self.host_name(), cluster_connection.auth)
-        self._post_cluster_config(cfgzip,connection)
+        self._post_cluster_config(cfgzip, connection)
 
     def _get_server_config(self):
         """
@@ -284,9 +286,9 @@ class Host(Model):
         if response.status_code != 200:
             raise UnexpectedManagementAPIResponse(response.text)
 
-        return response.text # this is always XML
+        return response.text  # this is always XML
 
-    def _post_cluster_config(self,cfgzip,connection):
+    def _post_cluster_config(self, cfgzip, connection):
         """
         Send the cluster configuration to the the server that's joining
         the cluster. This is the second half of
@@ -296,7 +298,7 @@ class Host(Model):
         :param cfgzip: The ZIP payload from post_server_config()
         """
         uri = "{0}://{1}:8001/admin/v1/cluster-config" \
-          .format(connection.protocol, connection.host)
+              .format(connection.protocol, connection.host)
 
         response = connection.post(uri, payload=cfgzip,
                                    content_type="application/zip")

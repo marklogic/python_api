@@ -19,9 +19,10 @@
 # Norman Walsh      19 July 2015     Initial development
 #
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from marklogic.utilities.validators import ValidationError
 from marklogic.exceptions import UnsupportedOperation
+
 
 class Model:
     """
@@ -44,7 +45,8 @@ class Model:
     def _validate(self, value, vtype):
         if isinstance(vtype, list):
             if value not in vtype:
-                raise ValidationError("Not in list: {0}".format(", ".join(vtype)),
+                raise ValidationError("Not in list: {0}"
+                                      .format(", ".join(vtype)),
                                       value)
         elif isinstance(vtype, dict):
             try:
@@ -70,5 +72,5 @@ class Model:
         elif vtype == 'string':
             pass
         else:
-            raise UnsupportedOperation("Unexpected type: {0}".format(vtype))
-
+            raise UnsupportedOperation("Unexpected type: {0}"
+                                       .format(vtype))

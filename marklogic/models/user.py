@@ -27,18 +27,19 @@ User related classes for manipulating MarkLogic users
 from __future__ import unicode_literals, print_function, absolute_import
 
 import json
-import marklogic.exceptions
 from marklogic.models.model import Model
 from marklogic.models.permission import Permission
 from marklogic.utilities import PropertyLists
 
-class User(Model,PropertyLists):
+
+class User(Model, PropertyLists):
     """
     The User class encapsulates a MarkLogic user.  It provides
     methods to set/get database attributes.  The use of methods will
     allow IDEs with tooling to provide auto-completion hints.
     """
-    def __init__(self, name, password=None, connection=None, save_connection=True):
+    def __init__(self, name, password=None, connection=None,
+                 save_connection=True):
         self._config = {}
         self._config['user-name'] = name
         if password is not None:
@@ -94,7 +95,7 @@ class User(Model,PropertyLists):
 
         perms = []
         for item in self._config['permission']:
-            perm = Permission(item['role-name'],item['capability'])
+            perm = Permission(item['role-name'], item['capability'])
             perms.append(perm)
 
         return perms
@@ -198,14 +199,13 @@ class User(Model,PropertyLists):
         return self.remove_from_property_list('external-name', name)
 
     def marshal(self):
-        """
-        Return a flat structure suitable for conversion to JSON or XML.
+        """Return a flat structure suitable for conversion to JSON or XML.
 
         :return: A hash of the keys in this object and their values, recursively.
         """
-        struct = { }
+        struct = {}
         for key in self._config:
-            struct[key] = self._config[key];
+            struct[key] = self._config[key]
         return struct
 
     @classmethod
@@ -356,7 +356,7 @@ class User(Model,PropertyLists):
         """
         return self._get_config_property('user-name')
 
-    def set_user_name(self,value):
+    def set_user_name(self, value):
         """
         Set the user-name.
 
@@ -366,7 +366,7 @@ class User(Model,PropertyLists):
         self._validate(value, 'string')
         return self._set_config_property('user-name', value)
 
-    def set_password(self,value):
+    def set_password(self, value):
         """
         Set the password.
 
@@ -384,7 +384,7 @@ class User(Model,PropertyLists):
         """
         return self._get_config_property('description')
 
-    def set_description(self,value):
+    def set_description(self, value):
         """
         Set the description.
 
@@ -393,4 +393,3 @@ class User(Model,PropertyLists):
         """
         self._validate(value, 'string')
         return self._set_config_property('description', value)
-

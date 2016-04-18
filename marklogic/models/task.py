@@ -28,10 +28,12 @@ Task related classes for manipulating MarkLogic scheduled tasks
 # FIXME: check types of arguments
 
 from abc import ABCMeta
-import json, logging
+import json
+import logging
 from marklogic.utilities import PropertyLists
 from marklogic.models.model import Model
 from marklogic.exceptions import UnexpectedManagementAPIResponse
+
 
 class Task(Model, PropertyLists):
     """
@@ -40,7 +42,8 @@ class Task(Model, PropertyLists):
     """
     __metaclass__ = ABCMeta
 
-    def __init__(self, taskid=None, group="Default", connection=None, save_connection=True):
+    def __init__(self, taskid=None, group="Default", connection=None,
+                 save_connection=True):
         """
         Create a scheduled task.
         """
@@ -150,64 +153,70 @@ class Task(Model, PropertyLists):
         return self
 
     @classmethod
-    def daily_task(cls, path, start_time, root="/", period=1, \
-                       user="nobody", host=None, priority=None, \
-                       modules=None, database="Documents", \
-                       connection=None, save_connection=True):
-        return DailyTask(path, start_time, root=root, period=period, \
-                             user=user, host=host, priority=priority, \
-                             modules=modules, database=database, \
-                             connection=connection, save_connection=save_connection)
+    def daily_task(cls, path, start_time, root="/", period=1,
+                   user="nobody", host=None, priority=None,
+                   modules=None, database="Documents",
+                   connection=None, save_connection=True):
+        return DailyTask(path, start_time, root=root, period=period,
+                         user=user, host=host, priority=priority,
+                         modules=modules, database=database,
+                         connection=connection,
+                         save_connection=save_connection)
 
     @classmethod
-    def hourly_task(cls, path, start_time, root="/", period=1, \
-                        user="nobody", host=None, priority=None, \
-                        modules=None, database="Documents", \
-                        connection=None, save_connection=True):
-        return HourlyTask(path, start_time, root=root, period=period, \
-                              user=user, host=host, priority=priority, \
-                              modules=modules, database=database, \
-                              connection=connection, save_connection=save_connection)
+    def hourly_task(cls, path, start_time, root="/", period=1,
+                    user="nobody", host=None, priority=None,
+                    modules=None, database="Documents",
+                    connection=None, save_connection=True):
+        return HourlyTask(path, start_time, root=root, period=period,
+                          user=user, host=host, priority=priority,
+                          modules=modules, database=database,
+                          connection=connection,
+                          save_connection=save_connection)
 
     @classmethod
-    def minutely_task(cls, path, root="/", period=1, \
-                          user="nobody", host=None, priority=None, \
-                          modules=None, database="Documents", \
-                          connection=None, save_connection=True):
-        return MinutelyTask(path, root=root, period=period, \
-                                user=user, host=host, priority=priority, \
-                                modules=modules, database=database, \
-                                connection=connection, save_connection=save_connection)
+    def minutely_task(cls, path, root="/", period=1,
+                      user="nobody", host=None, priority=None,
+                      modules=None, database="Documents",
+                      connection=None, save_connection=True):
+        return MinutelyTask(path, root=root, period=period,
+                            user=user, host=host, priority=priority,
+                            modules=modules, database=database,
+                            connection=connection,
+                            save_connection=save_connection)
 
     @classmethod
-    def monthly_task(cls, path, month_day, start_time, root="/", period=1, \
-                         user="nobody", host=None, priority=None, \
-                         modules=None, database="Documents", \
-                         connection=None, save_connection=True):
-        return MonthlyTask(path, month_day, start_time, root=root, period=period, \
-                               user=user, host=host, priority=priority, \
-                               modules=modules, database=database, \
-                               connection=connection, save_connection=save_connection)
+    def monthly_task(cls, path, month_day, start_time, root="/", period=1,
+                     user="nobody", host=None, priority=None,
+                     modules=None, database="Documents",
+                     connection=None, save_connection=True):
+        return MonthlyTask(path, month_day, start_time, root=root,
+                           period=period, user=user, host=host,
+                           priority=priority, modules=modules,
+                           database=database, connection=connection,
+                           save_connection=save_connection)
 
     @classmethod
-    def weekly_task(cls, path, days, start_time, root="/", period=1, \
-                        user="nobody", host=None, priority=None, \
-                        modules=None, database="Documents", \
-                        connection=None, save_connection=True):
-        return WeeklyTask(path, days, start_time, root=root, period=period, \
-                              user=user, host=host, priority=priority, \
-                              modules=modules, database=database, \
-                              connection=connection, save_connection=save_connection)
+    def weekly_task(cls, path, days, start_time, root="/", period=1,
+                    user="nobody", host=None, priority=None,
+                    modules=None, database="Documents",
+                    connection=None, save_connection=True):
+        return WeeklyTask(path, days, start_time, root=root, period=period,
+                          user=user, host=host, priority=priority,
+                          modules=modules, database=database,
+                          connection=connection,
+                          save_connection=save_connection)
 
     @classmethod
-    def once_task(cls, path, start_date, start_time, root="/", \
-                        user="nobody", host=None, priority=None, \
-                        modules=None, database="Documents", \
-                        connection=None, save_connection=True):
-        return OnceTask(path, start_date, start_time, root=root, \
-                              user=user, host=host, priority=priority, \
-                              modules=modules, database=database, \
-                              connection=connection, save_connection=save_connection)
+    def once_task(cls, path, start_date, start_time, root="/",
+                  user="nobody", host=None, priority=None,
+                  modules=None, database="Documents",
+                  connection=None, save_connection=True):
+        return OnceTask(path, start_date, start_time, root=root,
+                        user=user, host=host, priority=priority,
+                        modules=modules, database=database,
+                        connection=connection,
+                        save_connection=save_connection)
 
     def create(self, group="Default", connection=None):
         """
@@ -240,8 +249,8 @@ class Task(Model, PropertyLists):
         location = location[0:qpos]
 
         uri = "{0}://{1}:{2}{3}/properties?group-id={4}" \
-          .format(connection.protocol, connection.host,
-                  connection.management_port, location, group)
+              .format(connection.protocol, connection.host,
+                      connection.management_port, location, group)
 
         response = connection.get(uri)
 
@@ -285,8 +294,8 @@ class Task(Model, PropertyLists):
         if connection is None:
             connection = self.connection
 
-        uri = connection.uri("tasks", self.taskid, \
-                                 parameters=["group-id="+self.group])
+        uri = connection.uri("tasks", self.taskid,
+                             parameters=["group-id="+self.group])
         struct = self.marshal()
         response = connection.put(uri, payload=struct, etag=self.etag)
         if response.status_code != 204:
@@ -320,7 +329,7 @@ class Task(Model, PropertyLists):
         :param connection: The connection to the MarkLogic database
         :return: True if the task exists
         """
-        if connection == None:
+        if connection is None:
             connection = self.connection
 
         task = Task.lookup(connection, self.id(), self.group)
@@ -398,10 +407,11 @@ class Task(Model, PropertyLists):
         return result
 
     def marshal(self):
-        struct = { }
+        struct = {}
         for key in self._config:
             struct[key] = self._config[key]
         return struct
+
 
 class RepeatingTask(Task):
     """
@@ -411,7 +421,8 @@ class RepeatingTask(Task):
     __metaclass__ = ABCMeta
 
     def __init__(self, connection=None, save_connection=True):
-        super().__init__(connection=connection, save_connection=save_connection)
+        super().__init__(connection=connection,
+                         save_connection=save_connection)
 
     def period(self):
         return self._get_config_property('task-period')
@@ -420,21 +431,23 @@ class RepeatingTask(Task):
         self._config['task-period'] = period
         return self
 
+
 class DailyTask(RepeatingTask):
     """
     The DailyTask class encapsulates a MarkLogic daily scheduled task.
     """
-    def __init__(self, path="/", start_time=None, root="/", period=1, \
-                     user="nobody", host=None, priority=None, \
-                     modules=None, database="Documents", \
-                     connection=None, save_connection=True):
+    def __init__(self, path="/", start_time=None, root="/", period=1,
+                 user="nobody", host=None, priority=None,
+                 modules=None, database="Documents",
+                 connection=None, save_connection=True):
         """
         Create a daily scheduled task.
         """
-        super().__init__(connection=connection, save_connection=save_connection)
+        super().__init__(connection=connection,
+                         save_connection=save_connection)
 
-        self._config = { 'task-type': 'daily', \
-                             'task-enabled': True }
+        self._config = {'task-type': 'daily',
+                        'task-enabled': True}
         self.set_path(path)
         self.set_start_time(start_time)
         self.set_root(root)
@@ -451,22 +464,24 @@ class DailyTask(RepeatingTask):
     def set_start_time(self, start_time):
         self._config['task-start-time'] = start_time
         return self
+
 
 class HourlyTask(RepeatingTask):
     """
     The HourlyTask class encapsulates a MarkLogic hourly scheduled task.
     """
-    def __init__(self, path="/", start_time=None, root="/", period=1, \
-                     user="nobody", host=None, priority=None, \
-                     modules=None, database="Documents", \
-                     connection=None, save_connection=True):
+    def __init__(self, path="/", start_time=None, root="/", period=1,
+                 user="nobody", host=None, priority=None,
+                 modules=None, database="Documents",
+                 connection=None, save_connection=True):
         """
         Create an hourly scheduled task.
         """
-        super().__init__(connection=connection, save_connection=save_connection)
+        super().__init__(connection=connection,
+                         save_connection=save_connection)
 
-        self._config = { 'task-type': 'hourly', \
-                             'task-enabled': True }
+        self._config = {'task-type': 'hourly',
+                        'task-enabled': True}
         self.set_path(path)
         self.set_start_time(start_time)
         self.set_root(root)
@@ -484,21 +499,23 @@ class HourlyTask(RepeatingTask):
         self._config['task-start-time'] = start_time
         return self
 
+
 class MinutelyTask(RepeatingTask):
     """
     The MinutelyTask class encapsulates a MarkLogic minutely scheduled task.
     """
-    def __init__(self, path="/", root="/", period=1, \
-                     user="nobody", host=None, priority=None, \
-                     modules=None, database="Documents", \
-                     connection=None, save_connection=True):
+    def __init__(self, path="/", root="/", period=1,
+                 user="nobody", host=None, priority=None,
+                 modules=None, database="Documents",
+                 connection=None, save_connection=True):
         """
         Create a minutely scheduled task.
         """
-        super().__init__(connection=connection, save_connection=save_connection)
+        super().__init__(connection=connection,
+                         save_connection=save_connection)
 
-        self._config = { 'task-type': 'minutely', \
-                             'task-enabled': True }
+        self._config = {'task-type': 'minutely',
+                        'task-enabled': True}
         self.set_path(path)
         self.set_root(root)
         self.set_period(period)
@@ -508,22 +525,24 @@ class MinutelyTask(RepeatingTask):
         self.set_modules(modules)
         self.set_database(database)
 
+
 class MonthlyTask(RepeatingTask):
     """
     The MonthlyTask class encapsulates a MarkLogic monthly scheduled task.
     """
-    def __init__(self, path="/", month_day=None, start_time=None, \
-                     root="/", period=1, \
-                     user="nobody", host=None, priority=None, \
-                     modules=None, database="Documents", \
-                     connection=None, save_connection=True):
+    def __init__(self, path="/", month_day=None, start_time=None,
+                 root="/", period=1,
+                 user="nobody", host=None, priority=None,
+                 modules=None, database="Documents",
+                 connection=None, save_connection=True):
         """
         Create a monthly scheduled task.
         """
-        super().__init__(connection=connection, save_connection=save_connection)
+        super().__init__(connection=connection,
+                         save_connection=save_connection)
 
-        self._config = { 'task-type': 'monthly', \
-                             'task-enabled': True }
+        self._config = {'task-type': 'monthly',
+                        'task-enabled': True}
         self.set_path(path)
         self.set_month_day(month_day)
         self.set_start_time(start_time)
@@ -549,22 +568,24 @@ class MonthlyTask(RepeatingTask):
         self._config['task-start-time'] = start_time
         return self
 
+
 class WeeklyTask(RepeatingTask):
     """
     The WeeklyTask class encapsulates a MarkLogic weekly scheduled task.
     """
-    def __init__(self, path="/", days=None, start_time=None, \
-                     root="/", period=1, \
-                     user="nobody", host=None, priority=None, \
-                     modules=None, database="Documents", \
-                     connection=None, save_connection=True):
+    def __init__(self, path="/", days=None, start_time=None,
+                 root="/", period=1,
+                 user="nobody", host=None, priority=None,
+                 modules=None, database="Documents",
+                 connection=None, save_connection=True):
         """
         Create a weekly scheduled task.
         """
-        super().__init__(connection=connection, save_connection=save_connection)
+        super().__init__(connection=connection,
+                         save_connection=save_connection)
 
-        self._config = { 'task-type': 'weekly', \
-                             'task-enabled': True }
+        self._config = {'task-type': 'weekly',
+                        'task-enabled': True}
         self.set_path(path)
         self.set_days(days)
         self.set_start_time(start_time)
@@ -592,21 +613,23 @@ class WeeklyTask(RepeatingTask):
     def set_days(self, days):
         return self.set_property_list('task-day', days)
 
+
 class OnceTask(RepeatingTask):
     """
     The OnceTask class encapsulates a MarkLogic task scheduled once.
     """
-    def __init__(self, path="/", start_date=None, start_time=None, root="/", \
-                     user="nobody", host=None, priority=None, \
-                     modules=None, database="Documents", \
-                     connection=None, save_connection=True):
+    def __init__(self, path="/", start_date=None, start_time=None, root="/",
+                 user="nobody", host=None, priority=None,
+                 modules=None, database="Documents",
+                 connection=None, save_connection=True):
         """
         Create a weekly scheduled task.
         """
-        super().__init__(connection=connection, save_connection=save_connection)
+        super().__init__(connection=connection,
+                         save_connection=save_connection)
 
-        self._config = { 'task-type': 'once', \
-                             'task-enabled': True }
+        self._config = {'task-type': 'once',
+                        'task-enabled': True}
         self.set_path(path)
         self.set_start_date(start_date)
         self.set_start_time(start_time)
@@ -630,4 +653,5 @@ class OnceTask(RepeatingTask):
     def set_start_time(self, start_time):
         self._config['task-start-time'] = start_time
         return self
+
 

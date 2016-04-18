@@ -19,17 +19,23 @@
 # Paul Hoehne       03/01/2015     Initial development
 #
 
-import json, logging, requests, time
+import json
+import logging
+import requests
+import time
 from http.client import BadStatusLine
 from marklogic.exceptions import UnexpectedManagementAPIResponse
 from marklogic.exceptions import UnauthorizedAPIRequest
 from requests.auth import HTTPDigestAuth
-from requests.exceptions import ConnectionError,ReadTimeout
-from requests.packages.urllib3.exceptions import ProtocolError,ReadTimeoutError
+from requests.exceptions import ConnectionError
+from requests.exceptions import ReadTimeout
+from requests.packages.urllib3.exceptions import ProtocolError
+from requests.packages.urllib3.exceptions import ReadTimeoutError
 
 """
 Connection related classes and method to connect to MarkLogic.
 """
+
 
 class Connection:
     """
@@ -74,7 +80,7 @@ class Connection:
                 name = name + properties
 
         uri = "{0}://{1}:{2}/{3}/{4}/{5}{6}" \
-          .format(protocol, host, port, root, version, relation, name)
+              .format(protocol, host, port, root, version, relation, name)
 
         if parameters is not None:
             uri = uri + "?" + "&".join(parameters)
@@ -92,7 +98,7 @@ class Connection:
             version = self.client_version
 
         uri = "{0}://{1}:{2}/{3}/{4}" \
-          .format(protocol, host, port, version, path)
+              .format(protocol, host, port, version, path)
 
         return uri
 
@@ -117,7 +123,7 @@ class Connection:
     def post(self, uri, payload=None, etag=None, headers=None,
              content_type="application/json", accept="application/json"):
 
-        if headers == None:
+        if headers is None:
             headers = {}
 
         headers['content-type'] = content_type
@@ -129,7 +135,7 @@ class Connection:
         self.logger.debug("POST {0}...".format(uri))
         self.payload_logger.debug("Headers:")
         self.payload_logger.debug(json.dumps(headers, indent=2))
-        if payload != None:
+        if payload is not None:
             self.payload_logger.debug("Payload:")
             if content_type == 'application/json':
                 self.payload_logger.debug(json.dumps(payload, indent=2))
@@ -159,7 +165,7 @@ class Connection:
         self.logger.debug("PUT  {0}...".format(uri))
         self.payload_logger.debug("Headers:")
         self.payload_logger.debug(json.dumps(headers, indent=2))
-        if payload != None:
+        if payload is not None:
             self.payload_logger.debug("Payload:")
             if content_type == 'application/json':
                 self.payload_logger.debug(json.dumps(payload, indent=2))
@@ -171,10 +177,10 @@ class Connection:
         else:
             if content_type == "application/json":
                 self.response = requests.put(uri, json=payload,
-                                                 auth=self.auth, headers=headers)
+                                             auth=self.auth, headers=headers)
             else:
                 self.response = requests.put(uri, data=payload,
-                                                 auth=self.auth, headers=headers)
+                                             auth=self.auth, headers=headers)
 
         return self._response()
 
@@ -189,7 +195,7 @@ class Connection:
         self.logger.debug("DELETE {0}...".format(uri))
         self.payload_logger.debug("Headers:")
         self.payload_logger.debug(json.dumps(headers, indent=2))
-        if payload != None:
+        if payload is not None:
             self.payload_logger.debug("Payload:")
             if content_type == 'application/json':
                 self.payload_logger.debug(json.dumps(payload, indent=2))
@@ -228,10 +234,10 @@ class Connection:
         return response
 
     def wait_for_restart(self, last_startup, timestamp_uri="/admin/v1/timestamp"):
-        """
-        Wait for the host to restart.
+        """Wait for the host to restart.
 
-        :param last_startup: The last startup time reported in the restart message
+        :param last_startup: The last startup time reported in the
+        restart message
         """
 
         uri = "{0}://{1}:8001{2}".format(self.protocol, self.host,
@@ -241,21 +247,23 @@ class Connection:
         count = 24
         while not done:
             try:
-                self.logger.debug("Waiting for restart of {0}".format(self.host))
+                self.logger.debug("Waiting for restart of {0}"
+                                  .format(self.host))
                 response = requests.get(uri, auth=self.auth,
-                                             headers={'accept': 'application/json'})
-                done = response.status_code == 200 and response.text != last_startup
+                                        headers={'accept': 'application/json'})
+                done = (response.status_code == 200
+                        and response.text != last_startup)
             except TypeError:
                 self.logger.debug("{0}: {1}".format(response.status_code,
-                                               response.text))
+                                                    response.text))
                 pass
             except BadStatusLine:
                 self.logger.debug("{0}: {1}".format(response.status_code,
-                                               response.text))
+                                                    response.text))
                 pass
             except ProtocolError:
                 self.logger.debug("{0}: {1}".format(response.status_code,
-                                               response.text))
+                                                    response.text))
                 pass
             except ReadTimeoutError:
                 self.logger.debug("ReadTimeoutError error...")
@@ -266,7 +274,7 @@ class Connection:
             except ConnectionError:
                 self.logger.debug("Connection error...")
                 pass
-            time.sleep(4) # Sleep one more time even after success...
+            time.sleep(4)  # Sleep one more time even after success...
             count -= 1
 
             if count <= 0:
