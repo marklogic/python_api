@@ -3924,3 +3924,24 @@ class Database(Model,PropertyLists):
         else:
             raise UnexpectedAPIResponse(response.text)
 
+    @classmethod
+    def get_status_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            raise ValidationError("Database name expected.")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="databases/"+name, protocol=protocol,view="status")
+        return connection.get(viewuri, accept="application/json")
+
+    @classmethod
+    def get_metric_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="databases", protocol=protocol,view="metrics")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="databases/"+name, protocol=protocol,view="metrics")
+        return connection.get(viewuri, accept="application/json")

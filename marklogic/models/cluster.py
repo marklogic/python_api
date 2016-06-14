@@ -31,6 +31,7 @@ from marklogic.connection import Connection
 from marklogic.models.model import Model
 from marklogic.models.host import Host
 from marklogic.exceptions import UnexpectedManagementAPIResponse
+from marklogic.utilities.validators import ValidationError
 
 
 class LocalCluster(Model):
@@ -297,6 +298,27 @@ class LocalCluster(Model):
         self._validate(value, 'string')
         return self._set_config_property('cluster-name', value)
 
+    @classmethod
+    def get_status_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="", protocol=protocol,view="status")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="clusters/"+name, protocol=protocol,view="status")
+        return connection.get(viewuri, accept="application/json")
+
+    @classmethod
+    def get_metric_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="", protocol=protocol,view="metrics")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="clusters/"+name, protocol=protocol,view="metrics")
+        return connection.get(viewuri, accept="application/json")
 
 class ForeignCluster(Model):
     """
@@ -559,6 +581,28 @@ class ForeignCluster(Model):
         """
         self._validate(value, 'string')
         return self._set_config_property('xdqp-ssl-ciphers', value)
+
+    @classmethod
+    def get_status_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            raise ValidationError("ForeignCluster name expected.")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="clusters/"+name, protocol=protocol,view="status")
+        return connection.get(viewuri, accept="application/json")
+
+    @classmethod
+    def get_metric_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="clusters", protocol=protocol,view="metrics")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="clusters/"+name, protocol=protocol,view="metrics")
+        return connection.get(viewuri, accept="application/json")
 
 
 class BootstrapHost(Model):

@@ -1138,3 +1138,24 @@ class Group(Model,PropertyLists):
         self._validate(value, {'max': 4294967295, 'min': 0})
         return self._set_config_property('retry-timeout', value)
 
+    @classmethod
+    def get_status_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            raise ValidationError("Group name expected.")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="groups/"+name, protocol=protocol,view="status")
+        return connection.get(viewuri, accept="application/json")
+
+    @classmethod
+    def get_metric_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="groups", protocol=protocol,view="metrics")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="groups/"+name, protocol=protocol,view="metrics")
+        return connection.get(viewuri, accept="application/json")

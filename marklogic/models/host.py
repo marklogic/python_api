@@ -307,3 +307,25 @@ class Host(Model):
             raise UnexpectedManagementAPIResponse(response.text)
 
         data = json.loads(response.text)
+
+    @classmethod
+    def get_status_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="hosts", protocol=protocol,view="status")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="hosts/"+name, protocol=protocol,view="status")
+        return connection.get(viewuri, accept="application/json")
+
+    @classmethod
+    def get_metric_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="hosts", protocol=protocol,view="metrics")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="hosts/"+name, protocol=protocol,view="metrics")
+        return connection.get(viewuri, accept="application/json")
