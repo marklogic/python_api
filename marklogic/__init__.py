@@ -36,7 +36,7 @@ from marklogic.models.server import Server, HttpServer, WebDAVServer
 from marklogic.models.server import OdbcServer, XdbcServer
 from marklogic.exceptions import InvalidAPIRequest, UnexpectedManagementAPIResponse
 
-__version__ = "0.0.10"
+__version__ = "0.0.11"
 
 class MarkLogic:
     """
