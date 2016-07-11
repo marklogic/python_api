@@ -71,9 +71,16 @@ class MarkLogicManager(Manager):
             if connection.host == 'localhost':
                 try:
                     data = config[args['config']]['datadir']
+                    if not os.path.isdir(data):
+                        print("Not a directory: {}".format(data))
+                        sys.exit(1)
                     print("Clearing {0}...".format(data))
-                    shutil.rmtree(data)
-                    os.mkdir(data)
+                    for name in os.listdir(data):
+                        path = os.path.join(data, name)
+                        if os.path.isdir(path):
+                            shutil.rmtree(path)
+                        else:
+                            os.remove(path)
                 except KeyError:
                     pass
             else:
