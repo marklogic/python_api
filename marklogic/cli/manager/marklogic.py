@@ -70,17 +70,8 @@ class MarkLogicManager(Manager):
         else:
             if connection.host == 'localhost':
                 try:
-                    data = config[args['config']]['datadir']
-                    if not os.path.isdir(data):
-                        print("Not a directory: {}".format(data))
-                        sys.exit(1)
                     print("Clearing {0}...".format(data))
-                    for name in os.listdir(data):
-                        path = os.path.join(data, name)
-                        if os.path.isdir(path):
-                            shutil.rmtree(path)
-                        else:
-                            os.remove(path)
+                    self._clear_directory(config[args['config']]['datadir'])
                 except KeyError:
                     pass
             else:
@@ -92,6 +83,17 @@ class MarkLogicManager(Manager):
         MarkLogic.instance_admin(connection.host, args['realm'],
                                  connection.auth.username,
                                  connection.auth.password)
+
+    def _clear_directory(self, data):
+        if not os.path.isdir(data):
+            print("Not a directory: {}".format(data))
+            sys.exit(1)
+        for name in os.listdir(data):
+            path = os.path.join(data, name)
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
 
     def status(self, args, config, connection, internal=False):
         if connection is None:
@@ -292,8 +294,7 @@ class MarkLogicManager(Manager):
             sys.exit(1)
 
         print("Switching {0} to {1}.tar.gz".format(datadir,archive))
-        shutil.rmtree(datadir)
-        os.mkdir(datadir)
+        self._clear_directory(datadir)
         subprocess.call(["/bin/tar", "-zxf", archive+".tar.gz", lastseg])
 
         if status == 'up':
