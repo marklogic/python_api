@@ -127,9 +127,13 @@ class MMA():
         args = vars(parser.parse_args(argv))
 
         if args['debug']:
-            logging.basicConfig(level=logging.WARNING)
-            logging.getLogger("requests").setLevel(logging.WARNING)
-            logging.getLogger("marklogic").setLevel(logging.DEBUG)
+            if args['debug'] == 'debug':
+                # This is the debug command, not the debug option!
+                pass
+            else:
+                logging.basicConfig(level=logging.WARNING)
+                logging.getLogger("requests").setLevel(logging.WARNING)
+                logging.getLogger("marklogic").setLevel(logging.DEBUG)
         else:
             logging.basicConfig(level=logging.INFO)
             logging.getLogger("requests").setLevel(logging.WARNING)
