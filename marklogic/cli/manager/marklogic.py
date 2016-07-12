@@ -70,8 +70,9 @@ class MarkLogicManager(Manager):
         else:
             if connection.host == 'localhost':
                 try:
+                    data = config[args['config']]['datadir']
                     print("Clearing {0}...".format(data))
-                    self._clear_directory(config[args['config']]['datadir'])
+                    self._clear_directory(data)
                 except KeyError:
                     pass
             else:
