@@ -22,9 +22,10 @@ from __future__ import unicode_literals, print_function, absolute_import
 # Paul Hoehne       03/01/2015     Initial development
 #
 
-import json, logging
-import marklogic.exceptions
-from marklogic.utilities.validators import *
+import json
+import logging
+from marklogic.exceptions import UnexpectedManagementAPIResponse, UnsupportedOperation
+from marklogic.utilities.validators import validate_forest_availability, validate_boolean
 from marklogic.models.model import Model
 from marklogic.models.forest.scheduledbackup import ScheduledForestBackup
 from marklogic.models.forest.replica import ForestReplica
@@ -121,10 +122,10 @@ class Forest(Model,PropertyLists):
             return self._set_config_property('database', name)
 
     def database_replication(self):
-      raise UnsupportedOperation("Not implemented yet")
+        raise UnsupportedOperation("Not implemented yet")
 
     def set_database_replication(self,value):
-      raise UnsupportedOperation("Not implemented yet")
+        raise UnsupportedOperation("Not implemented yet")
 
     def enabled(self):
         return self._get_config_property('enabled')
@@ -330,8 +331,6 @@ class Forest(Model,PropertyLists):
         :param connection: The connection to a MarkLogic server
         :return: The Forest object
         """
-        logger = logging.getLogger("marklogic")
-
         uri = connection.uri("forests", name)
         response = connection.get(uri)
 
@@ -374,11 +373,11 @@ class Forest(Model,PropertyLists):
 
         atomic = {'availability', 'data-directory',
                   'database-replication', 'enabled',
-                  'failover-enable', 'fast-data-directory',
+                  'failover-enable', 'fast-data-directory', 'fast-data-max-size',
                   'forest-name', 'host', 'large-data-directory',
                   'range', 'rebalancer-enable', 'updates-allowed',
                   'database'
-                  }
+                 }
 
         for key in result._config:
             olist = []
@@ -389,34 +388,34 @@ class Forest(Model,PropertyLists):
                 for backup in result._config['forest-backup']:
                     #logger.debug(backup)
                     temp = None
-                    if (backup['backup-type'] == 'minutely'):
+                    if backup['backup-type'] == 'minutely':
                         temp = ScheduledForestBackup.minutely(
                             backup['backup-directory'],
                             backup['backup-period'])
-                    elif (backup['backup-type'] == 'hourly'):
+                    elif backup['backup-type'] == 'hourly':
                         minute = int(backup['backup-start-time'].split(':')[1])
                         temp = ScheduledForestBackup.hourly(
                             backup['backup-directory'],
                             backup['backup-period'],
                             minute)
-                    elif (backup['backup-type'] == 'daily'):
+                    elif backup['backup-type'] == 'daily':
                         temp = ScheduledForestBackup.daily(
                             backup['backup-directory'],
                             backup['backup-period'],
                             backup['backup-start-time'])
-                    elif (backup['backup-type'] == 'weekly'):
+                    elif backup['backup-type'] == 'weekly':
                         temp = ScheduledForestBackup.weekly(
                             backup['backup-directory'],
                             backup['backup-period'],
                             backup['backup-day'],
                             backup['backup-start-time'])
-                    elif (backup['backup-type'] == 'monthly'):
+                    elif backup['backup-type'] == 'monthly':
                         temp = ScheduledForestBackup.monthly(
                             backup['backup-directory'],
                             backup['backup-period'],
                             backup['backup-month-day'],
                             backup['backup-start-time'])
-                    elif (backup['backup-type'] == 'once'):
+                    elif backup['backup-type'] == 'once':
                         temp = ScheduledForestBackup.once(
                             backup['backup-directory'],
                             backup['backup-start-date'],

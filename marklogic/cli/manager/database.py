@@ -33,7 +33,7 @@ class DatabaseManager(Manager):
     The DatabaseManager performs operations on databases.
     """
     def __init__(self):
-        pass
+        self.forests = []
 
     def list(self, args, config, connection):
         names = Database.list(connection)
@@ -70,7 +70,10 @@ class DatabaseManager(Manager):
             sys.exit(1)
 
         if args['json'] is not None:
-            database = self._read(None, args['json'],
+            rname = name
+            if 'name' in args['json']:
+                rname = None
+            database = self._read(rname, args['json'],
                                   connection=connection)
             database.name = name
 
