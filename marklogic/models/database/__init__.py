@@ -3283,9 +3283,9 @@ class Database(Model,PropertyLists):
         # atomic values or lists of atomic values.
 
         atomic = {'attribute-value-positions', 'collection-lexicon',
-                  'database-name', 'directory-creation',
+                  'data-encryption', 'database-name', 'directory-creation',
                   'element-value-positions', 'element-word-positions',
-                  'enabled', 'expunge-locks',
+                  'enabled', 'encryption-key-id', 'expunge-locks',
                   'fast-case-sensitive-searches',
                   'fast-diacritic-sensitive-searches',
                   'fast-element-character-searches',
@@ -3294,7 +3294,8 @@ class Database(Model,PropertyLists):
                   'fast-element-word-searches',
                   'fast-phrase-searches', 'fast-reverse-searches',
                   'field-value-positions', 'field-value-searches',
-                  'forest', 'format-compatibility', 'in-memory-limit',
+                  'forest', 'format-compatibility',
+                  'in-memory-geospatial-region-index-size', 'in-memory-limit',
                   'in-memory-list-size', 'in-memory-range-index-size',
                   'in-memory-reverse-index-size',
                   'in-memory-tree-size',

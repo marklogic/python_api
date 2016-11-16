@@ -34,7 +34,7 @@ from marklogic.models.host import Host
 from marklogic.models.group.audit import Audit, AuditEvent, AuditRestriction
 from marklogic.models.group.schema import Schema
 
-class Group(Model,PropertyLists):
+class Group(Model, PropertyLists):
     """
     The Group class encapsulates a MarkLogic group.  It provides
     methods to set/get group attributes.  The use of methods will
@@ -69,10 +69,10 @@ class Group(Model,PropertyLists):
 
         :return: A hash of the keys in this object and their values, recursively.
         """
-        struct = { }
+        struct = {}
         for key in self._config:
             if key == 'audit':
-                substruct = { }
+                substruct = {}
                 audit = self._config[key]._config
                 for prop in audit:
                     if prop == 'audit-event':
@@ -94,7 +94,7 @@ class Group(Model,PropertyLists):
                     olist.append(schema._config)
                 struct[key] = olist
             else:
-                struct[key] = self._config[key];
+                struct[key] = self._config[key]
 
         return struct
 
@@ -152,9 +152,9 @@ class Group(Model,PropertyLists):
                   'xdqp-ssl-ciphers', 'xdqp-ssl-enabled',
                   'xdqp-timeout', 'opsdirector-config',
                   'opsdirector-log-level', 'opsdirector-metering',
-                  'opsdirector-session-uri', 'telemetry-config',
+                  'opsdirector-session-endpoint', 'telemetry-config',
                   'telemetry-log-level', 'telemetry-metering',
-                  'telemetry-session-uri'
+                  'telemetry-session-endpoint'
                   }
 
         for key in result._config:
@@ -267,7 +267,7 @@ class Group(Model,PropertyLists):
 
         self.name = self._config['group-name']
         if 'etag' in response.headers:
-                self.etag = response.headers['etag']
+            self.etag = response.headers['etag']
 
         return self
 
