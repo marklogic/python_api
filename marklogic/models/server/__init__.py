@@ -1624,6 +1624,28 @@ class Server(Model,PropertyLists):
                 struct[key] = self._config[key];
         return struct
 
+    @classmethod
+    def get_status_view(self, connection, name=None, group=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="servers", protocol=protocol,view="status")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="servers/"+name, protocol=protocol,view="status&group-id="+group)
+        return connection.get(viewuri, accept="application/json")
+
+    @classmethod
+    def get_metric_view(self, connection, name=None, group=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="servers", protocol=protocol,view="metrics")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="servers/"+name, protocol=protocol,view="metrics&group-id="+group)
+        return connection.get(viewuri, accept="application/json")
+
 class HttpServer(Server):
     def __init__(self, name, group="Default", port=None, root=None,
                  content_db_name=None, modules_db_name=None,

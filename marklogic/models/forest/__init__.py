@@ -454,3 +454,32 @@ class Forest(Model,PropertyLists):
             else:
                 struct[key] = self._config[key];
         return struct
+
+    @classmethod
+    def get_status_view(self, connection, name=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="forests", protocol=protocol,view="status")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="forests/"+name, protocol=protocol,view="status")
+        return connection.get(viewuri, accept="application/json")
+
+    @classmethod
+    def get_metric_view(self, connection, name=None, period=None, start=None, end=None, detail=None, summary=None):
+        version = connection.version
+        port = connection.port
+        protocol = connection.protocol
+        params = {}
+        if period:
+            params.update({'period':period})
+        if summary:
+            params.update({'summary':summary})
+        if detail:
+            params.update({'detail':detail})
+        if name == None:
+            viewuri = connection.view_uri(version=version,port=port,path="forests", protocol=protocol,view="metrics")
+        else:
+            viewuri = connection.view_uri(version=version,port=port,path="forests/"+name, protocol=protocol,view="metrics")
+        return connection.get(viewuri, accept="application/json",parameters=params)

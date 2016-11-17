@@ -102,12 +102,29 @@ class Connection:
 
         return uri
 
+    def view_uri(self, path, protocol=None, host=None, port=None, version=None, view=None):
+        if protocol is None:
+            protocol = self.protocol
+        if host is None:
+            host = self.host
+        if port is None:
+            port = self.port
+        if version is None:
+            version = self.client_version
+        if view is None:
+            view = "default"
+
+        uri = "{0}://{1}:{2}/manage/{3}/{4}?view={5}" \
+              .format(protocol, host, port, version, path, view)
+
+        return uri
+
     def head(self, uri, accept="application/json"):
         self.logger.debug("HEAD {0}...".format(uri))
         self.response = requests.head(uri, auth=self.auth)
         return self._response()
 
-    def get(self, uri, accept="application/json", headers=None):
+    def get(self, uri, accept="application/json", headers=None, parameters=None):
         if headers is None:
             headers = {'accept': accept}
         else:
@@ -117,7 +134,7 @@ class Connection:
         self.payload_logger.debug("Headers:")
         self.payload_logger.debug(json.dumps(headers, indent=2))
 
-        self.response = requests.get(uri, auth=self.auth, headers=headers)
+        self.response = requests.get(uri, auth=self.auth, headers=headers, params=parameters)
         return self._response()
 
     def post(self, uri, payload=None, etag=None, headers=None,
