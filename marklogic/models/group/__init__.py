@@ -336,7 +336,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('compressed-tree-read-size')
 
-    def set_compressed_tree_read_size(self,value):
+    def set_compressed_tree_read_size(self, value):
         """
         Set the compressed-tree-read-size.
 
@@ -354,7 +354,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('performance-metering-retain-hourly')
 
-    def set_performance_metering_retain_hourly(self,value):
+    def set_performance_metering_retain_hourly(self, value):
         """
         Set the performance-metering-retain-hourly.
 
@@ -372,7 +372,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('expanded-tree-cache-size')
 
-    def set_expanded_tree_cache_size(self,value):
+    def set_expanded_tree_cache_size(self, value):
         """
         Set the expanded-tree-cache-size.
 
@@ -386,19 +386,167 @@ class Group(Model, PropertyLists):
         """
         true or false
 
-        :return: The metering-enabled.
+        :return: The metering-enabled value.
         """
         return self._get_config_property('metering-enabled')
 
-    def set_metering_enabled(self,value=True):
+    def set_metering_enabled(self, value=True):
         """
-        Set the metering-enabled.
+        Set metering-enabled.
 
         :param value: The metering-enabled.
         :return: The object with the mutated property value.
         """
         self._validate(value, 'boolean')
         return self._set_config_property('metering-enabled', value)
+
+    def opsdirector_config(self):
+        """
+        The OpsDirector config level: disabled, frequent, or infrequent.
+
+        :return: The config level.
+        """
+        return self._get_config_property("opsdirector-config")
+
+    def set_opsdirector_config(self, value):
+        """
+        Set the OpsDirector config level: disabled, frequent, or infrequent.
+
+        :param value: The config level.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, ['disabled', 'frequent', 'infrequent'])
+        return self._set_config_property('opsdirector-config', value)
+
+    def opsdirector_log_level(self):
+        """
+        The OpsDirector log level.
+
+        :return: The log level.
+        """
+        return self._get_config_property("opsdirector-log-level")
+
+    def set_opsdirector_log_level(self, value):
+        """
+        Set the OpsDirector log level.
+
+        :param value: The log level.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, ['disabled', 'finest', 'finer', 'fine',
+                               'debug', 'config', 'info', 'notice',
+                               'warning', 'error', 'critical', 'alert', 'emergency'])
+        return self._set_config_property("opsdirector-log-level", value)
+
+    def opsdirector_metering(self):
+        """
+        The OpsDirector metering level.
+
+        :return: The metering level.
+        """
+        return self._get_config_property("opsdirector_metering")
+
+    def set_opsdirector_metering(self, value):
+        """
+        Set the OpsDirector metering level.
+
+        :param value: The metering level.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, ['disabled', 'full', 'aggregates', 'usage-only'])
+        return self._set_config_property("opsdirector-metering", value)
+
+    def opsdirector_session_endpoint(self):
+        """
+        The OpsDirector session endpoint.
+
+        :return: The endpoint.
+        """
+        return self._get_config_property("opsdirector-session-endpoint")
+
+    def set_opsdirector_session_endpoint(self, value):
+        """
+        Set the OpsDirector session endpoint.
+
+        :param value: The endpoint.
+        :return: The object with the mutated property value.
+        """
+        # FIXME: Should I test that this is a reasonable http(s) URI?
+        return self._set_config_property("opsdirector-session-endpoint", value)
+
+    def telemetry_config(self):
+        """
+        The Telemetry config level: disabled, frequent, or infrequent.
+
+        :return: The config level.
+        """
+        return self._get_config_property("telemetry-config")
+
+    def set_telemetry_config(self, value):
+        """
+        Set the Telemetry config level: disabled, frequent, or infrequent.
+
+        :param value: The config level.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, ['disabled', 'frequent', 'infrequent'])
+        return self._set_config_property('telemetry-config', value)
+
+    def telemetry_log_level(self):
+        """
+        The Telemetry log level.
+
+        :return: The log level.
+        """
+        return self._get_config_property("telemetry-log-level")
+
+    def set_telemetry_log_level(self, value):
+        """
+        Set the Telemetry log level.
+
+        :param value: The log level.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, ['disabled', 'finest', 'finer', 'fine',
+                               'debug', 'config', 'info', 'notice',
+                               'warning', 'error', 'critical', 'alert', 'emergency'])
+        return self._set_config_property("telemetry-log-level", value)
+
+    def telemetry_metering(self):
+        """
+        The Telemetry metering level.
+
+        :return: The metering level.
+        """
+        return self._get_config_property("telemetry_metering")
+
+    def set_telemetry_metering(self, value):
+        """
+        Set the Telemetry metering level.
+
+        :param value: The metering level.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, ['disabled', 'full', 'aggregates', 'usage-only'])
+        return self._set_config_property("telemetry-metering", value)
+
+    def telemetry_session_endpoint(self):
+        """
+        The Telemetry session endpoint.
+
+        :return: The endpoint.
+        """
+        return self._get_config_property("telemetry-session-endpoint")
+
+    def set_telemetry_session_endpoint(self, value):
+        """
+        Set the Telemetry session endpoint.
+
+        :param value: The endpoint.
+        :return: The object with the mutated property value.
+        """
+        # FIXME: Should I test that this is a reasonable http(s) URI?
+        return self._set_config_property("telemetry-session-endpoint", value)
 
     def triple_cache_timeout(self):
         """
@@ -408,7 +556,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('triple-cache-timeout')
 
-    def set_triple_cache_timeout(self,value):
+    def set_triple_cache_timeout(self, value):
         """
         Set the triple-cache-timeout.
 
@@ -426,7 +574,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('security-database')
 
-    def set_security_database(self,value):
+    def set_security_database(self, value):
         """
         Set the security-database.
 
@@ -444,7 +592,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('module-cache-timeout')
 
-    def set_module_cache_timeout(self,value):
+    def set_module_cache_timeout(self, value):
         """
         Set the module-cache-timeout.
 
@@ -462,7 +610,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('performance-metering-retain-raw')
 
-    def set_performance_metering_retain_raw(self,value):
+    def set_performance_metering_retain_raw(self, value):
         """
         Set the performance-metering-retain-raw.
 
@@ -480,7 +628,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('performance-metering-period')
 
-    def set_performance_metering_period(self,value):
+    def set_performance_metering_period(self, value):
         """
         Set the performance-metering-period.
 
@@ -498,7 +646,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('background-io-limit')
 
-    def set_background_io_limit(self,value):
+    def set_background_io_limit(self, value):
         """
         Set the background-io-limit.
 
@@ -516,7 +664,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('file-log-level')
 
-    def set_file_log_level(self,value):
+    def set_file_log_level(self, value):
         """
         Set the file-log-level.
 
@@ -534,7 +682,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('meters-database')
 
-    def set_meters_database(self,value):
+    def set_meters_database(self, value):
         """
         Set the meters-database.
 
@@ -552,7 +700,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('list-cache-partitions')
 
-    def set_list_cache_partitions(self,value):
+    def set_list_cache_partitions(self, value):
         """
         Set the list-cache-partitions.
 
@@ -570,7 +718,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('s3-protocol')
 
-    def set_s3_protocol(self,value):
+    def set_s3_protocol(self, value):
         """
         Set the s3-protocol.
 
@@ -588,7 +736,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('xdqp-ssl-enabled')
 
-    def set_xdqp_ssl_enabled(self,value=True):
+    def set_xdqp_ssl_enabled(self, value=True):
         """
         Set the xdqp-ssl-enabled.
 
@@ -606,7 +754,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('performance-metering-retain-daily')
 
-    def set_performance_metering_retain_daily(self,value):
+    def set_performance_metering_retain_daily(self, value):
         """
         Set the performance-metering-retain-daily.
 
@@ -624,7 +772,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('http-user-agent')
 
-    def set_http_user_agent(self,value):
+    def set_http_user_agent(self, value):
         """
         Set the http-user-agent.
 
@@ -642,7 +790,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('compressed-tree-cache-size')
 
-    def set_compressed_tree_cache_size(self,value):
+    def set_compressed_tree_cache_size(self, value):
         """
         Set the compressed-tree-cache-size.
 
@@ -660,7 +808,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('rotate-log-files')
 
-    def set_rotate_log_files(self,value):
+    def set_rotate_log_files(self, value):
         """
         Set the rotate-log-files.
 
@@ -678,7 +826,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('host-timeout')
 
-    def set_host_timeout(self,value):
+    def set_host_timeout(self, value):
         """
         Set the host-timeout.
 
@@ -696,7 +844,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('group-name')
 
-    def set_group_name(self,value):
+    def set_group_name(self, value):
         """
         Set the group-name.
 
@@ -714,7 +862,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('triple-cache-partitions')
 
-    def set_triple_cache_partitions(self,value):
+    def set_triple_cache_partitions(self, value):
         """
         Set the triple-cache-partitions.
 
@@ -732,7 +880,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('performance-metering-enabled')
 
-    def set_performance_metering_enabled(self,value=True):
+    def set_performance_metering_enabled(self, value=True):
         """
         Set the performance-metering-enabled.
 
@@ -750,7 +898,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('triple-value-cache-partitions')
 
-    def set_triple_value_cache_partitions(self,value):
+    def set_triple_value_cache_partitions(self, value):
         """
         Set the triple-value-cache-partitions.
 
@@ -768,7 +916,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('xdqp-ssl-allow-sslv3')
 
-    def set_xdqp_ssl_allow_sslv3(self,value=True):
+    def set_xdqp_ssl_allow_sslv3(self, value=True):
         """
         Set the xdqp-ssl-allow-sslv3.
 
@@ -786,7 +934,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('compressed-tree-cache-partitions')
 
-    def set_compressed_tree_cache_partitions(self,value):
+    def set_compressed_tree_cache_partitions(self, value):
         """
         Set the compressed-tree-cache-partitions.
 
@@ -804,7 +952,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('xdqp-ssl-ciphers')
 
-    def set_xdqp_ssl_ciphers(self,value):
+    def set_xdqp_ssl_ciphers(self, value):
         """
         Set the xdqp-ssl-ciphers.
 
@@ -822,7 +970,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('events-activated')
 
-    def set_events_activated(self,value=True):
+    def set_events_activated(self, value=True):
         """
         Set the events-activated.
 
@@ -840,7 +988,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('expanded-tree-cache-partitions')
 
-    def set_expanded_tree_cache_partitions(self,value):
+    def set_expanded_tree_cache_partitions(self, value):
         """
         Set the expanded-tree-cache-partitions.
 
@@ -858,7 +1006,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('keep-log-files')
 
-    def set_keep_log_files(self,value):
+    def set_keep_log_files(self, value):
         """
         Set the keep-log-files.
 
@@ -876,7 +1024,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('smtp-relay')
 
-    def set_smtp_relay(self,value):
+    def set_smtp_relay(self, value):
         """
         Set the smtp-relay.
 
@@ -894,7 +1042,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('http-timeout')
 
-    def set_http_timeout(self,value):
+    def set_http_timeout(self, value):
         """
         Set the http-timeout.
 
@@ -912,7 +1060,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('triple-value-cache-timeout')
 
-    def set_triple_value_cache_timeout(self,value):
+    def set_triple_value_cache_timeout(self, value):
         """
         Set the triple-value-cache-timeout.
 
@@ -930,7 +1078,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('s3-domain')
 
-    def set_s3_domain(self,value):
+    def set_s3_domain(self, value):
         """
         Set the s3-domain.
 
@@ -948,7 +1096,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('triple-cache-size')
 
-    def set_triple_cache_size(self,value):
+    def set_triple_cache_size(self, value):
         """
         Set the triple-cache-size.
 
@@ -966,7 +1114,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('system-log-level')
 
-    def set_system_log_level(self,value):
+    def set_system_log_level(self, value):
         """
         Set the system-log-level.
 
@@ -984,7 +1132,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('s3-server-side-encryption')
 
-    def set_s3_server_side_encryption(self,value):
+    def set_s3_server_side_encryption(self, value):
         """
         Set the s3-server-side-encryption.
 
@@ -1002,7 +1150,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('host-initial-timeout')
 
-    def set_host_initial_timeout(self,value):
+    def set_host_initial_timeout(self, value):
         """
         Set the host-initial-timeout.
 
@@ -1020,7 +1168,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('list-cache-size')
 
-    def set_list_cache_size(self,value):
+    def set_list_cache_size(self, value):
         """
         Set the list-cache-size.
 
@@ -1038,7 +1186,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('xdqp-timeout')
 
-    def set_xdqp_timeout(self,value):
+    def set_xdqp_timeout(self, value):
         """
         Set the xdqp-timeout.
 
@@ -1056,7 +1204,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('failover-enable')
 
-    def set_failover_enable(self,value=True):
+    def set_failover_enable(self, value=True):
         """
         Set the failover-enable.
 
@@ -1074,7 +1222,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('triple-value-cache-size')
 
-    def set_triple_value_cache_size(self,value):
+    def set_triple_value_cache_size(self, value):
         """
         Set the triple-value-cache-size.
 
@@ -1092,7 +1240,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('xdqp-ssl-allow-tls')
 
-    def set_xdqp_ssl_allow_tls(self,value=True):
+    def set_xdqp_ssl_allow_tls(self, value=True):
         """
         Set the xdqp-ssl-allow-tls.
 
@@ -1110,7 +1258,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('smtp-timeout')
 
-    def set_smtp_timeout(self,value):
+    def set_smtp_timeout(self, value):
         """
         Set the smtp-timeout.
 
@@ -1128,7 +1276,7 @@ class Group(Model, PropertyLists):
         """
         return self._get_config_property('retry-timeout')
 
-    def set_retry_timeout(self,value):
+    def set_retry_timeout(self, value):
         """
         Set the retry-timeout.
 
@@ -1137,4 +1285,3 @@ class Group(Model, PropertyLists):
         """
         self._validate(value, {'max': 4294967295, 'min': 0})
         return self._set_config_property('retry-timeout', value)
-
