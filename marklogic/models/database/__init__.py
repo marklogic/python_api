@@ -1755,6 +1755,24 @@ class Database(Model,PropertyLists):
         """
         return self._get_config_property('in-memory-triple-index-size')
 
+    def set_in_memory_geospatial_region_index_size(self, value):
+        """
+        Set the in-memory geospatial region index size.
+
+        :param value: The value (1-64 megabytes)
+        :return: The database object
+        """
+        self._validate(value, {'max': 64, 'min': 1})
+        return self._set_config_property('in-memory-geospatial-region-index-size', value)
+
+    def in_memory_geospatial_region_index_size(self, value):
+        """
+        The in-memory geospatial region index size.
+
+        :return: The size in megabytes
+        """
+        return self._get_config_property('in-memory-geospatial-region-index-size')
+
     def set_large_size_threshold(self, limit=1024):
         """
         Sets size threshold for large objects, in kilobytes.
@@ -2659,6 +2677,41 @@ class Database(Model,PropertyLists):
         :return: The policy for assignment and rebalancing
         """
         return self._get_config_property('assignment-policy')
+
+    def data_encryption(self):
+        """
+        Encryption at rest for this database.
+
+        :return: The encryption setting.
+        """
+        return self._get_config_property('data-encryption')
+
+    def set_data_encryption(self, value):
+        """
+        Encryption at rest for this database.
+
+        :param value: The encryption setting.
+        :return: The database object.
+        """
+        self._validate(value, ['on', 'off', 'default-cluster'])
+        return self._set_config_property('data-encryption', value)
+
+    def encryption_key_id(self):
+        """
+        Data encryption key id.
+
+        :return: The key id.
+        """
+        return self._get_config_property('encryption-key-id')
+
+    def set_encryption_key_id(self, value):
+        """
+        Set the data encryption key id.
+
+        :param value: The key id.
+        :return: The database object.
+        """
+        return self._set_config_property('encryption-key-id', value)
 
     def path_namespaces(self):
         """

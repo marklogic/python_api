@@ -111,6 +111,17 @@ class Forest(Model,PropertyLists):
     def set_fast_data_directory(self, path):
         return self._set_config_property('fast-data-directory', path)
 
+    def fast_data_max_size(self):
+        """
+        Return the fast data max size for the forest.
+
+        :return:The fast data maxs ize
+        """
+        return self._get_config_property('fast-data-max-size')
+
+    def set_fast_data_max_size(self, size):
+        return self._set_config_property('fast-data-max-size', size)
+
     def database(self):
         return self._get_config_property('database')
 
