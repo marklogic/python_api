@@ -158,5 +158,6 @@ for config in data['servers']:
     else:
         verb = "Updating"
         server = Server.unmarshal(config)
+        kind = server.server_type()
         print("{0} {1} server: {2}".format(verb, kind, name))
         server.update(conn)

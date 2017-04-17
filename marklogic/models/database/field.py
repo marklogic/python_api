@@ -609,6 +609,11 @@ class Field(Model,PropertyLists):
                         item['tokenizer-class'])
                     elems.append(over)
                 self._config[key] = elems
+            elif key == 'tokenizer-overrides':
+                if field[key] is None:
+                    pass
+                else:
+                    raise ValueError("Unexpected key in field: {0}".format(key))
             elif (key == 'field-name'
                   or key == 'include-root'
                   or key == 'field-path'):

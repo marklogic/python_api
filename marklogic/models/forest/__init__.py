@@ -378,7 +378,7 @@ class Forest(Model,PropertyLists):
         result = Forest("temp",
                         connection=connection, save_connection=save_connection)
         result._config = config
-        result.name = result._config['forest-name']
+#        result.name = result._config['forest-name']
 
         logger = logging.getLogger("marklogic.forest")
 
