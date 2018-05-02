@@ -67,6 +67,27 @@ class MarkLogicDatabaseMirror:
         self.path = os.path.abspath(args['path'])
         self.loadconfig(self.path)
 
+        if args['hostname'] is None:
+            if 'host' in self.config:
+                self.hostname = self.config['host']
+                if 'port' in self.config:
+                    self.port = self.config['port']
+                else:
+                    self.port = 8000
+                if 'management-port' in self.config:
+                    self.management_port = self.config['management-port']
+                else:
+                    self.management_port = 8002
+        else:
+            parts = args['hostname'].split(":")
+            self.hostname = parts.pop(0)
+            self.management_port = 8002
+            self.port = 8000
+            if parts:
+                self.management_port = parts.pop(0)
+            if parts:
+                self.port = parts.pop(0)
+
         if args['credentials'] is not None:
             cred = args['credentials']
         else:
@@ -74,6 +95,11 @@ class MarkLogicDatabaseMirror:
                 cred = self.config['user'] + ":" + self.config['pass']
             else:
                 cred = None
+                key = self.hostname + ":" + str(self.management_port)
+                if key in self.config:
+                    obj = self.config[key]
+                    if 'user' in obj and 'pass' in obj:
+                        cred = obj['user'] + ":" + obj['pass']
 
         try:
             adminuser, adminpass = re.split(":", cred)
@@ -101,27 +127,6 @@ class MarkLogicDatabaseMirror:
 
         if self.root.endswith("/"):
             self.root = self.root[0:len(self.root)-1]
-
-        if args['hostname'] is None:
-            if 'host' in self.config:
-                self.hostname = self.config['host']
-                if 'port' in self.config:
-                    self.port = self.config['port']
-                else:
-                    self.port = 8000
-                if 'management-port' in self.config:
-                    self.management_port = self.config['management-port']
-                else:
-                    self.management_port = 8002
-        else:
-            parts = args['hostname'].split(":")
-            self.hostname = parts.pop(0)
-            self.management_port = 8002
-            self.port = 8000
-            if parts:
-                self.management_port = parts.pop(0)
-            if parts:
-                self.port = parts.pop(0)
 
         self.connection \
           = Connection(self.hostname, HTTPDigestAuth(adminuser, adminpass), \
