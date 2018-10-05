@@ -19,13 +19,14 @@
 Support the CMA V3 endpoint
 """
 
-import json, logging, sys
+import json, logging
 import requests
 from marklogic.exceptions import *
 
 class CMA:
     """
-    CMA class provides methods to generate and apply application configuration
+    CMA class provides methods to generate and apply application configuration.
+    Sample payloads in examples/data
     """
 
     _cma_version = "v3"

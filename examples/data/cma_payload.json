@@ -1,0 +1,75 @@
+{
+  "params": {
+    "mlRole": "cma_role",
+    "mlUser": "cma-user",
+    "mlUserPassword": "password",
+    "mlForest": "cma_forest",
+    "mlSchemaDatabase": "cma_schema_database",
+    "mlDatabase": "cma_database",
+    "mlAppServer": "cma_appserver",
+    "mlGroup": "cma_group",
+    "mlAuth": "digest",
+    "mlPort": "8005"
+
+  },
+  "config": [{
+    "role": [{
+      "role-name": "%%mlRole%%",
+      "description": "A role that allows the user to read and write to rest",
+      "role": [
+        "rest-reader",
+        "rest-extension-user",
+        "rest-writer"
+      ],
+      "privilege": [{
+          "privilege-name": "xdmp:eval",
+          "action": "http://marklogic.com/xdmp/privileges/xdmp-eval",
+          "kind": "execute"
+        }]
+    }
+    ],
+    "user": [{
+      "user-name": "%%mlUser%%",
+      "description": "A user with the rest role with eval",
+      "password": "%%mlUserPassword%%",
+      "role": ["%%mlRole%%"]
+    }],
+    "forest":[
+      {"forest-name":"%%mlForest%%"}
+    ],
+    "database": [
+      {
+        "database-name": "%%mlSchemaDatabase%%"
+      },
+      {
+        "database-name": "%%mlDatabase%%",
+        "range-element-index": [],
+        "triggers-database": "%%mlSchemaDatabase%%",
+        "triple-index": true,
+        "collection-lexicon": true,
+        "uri-lexicon": true,
+        "forest":["%%mlForest%%"]
+      }
+    ],
+    "group":[
+      {
+        "group-name":"%%mlGroup%%"
+      }
+    ],
+    "server": [{
+      "server-name": "%%mlAppServer%%",
+      "server-type": "http",
+      "root": "/",
+      "group-name": "%%mlGroup%%",
+      "port": "%%mlPort%%",
+      "modules-database": "%%mlDatabase%%",
+      "content-database": "%%mlDatabase%%",
+      "authentication": "%%mlAuth%%",
+      "default-error-format": "json",
+      "error-handler": "/MarkLogic/rest-api/error-handler.xqy",
+      "url-rewriter": "/MarkLogic/rest-api/rewriter.xml",
+      "rewrite-resolves-globally": true
+    }
+    ]
+  }]
+}

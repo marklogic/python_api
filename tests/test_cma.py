@@ -20,6 +20,7 @@ from mlconfig import MLConfig
 from marklogic.client.cma import CMA
 from marklogic.models import Database
 
+
 class TestCMA(MLConfig):
 
     def test_generate_config(self):
@@ -46,7 +47,8 @@ class TestCMA(MLConfig):
                 }
             ]
         }
-        config2 = "<configuration xmlns=\"http://marklogic.com/manage/config\"><configs><config><databases><database><database-name>CMA_Check2</database-name></database></databases></config></configs></configuration>"
+        config2 = "<configuration xmlns=\"http://marklogic.com/manage/config\"><configs><config><databases><database>" \
+                  "<database-name>CMA_Check2</database-name></database></databases></config></configs></configuration>"
         cma.apply_config(json.dumps(config1), "application/json")
         cma.apply_config(config2, "application/xml")
 
