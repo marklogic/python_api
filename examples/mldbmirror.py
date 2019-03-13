@@ -491,15 +491,17 @@ class MarkLogicDatabaseMirror:
         down_map = {}
         skip_list = []
         for uri in uris:
-            if not self.can_store_on_filesystem(uri):
-                raise RuntimeError("Cannot save URI:", uri)
-
             localfile = self.path + uri
             skip = False
-            if uri in stamps and os.path.exists(localfile):
-                statinfo = os.stat(localfile)
-                stamp = self._convert_timestamp(stamps[uri])
-                skip = statinfo.st_mtime >= stamp.timestamp()
+
+            if not self.can_store_on_filesystem(uri):
+                print("Skipping " + uri + ": cannot store on filesystem")
+                skip = True
+            else:
+                if uri in stamps and os.path.exists(localfile):
+                    statinfo = os.stat(localfile)
+                    stamp = self._convert_timestamp(stamps[uri])
+                    skip = statinfo.st_mtime >= stamp.timestamp()
 
             if skip:
                 skip_list.append(localfile)
@@ -714,7 +716,7 @@ class MarkLogicDatabaseMirror:
         filesystem because if it's ever uploaded, it'll get a leading /.
         """
         if (not filename.startswith("/")) or ("//" in filename) \
-          or (":" in filename) or ('"' in filename) or ('"' in filename) \
+          or (":" in filename) or ('"' in filename) or ("'" in filename) \
           or ("\\" in filename):
             return False
         else:
