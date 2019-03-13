@@ -36,7 +36,7 @@ from marklogic.models.server import Server, HttpServer, WebDAVServer
 from marklogic.models.server import OdbcServer, XdbcServer
 from marklogic.exceptions import InvalidAPIRequest, UnexpectedManagementAPIResponse
 
-__version__ = "0.0.14"
+__version__ = "0.0.17"
 
 class MarkLogic:
     """
@@ -446,7 +446,7 @@ class MarkLogic:
         return Host(host)._set_just_initialized()
 
     @classmethod
-    def instance_admin(cls,host,realm,admin,password):
+    def instance_admin(cls,host,realm,admin,password,wallet_password=None):
         """
         Initializes the security database of a newly initialized server.
 
@@ -462,6 +462,9 @@ class MarkLogic:
             'admin-password': password,
             'realm': realm
             }
+
+        if wallet_password is not None:
+            payload["wallet-password"] = wallet_password
 
         uri = "{0}://{1}:8001/admin/v1/instance-admin".format(
             conn.protocol, conn.host)
