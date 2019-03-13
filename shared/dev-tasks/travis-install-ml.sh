@@ -49,7 +49,7 @@ else
   # if the user passed a day string as a param then use it instead
   test $1 && day=$1
   # make a version number out of the date
-  ver="8.0-$day"
+  ver="9.0-$day"
 
   echo "********* Downloading MarkLogic nightly $ver"
 
