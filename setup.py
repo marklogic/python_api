@@ -25,8 +25,8 @@ setup(
     long_description=read('README.rst'),
     packages=find_packages(),
     install_requires=[
-        'requests>=2.8.0',
-        'requests_toolbelt>=0.6.0'
+        'requests>=2.21.0',
+        'requests_toolbelt>=0.9.1'
     ],
     include_package_data=True,
     platforms='any',
