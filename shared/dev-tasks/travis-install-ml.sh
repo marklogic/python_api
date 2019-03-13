@@ -60,7 +60,7 @@ else
   suff="_amd64.deb"
   fnamedeb=$fnamedeb$suff
 
-  url="https://root.marklogic.com/nightly/builds/linux64/rh6-intel64-80-test-1.marklogic.com/b8_0/pkgs.$day/$fname"
+  url="https://root.marklogic.com/nightly/builds/linux64-rh7/rh7v-intel64-90-test-build.marklogic.com/b9_0/pkgs.20190313/$fname"
 
   status=$(curl -k --anyauth -u $MLBUILD_USER:$MLBUILD_PASSWORD --head --write-out %{http_code} --silent --output /dev/null $url)
   if [[ $status = 200 ]]; then
