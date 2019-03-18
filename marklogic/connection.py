@@ -31,6 +31,7 @@ from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 from requests.packages.urllib3.exceptions import ProtocolError
 from requests.packages.urllib3.exceptions import ReadTimeoutError
+from requests.packages import urllib3
 
 """
 Connection related classes and method to connect to MarkLogic.
@@ -55,6 +56,9 @@ class Connection:
         self.client_version = client_version
         self.logger = logging.getLogger("marklogic.connection")
         self.payload_logger = logging.getLogger("marklogic.connection.payloads")
+
+        self.verify = False # Danger, Will Robinson!
+        urllib3.disable_warnings()
 
     # You'd expect parameters to be a dictionary, but then it couldn't
     # have repeated keys, so it's an array.
@@ -104,7 +108,7 @@ class Connection:
 
     def head(self, uri, accept="application/json"):
         self.logger.debug("HEAD {0}...".format(uri))
-        self.response = requests.head(uri, auth=self.auth)
+        self.response = requests.head(uri, auth=self.auth, verify=self.verify)
         return self._response()
 
     def get(self, uri, accept="application/json", headers=None):
@@ -117,7 +121,8 @@ class Connection:
         self.payload_logger.debug("Headers:")
         self.payload_logger.debug(json.dumps(headers, indent=2))
 
-        self.response = requests.get(uri, auth=self.auth, headers=headers)
+        self.response = requests.get(uri, auth=self.auth, headers=headers,
+                                     verify=self.verify)
         return self._response()
 
     def post(self, uri, payload=None, etag=None, headers=None,
@@ -143,14 +148,17 @@ class Connection:
                 self.payload_logger.debug(payload)
 
         if payload is None:
-            self.response = requests.post(uri, auth=self.auth, headers=headers)
+            self.response = requests.post(uri, auth=self.auth, headers=headers,
+                                          verify=self.verify)
         else:
             if content_type == "application/json":
                 self.response = requests.post(uri, json=payload,
-                                              auth=self.auth, headers=headers)
+                                              auth=self.auth, headers=headers,
+                                              verify=self.verify)
             else:
                 self.response = requests.post(uri, data=payload,
-                                              auth=self.auth, headers=headers)
+                                              auth=self.auth, headers=headers,
+                                              verify=self.verify)
 
         return self._response()
 
@@ -173,14 +181,17 @@ class Connection:
                 self.payload_logger.debug(payload)
 
         if payload is None:
-            self.response = requests.put(uri, auth=self.auth, headers=headers)
+            self.response = requests.put(uri, auth=self.auth, headers=headers,
+                                         verify=self.verify)
         else:
             if content_type == "application/json":
                 self.response = requests.put(uri, json=payload,
-                                             auth=self.auth, headers=headers)
+                                             auth=self.auth, headers=headers,
+                                             verify=self.verify)
             else:
                 self.response = requests.put(uri, data=payload,
-                                             auth=self.auth, headers=headers)
+                                             auth=self.auth, headers=headers,
+                                             verify=self.verify)
 
         return self._response()
 
@@ -203,10 +214,12 @@ class Connection:
                 self.payload_logger.debug(payload)
 
         if payload is None:
-            self.response = requests.delete(uri, auth=self.auth, headers=headers)
+            self.response = requests.delete(uri, auth=self.auth, headers=headers,
+                                            verify=self.verify)
         else:
             self.response = requests.delete(uri, json=payload,
-                                            auth=self.auth, headers=headers)
+                                            auth=self.auth, headers=headers,
+                                            verify=self.verify)
 
         return self._response()
 
@@ -250,7 +263,8 @@ class Connection:
                 self.logger.debug("Waiting for restart of {0}"
                                   .format(self.host))
                 response = requests.get(uri, auth=self.auth,
-                                        headers={'accept': 'application/json'})
+                                        headers={'accept': 'application/json'},
+                                        verify=self.verify)
                 done = (response.status_code == 200
                         and response.text != last_startup)
             except TypeError:
