@@ -244,8 +244,8 @@ def validate_collation(index_type, collation):
         return
     if collation is None or collation == "":
         return
-    raise ValidationError('Collation cannot be {0} for an index of type {1}' \
-                          .format(index_type, collation))
+    raise ValidationError('Invalid collation for index of type {0}' \
+                          .format(index_type), repr(collation))
 
 def validate_type(raw_val, cls):
     """
