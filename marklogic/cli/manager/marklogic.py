@@ -152,7 +152,11 @@ class MarkLogicManager(Manager):
                 cluster = LocalCluster(connection=connection).read()
                 print("Restarting cluster...")
                 cluster.restart()
-
+                # Make sure it's back up
+                status = self.status(args,config,connection,internal=True)
+                while status != 'up':
+                    time.sleep(2)
+                    status = self.status(args,config,connection,internal=True)
             else:
                 hostname = connection.host
                 if hostname == 'localhost':
@@ -160,6 +164,11 @@ class MarkLogicManager(Manager):
                 host = Host(hostname,connection=connection).read()
                 print("Restarting host...")
                 host.restart()
+                # Make sure it's back up
+                status = self.status(args,config,connection,internal=True)
+                while status != 'up':
+                    time.sleep(2)
+                    status = self.status(args,config,connection,internal=True)
 
     def stop(self, args, config, connection):
         status = self.status(args, config, connection, internal=True)
@@ -174,6 +183,11 @@ class MarkLogicManager(Manager):
                 cluster = LocalCluster(connection=connection).read()
                 print("Shutting down cluster...")
                 cluster.shutdown()
+                # Make sure it's all the way down
+                status = self.status(args,config,connection,internal=True)
+                while status != 'down':
+                    time.sleep(2)
+                    status = self.status(args,config,connection,internal=True)
             else:
                 hostname = connection.host
                 if hostname == 'localhost':
@@ -190,6 +204,11 @@ class MarkLogicManager(Manager):
 
                 print("Shutting down host: " + host.host_name())
                 host.shutdown()
+                # Make sure it's all the way down
+                status = self.status(args,config,connection,internal=True)
+                while status != 'down':
+                    time.sleep(2)
+                    status = self.status(args,config,connection,internal=True)
 
             status = self.status(args,config,connection,internal=True)
             while status == 'up':

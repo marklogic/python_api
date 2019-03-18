@@ -36,6 +36,9 @@ from marklogic.exceptions import UnexpectedManagementAPIResponse
 class LocalCluster(Model):
     """
     The LocalCluster class encapsulates the local cluster.
+
+    For reasons that don't seem obvious today, it's not handled using the same
+    marshal and unmarshal approach as other resources. That's probably a bug.
     """
     def __init__(self,connection=None, save_connection=True):
         """
@@ -297,6 +300,70 @@ class LocalCluster(Model):
         self._validate(value, 'string')
         return self._set_config_property('cluster-name', value)
 
+    def xdqp_ssl_certificate(self):
+        return self._get_config_property('xdqp-ssl-certificate')
+
+    def xdqp_ssl_private_key(self):
+        return self._get_config_property('xdqp-ssl-private-key')
+
+    def language_baseline(self):
+        return self._get_config_property('language-baseline')
+
+    def opsdirector_log_level(self):
+        """
+        The OpsDirector log level.
+
+        :return: The log level.
+        """
+        return self._get_config_property("opsdirector-log-level")
+
+    def set_opsdirector_log_level(self, value):
+        """
+        Set the OpsDirector log level.
+
+        :param value: The log level.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, ['disabled', 'finest', 'finer', 'fine',
+                               'debug', 'config', 'info', 'notice',
+                               'warning', 'error', 'critical', 'alert', 'emergency'])
+        return self._set_config_property("opsdirector-log-level", value)
+
+    def opsdirector_metering(self):
+        """
+        The OpsDirector metering level.
+
+        :return: The metering level.
+        """
+        return self._get_config_property("opsdirector_metering")
+
+    def set_opsdirector_metering(self, value):
+        """
+        Set the OpsDirector metering level.
+
+        :param value: The metering level.
+        :return: The object with the mutated property value.
+        """
+        self._validate(value, ['disabled', 'full', 'aggregates', 'usage-only'])
+        return self._set_config_property("opsdirector-metering", value)
+
+    def opsdirector_session_endpoint(self):
+        """
+        The OpsDirector session endpoint.
+
+        :return: The endpoint.
+        """
+        return self._get_config_property("opsdirector-session-endpoint")
+
+    def set_opsdirector_session_endpoint(self, value):
+        """
+        Set the OpsDirector session endpoint.
+
+        :param value: The endpoint.
+        :return: The object with the mutated property value.
+        """
+        # FIXME: Should I test that this is a reasonable http(s) URI?
+        return self._set_config_property("opsdirector-session-endpoint", value)
 
 class ForeignCluster(Model):
     """
@@ -559,7 +626,6 @@ class ForeignCluster(Model):
         """
         self._validate(value, 'string')
         return self._set_config_property('xdqp-ssl-ciphers', value)
-
 
 class BootstrapHost(Model):
     """
