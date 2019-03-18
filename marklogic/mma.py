@@ -7,6 +7,7 @@ import re
 import shlex
 import sys
 from requests.auth import HTTPDigestAuth
+from requests.auth import HTTPBasicAuth
 from marklogic.connection import Connection
 from marklogic.cli.template import Template
 
@@ -57,7 +58,7 @@ class MMA():
                 optarg = False
             elif tok.startswith("-"):
                 options.append(tok)
-                if tok != "--debug":
+                if tok != "--debug" and tok != "--https":
                     optarg = True
             elif "=" in tok:
                 params.append(tok)
@@ -152,9 +153,16 @@ class MMA():
                 mgmt_port = args['hostname'].split(":")[1]
             except IndexError:
                 mgmt_port = 8002
-            self.connection = Connection(host,
-                                         HTTPDigestAuth(username, password),
-                                         management_port=mgmt_port)
+
+            if args['https']:
+                self.connection = Connection(host,
+                                             HTTPBasicAuth(username, password),
+                                             protocol="https",
+                                             management_port=mgmt_port)
+            else:
+                self.connection = Connection(host,
+                                             HTTPDigestAuth(username, password),
+                                             management_port=mgmt_port)
 
         # do it!
         if command == 'run':
