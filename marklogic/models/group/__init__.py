@@ -154,7 +154,9 @@ class Group(Model, PropertyLists):
                   'opsdirector-log-level', 'opsdirector-metering',
                   'opsdirector-session-endpoint', 'telemetry-config',
                   'telemetry-log-level', 'telemetry-metering',
-                  'telemetry-session-endpoint'
+                  'telemetry-session-endpoint',
+                  'xdqp-ssl-disable-sslv3', 'xdqp-ssl-disable-tlsv1',
+                  'xdqp-ssl-disable-tlsv1-1', 'xdqp-ssl-disable-tlsv1-2'
                   }
 
         for key in result._config:
