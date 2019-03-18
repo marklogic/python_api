@@ -188,7 +188,7 @@ class Group(Model, PropertyLists):
                                                     r['audit-restriction-items'])
                             restrictions.append(rest)
                     else:
-                        logger.warn("Unexpected audit property: " + prop)
+                        logger.warning("Unexpected audit property: " + prop)
                 audit = Audit(enabled, keep, rotate, events, restrictions)
                 result._config[key] = audit
             elif key == 'event':
@@ -200,7 +200,7 @@ class Group(Model, PropertyLists):
                     schemas.append(schema)
                 result._config[key] = schemas
             else:
-                logger.warn("Unexpected group property: " + key)
+                logger.warning("Unexpected group property: " + key)
 
         return result
 
