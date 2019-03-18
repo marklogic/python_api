@@ -150,9 +150,7 @@ class Group(Model, PropertyLists):
                   'triple-value-cache-timeout',
                   'xdqp-ssl-allow-sslv3', 'xdqp-ssl-allow-tls',
                   'xdqp-ssl-ciphers', 'xdqp-ssl-enabled',
-                  'xdqp-timeout', 'opsdirector-config',
-                  'opsdirector-log-level', 'opsdirector-metering',
-                  'opsdirector-session-endpoint', 'telemetry-config',
+                  'xdqp-timeout', 'telemetry-config',
                   'telemetry-log-level', 'telemetry-metering',
                   'telemetry-session-endpoint',
                   'xdqp-ssl-disable-sslv3', 'xdqp-ssl-disable-tlsv1',
@@ -401,80 +399,6 @@ class Group(Model, PropertyLists):
         """
         self._validate(value, 'boolean')
         return self._set_config_property('metering-enabled', value)
-
-    def opsdirector_config(self):
-        """
-        The OpsDirector config level: disabled, frequent, or infrequent.
-
-        :return: The config level.
-        """
-        return self._get_config_property("opsdirector-config")
-
-    def set_opsdirector_config(self, value):
-        """
-        Set the OpsDirector config level: disabled, frequent, or infrequent.
-
-        :param value: The config level.
-        :return: The object with the mutated property value.
-        """
-        self._validate(value, ['disabled', 'frequent', 'infrequent'])
-        return self._set_config_property('opsdirector-config', value)
-
-    def opsdirector_log_level(self):
-        """
-        The OpsDirector log level.
-
-        :return: The log level.
-        """
-        return self._get_config_property("opsdirector-log-level")
-
-    def set_opsdirector_log_level(self, value):
-        """
-        Set the OpsDirector log level.
-
-        :param value: The log level.
-        :return: The object with the mutated property value.
-        """
-        self._validate(value, ['disabled', 'finest', 'finer', 'fine',
-                               'debug', 'config', 'info', 'notice',
-                               'warning', 'error', 'critical', 'alert', 'emergency'])
-        return self._set_config_property("opsdirector-log-level", value)
-
-    def opsdirector_metering(self):
-        """
-        The OpsDirector metering level.
-
-        :return: The metering level.
-        """
-        return self._get_config_property("opsdirector_metering")
-
-    def set_opsdirector_metering(self, value):
-        """
-        Set the OpsDirector metering level.
-
-        :param value: The metering level.
-        :return: The object with the mutated property value.
-        """
-        self._validate(value, ['disabled', 'full', 'aggregates', 'usage-only'])
-        return self._set_config_property("opsdirector-metering", value)
-
-    def opsdirector_session_endpoint(self):
-        """
-        The OpsDirector session endpoint.
-
-        :return: The endpoint.
-        """
-        return self._get_config_property("opsdirector-session-endpoint")
-
-    def set_opsdirector_session_endpoint(self, value):
-        """
-        Set the OpsDirector session endpoint.
-
-        :param value: The endpoint.
-        :return: The object with the mutated property value.
-        """
-        # FIXME: Should I test that this is a reasonable http(s) URI?
-        return self._set_config_property("opsdirector-session-endpoint", value)
 
     def telemetry_config(self):
         """
