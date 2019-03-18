@@ -124,6 +124,7 @@ class Group(Model, PropertyLists):
         # atomic values or lists of atomic values.
 
         atomic = {'background-io-limit',
+                  'cache-sizing',
                   'compressed-tree-cache-partitions',
                   'compressed-tree-cache-size',
                   'compressed-tree-read-size', 'events-activated',
@@ -140,8 +141,9 @@ class Group(Model, PropertyLists):
                   'performance-metering-retain-daily',
                   'performance-metering-retain-hourly',
                   'performance-metering-retain-raw', 'retry-timeout',
-                  'rotate-log-files', 's3-domain', 's3-protocol',
-                  's3-server-side-encryption', 'security-database',
+                  'rotate-log-files', 's3-domain', 's3-protocol', 's3-proxy',
+                  's3-server-side-encryption', 's3-server-side-encryption-kms-key',
+                  'azure-storage-proxy', 'security-database',
                   'smtp-relay', 'smtp-timeout', 'system-log-level',
                   'triple-cache-partitions', 'triple-cache-size',
                   'triple-cache-timeout',
@@ -152,7 +154,7 @@ class Group(Model, PropertyLists):
                   'xdqp-ssl-ciphers', 'xdqp-ssl-enabled',
                   'xdqp-timeout', 'telemetry-config',
                   'telemetry-log-level', 'telemetry-metering',
-                  'telemetry-session-endpoint',
+                  'telemetry-session-endpoint', 'telemetry-proxy',
                   'xdqp-ssl-disable-sslv3', 'xdqp-ssl-disable-tlsv1',
                   'xdqp-ssl-disable-tlsv1-1', 'xdqp-ssl-disable-tlsv1-2'
                   }
@@ -474,6 +476,41 @@ class Group(Model, PropertyLists):
         # FIXME: Should I test that this is a reasonable http(s) URI?
         return self._set_config_property("telemetry-session-endpoint", value)
 
+    def telemetry_proxy(self):
+        """
+        The Telemetry proxy setting.
+
+        :return: The proxy setting.
+        """
+        return self._get_config_property("telemetry-proxy")
+
+    def set_telemetry_proxy(self, value):
+        """
+        Set the Telemetry proxy setting.
+
+        :param value: The proxy setting.
+        :return: The object with the mutated property value.
+        """
+        return self._set_config_property("telemetry-proxy", value)
+
+    def cache_sizing(self):
+        """
+        The cache sizing property.
+
+        :return: The cache sizing setting.
+        """
+        return self._get_config_property("cache-sizing")
+
+    def set_cache_sizing(self, value):
+        """
+        Set the cache sizing value.
+
+        :param value: The cache sizing.
+        :return: The object with the mutated property value.
+        """
+        # FIXME: check that the value is reasonable
+        return self._set_config_property("cache-sizing", value)
+
     def triple_cache_timeout(self):
         """
         An integer number of seconds, min 0, max 4294967295.
@@ -653,6 +690,40 @@ class Group(Model, PropertyLists):
         """
         self._validate(value, ['http', 'https'])
         return self._set_config_property('s3-protocol', value)
+
+    def s3_proxy(self):
+        """
+        The S3 proxy.
+
+        :return: The s3-proxy.
+        """
+        return self._get_config_property('s3-proxy')
+
+    def set_s3_proxy(self, value):
+        """
+        Set the s3-proxy.
+
+        :param value: The s3-proxy.
+        :return: The object with the mutated property value.
+        """
+        return self._set_config_property('s3-proxy', value)
+
+    def azure_storage_proxy(self):
+        """
+        The Azure storage proxy.
+
+        :return: The azure-storage-proxy.
+        """
+        return self._get_config_property('azure-storage-proxy')
+
+    def set_azure_storage_proxy(self, value):
+        """
+        Set the Azure storage proxy.
+
+        :param value: The azure-storage-proxy.
+        :return: The object with the mutated property value.
+        """
+        return self._set_config_property('azure-storage-proxy', value)
 
     def xdqp_ssl_enabled(self):
         """
@@ -1067,6 +1138,23 @@ class Group(Model, PropertyLists):
         """
         self._validate(value, ['none', 'aes256'])
         return self._set_config_property('s3-server-side-encryption', value)
+
+    def s3_server_side_encryption_kms_key(self):
+        """
+        The KMS encryption key.
+
+        :return: The s3-server-side-encryption KMS key.
+        """
+        return self._get_config_property('s3-server-side-encryption-kms-key')
+
+    def set_s3_server_side_encryption_kms_key(self, value):
+        """
+        Set the s3-server-side-encryption KMS key.
+
+        :param value: The s3-server-side-encryption KMS key.
+        :return: The object with the mutated property value.
+        """
+        return self._set_config_property('s3-server-side-encryption-kms-key', value)
 
     def host_initial_timeout(self):
         """
