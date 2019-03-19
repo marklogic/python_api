@@ -638,6 +638,8 @@ class Template:
                             help='Host on which to issue the request')
         parser.add_argument('--credentials', default='admin:admin',
                             help='Login credentials for request')
+        parser.add_argument('--https', action='store_true',
+                            help='Enable https')
         parser.add_argument('--debug', action='store_true',
                             help='Enable debug logging')
         return parser

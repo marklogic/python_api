@@ -445,7 +445,7 @@ class Forest(Model,PropertyLists):
                     olist.append(temp)
                 result._config['forest-replica'] = olist
             else:
-                logger.warn("Unexpected forest property: " + key)
+                logger.warning("Unexpected forest property: " + key)
 
         return result
 

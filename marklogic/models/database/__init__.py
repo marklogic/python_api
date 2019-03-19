@@ -3755,7 +3755,7 @@ class Database(Model,PropertyLists):
                     olist.append(temp)
                 result._config['range-path-index'] = olist
             else:
-                logger.warn("Unexpected database property: " + key)
+                logger.warning("Unexpected database property: " + key)
 
         return result
 
