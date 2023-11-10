@@ -25,7 +25,7 @@ Database related classes for manipulating MarkLogic databases
 """
 
 from __future__ import unicode_literals, print_function, absolute_import
-
+import requests
 import json, logging, sys
 from marklogic.models.forest import Forest
 from marklogic.utilities import files
